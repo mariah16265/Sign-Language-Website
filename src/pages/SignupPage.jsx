@@ -15,173 +15,138 @@ const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Emoji options for floating background elements
+  // Updated emoji options with fewer hands and more fun elements
   const emojis = [
-    '✋',
-    '👋',
-    '👐',
-    '🙌',
-    '👏',
-    '🤲',
-    '👍',
-    '👌',
-    '✌️',
-    '🤟',
-    '🤘',
-    '👆',
-    '👇',
-    '👈',
-    '👉',
-    '🖐️',
-    '🤙',
-    '🖖',
-    '👋',
-    '🤚',
-    '🧠',
-    '👀',
-    '👂',
-    '👄',
-    '🦷',
-    '👁️',
     '🌈',
+    '⭐',
+    '🌟',
     '✨',
     '🎈',
     '🎀',
     '🎁',
     '🧸',
-    '🪀',
-    '🪁',
-    '🔮',
-    '🪄',
-    '📚',
-    '📖',
-    '✏️',
-    '📝',
-    '🔢',
-    '🔤',
-    '🔡',
-    '📐',
-    '🧮',
-    '📏',
-    '📌',
-    '📍',
+    '🦄',
+    '🐝',
+    '🦋',
+    '🐞',
+    '🐶',
+    '🐱',
+    '🦁',
+    '🐯',
+    '🦊',
+    '🐻',
+    '🐧',
+    '🦉',
+    '🐙',
+    '🦕',
+    '🚀',
+    '🎠',
+    '🎪',
+    '🎨',
+    '🧩',
     '🎯',
-    '🖍️',
-    '🖌️',
-    '🖊️',
-    '✒️',
-    '🖋️',
+    '🍎',
+    '🍭',
+    '🍪',
+    '🧁',
+    '👋',
+    '✋',
+    '🤚',
+    '📚',
     '✏️',
-    '📒',
-    '📔',
+    '🎨',
+    '🖍️',
+    '🎮',
+    '🧩',
+    '🎲',
+    '🏆',
+    '🎵',
+    '🎶',
+    '🎤',
+    '🎧',
+    '🎭',
+    '🤹',
+    '🎪',
   ];
 
   return (
     <div className="relative min-h-screen flex items-center justify-center px-4 py-8 overflow-hidden bg-gradient-to-br from-blue-100 via-pink-50 to-purple-50">
-      {/* Background elements matching login page */}
+      {/* Background elements */}
       <div className="absolute top-[-50px] left-[-50px] w-[300px] h-[300px] bg-pink-200 opacity-30 blur-xl rounded-full animate-float-slow"></div>
       <div className="absolute bottom-[-80px] right-[-80px] w-[400px] h-[400px] bg-blue-300 opacity-30 blur-xl rounded-full animate-float-slower"></div>
       <div className="absolute top-1/3 left-1/4 w-[250px] h-[250px] bg-purple-200 opacity-20 blur-xl rounded-full animate-float-medium"></div>
       <div className="absolute bottom-1/4 right-1/3 w-[300px] h-[300px] bg-yellow-100 opacity-20 blur-xl rounded-full animate-float-slowest"></div>
 
-      {/* Floating gradient particles */}
-      {[...Array(15)].map((_, i) => {
-        const size = Math.random() * 15 + 8;
-        const color = [
-          'bg-pink-300',
-          'bg-blue-300',
-          'bg-purple-300',
-          'bg-yellow-300',
-        ][Math.floor(Math.random() * 4)];
+      {/* Floating emojis - enhanced version */}
+      {[...Array(60)].map((_, i) => {
+        const row = Math.floor(i / 10);
+        const col = i % 10;
+        const startX = col * 10 + Math.random() * 5;
+        const startYOffset = row * 12;
+        const driftAmount = (Math.random() * 60 - 30) * (1 + row * 0.1);
+        const rotation = Math.random() * 360;
+        const size = `${Math.random() * 16 + 16}px`;
+        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+        const duration = 15 + row * 1.5;
+        const delay = col * 0.03;
+
+        // Vibrant colors
+        const colors = [
+          '#a78bfa', // purple
+          '#f9a8d4', // pink
+          '#93c5fd', // blue
+          '#86efac', // green
+          '#fde047', // yellow
+          '#fca5a5', // red
+          '#7dd3fc', // light blue
+          '#c4b5fd', // light purple
+          '#bef264', // lime
+          '#fda4af', // rose
+        ];
 
         return (
           <motion.div
             key={i}
-            className={`absolute rounded-full ${color} opacity-30`}
+            className="absolute pointer-events-none select-none will-change-transform"
             style={{
-              width: `${size}px`,
-              height: `${size}px`,
-              left: `${50 + Math.random() * 60 - 30}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${startX}vw`,
+              top: `${80 + startYOffset}vh`,
+              fontSize: size,
+              color: colors[i % colors.length],
+              zIndex: 0,
+              filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.1))',
             }}
+            initial={{ y: 0, opacity: 0.8 }}
             animate={{
-              y: [0, -100, -200, -300],
-              x: [0, Math.random() * 50 - 25, Math.random() * 50 - 25],
-              rotate: [0, 180, 360],
-              opacity: [0.3, 0.5, 0.3, 0],
+              y: [-100, -400, -700, -1000, -1300],
+              x: [
+                0,
+                driftAmount * 0.3,
+                driftAmount * 0.7,
+                driftAmount,
+                driftAmount * 0.5,
+              ],
+              rotate: [
+                rotation,
+                rotation + 180,
+                rotation + 360,
+                rotation + 540,
+                rotation + 720,
+              ],
+              opacity: [0.8, 0.9, 0.7, 0.5, 0.2, 0],
             }}
             transition={{
-              duration: Math.random() * 15 + 15,
+              duration: duration,
+              delay: delay,
               repeat: Infinity,
-              delay: Math.random() * 10,
-              ease: 'linear',
-            }}
-          />
-        );
-      })}
-
-      {/* Floating emojis - increased quantity and variety */}
-      {[...Array(30)].map((_, i) => {
-        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-        const size = Math.random() * 0.8 + 0.8; // Random size between 0.8 and 1.6rem
-
-        return (
-          <motion.div
-            key={`emoji-${i}`}
-            className="absolute pointer-events-none"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              fontSize: `${size}rem`,
-              opacity: 0.2 + Math.random() * 0.3, // Random opacity between 0.2 and 0.5
-              filter: 'drop-shadow(0 0 2px rgba(255,255,255,0.5))',
-            }}
-            animate={{
-              y: [0, -50, -100, -150, -200],
-              x: [0, Math.random() * 40 - 20, Math.random() * 40 - 20],
-              rotate: [0, Math.random() * 360],
-              scale: [1, 1.1, 1],
-            }}
-            transition={{
-              duration: Math.random() * 15 + 15,
-              repeat: Infinity,
-              delay: Math.random() * 10,
-              ease: 'linear',
+              repeatDelay: 3,
+              ease: [0.4, 0.6, 0.2, 0.1],
             }}
           >
             {emoji}
           </motion.div>
         );
       })}
-
-      {/* Floating subtle sparkles */}
-      {[...Array(12)].map((_, i) => (
-        <motion.div
-          key={`sparkle-${i}`}
-          className="absolute text-xl opacity-70 pointer-events-none"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            color: ['#f472b6', '#60a5fa', '#a78bfa', '#fbbf24'][
-              Math.floor(Math.random() * 4)
-            ],
-          }}
-          animate={{
-            y: [0, -50, -100, -150],
-            x: [0, Math.random() * 20 - 10],
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.7, 0.2],
-          }}
-          transition={{
-            duration: Math.random() * 8 + 8,
-            repeat: Infinity,
-            delay: Math.random() * 5,
-          }}
-        >
-          {['✨', '⭐', '❄️', '⚡'][Math.floor(Math.random() * 4)]}
-        </motion.div>
-      ))}
-
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

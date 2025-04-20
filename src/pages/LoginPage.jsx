@@ -1,176 +1,156 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaSignInAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
-
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Emoji options for floating background elements
+  // Updated emoji options to match signup page
   const emojis = [
-    '✋',
-    '👋',
-    '👐',
-    '🙌',
-    '👏',
-    '🤲',
-    '👍',
-    '👌',
-    '✌️',
-    '🤟',
-    '🤘',
-    '👆',
-    '👇',
-    '👈',
-    '👉',
-    '🖐️',
-    '🤙',
-    '🖖',
-    '👋',
-    '🤚',
-    '🧠',
-    '👀',
-
-    '👄',
-    '🦷',
-    '👁️',
     '🌈',
+    '⭐',
+    '🌟',
     '✨',
     '🎈',
     '🎀',
     '🎁',
     '🧸',
-    '🪀',
-    '🪁',
-    '🔮',
-    '🪄',
-    '📚',
-    '📖',
-    '✏️',
-    '📝',
-    '🔢',
-    '🔤',
-    '🔡',
-    '📐',
-    '🧮',
-    '📏',
-    '📌',
-    '📍',
+    '🦄',
+    '🐝',
+    '🦋',
+    '🐞',
+    '🐶',
+    '🐱',
+    '🦁',
+    '🐯',
+    '🦊',
+    '🐻',
+    '🐧',
+    '🦉',
+    '🐙',
+    '🦕',
+    '🚀',
+    '🎠',
+    '🎪',
+    '🎨',
+    '🧩',
     '🎯',
-    '🖍️',
-    '🖌️',
-    '🖊️',
-    '✒️',
-    '🖋️',
+    '🍎',
+    '🍭',
+    '🍪',
+    '🧁',
+    '👋',
+    '✋',
+    '🤚',
+    '📚',
     '✏️',
-    '📒',
-    '📔',
+    '🎨',
+    '🖍️',
+    '🎮',
+    '🧩',
+    '🎲',
+    '🏆',
+    '🎵',
+    '🎶',
+    '🎤',
+    '🎧',
+    '🎭',
+    '🤹',
+    '🎪',
   ];
 
+  const colors = [
+    '#a78bfa',
+    '#f9a8d4',
+    '#93c5fd',
+    '#86efac',
+    '#fde047',
+    '#fca5a5',
+    '#7dd3fc',
+    '#c4b5fd',
+    '#bef264',
+    '#fda4af',
+  ];
+
+  // Memoize the emoji data to prevent recreation on re-renders
+  const floatingEmojis = useMemo(() => {
+    return [...Array(60)].map((_, i) => {
+      const row = Math.floor(i / 10);
+      const col = i % 10;
+      const startX = col * 10 + Math.random() * 5;
+      const startYOffset = row * 12;
+      const driftAmount = (Math.random() * 60 - 30) * (1 + row * 0.1);
+      const rotation = Math.random() * 360;
+      const size = `${Math.random() * 16 + 16}px`;
+      const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+      const duration = 15 + row * 1.5;
+      const delay = col * 0.03;
+
+      return {
+        id: i,
+        startX,
+        startYOffset,
+        driftAmount,
+        rotation,
+        size,
+        emoji,
+        duration,
+        delay,
+        color: colors[i % colors.length],
+      };
+    });
+  }, []); // Empty dependency array means this only runs once
+
   return (
-    <div className="relative min-h-screen flex items-center justify-center px-4 py-10 overflow-hidden bg-gradient-to-br from-blue-100 via-pink-50 to-purple-50">
-      {/* Enhanced background elements - larger and more vibrant */}
-      <div className="absolute top-[-50px] left-[-50px] w-[400px] h-[400px] bg-pink-200 opacity-30 blur-xl rounded-full animate-float-slow"></div>
-      <div className="absolute bottom-[-80px] right-[-80px] w-[500px] h-[500px] bg-blue-300 opacity-30 blur-xl rounded-full animate-float-slower"></div>
-      <div className="absolute top-1/3 left-1/4 w-[300px] h-[300px] bg-purple-200 opacity-20 blur-xl rounded-full animate-float-medium"></div>
-      <div className="absolute bottom-1/4 right-1/3 w-[350px] h-[350px] bg-yellow-100 opacity-20 blur-xl rounded-full animate-float-slowest"></div>
+    <div className="relative min-h-screen flex items-center justify-center px-4 py-8 overflow-hidden bg-gradient-to-br from-blue-100 via-pink-50 to-purple-50">
+      {/* Background elements - matching signup page */}
+      <div className="absolute top-[-50px] left-[-50px] w-[300px] h-[300px] bg-pink-200 opacity-30 blur-xl rounded-full animate-float-slow"></div>
+      <div className="absolute bottom-[-80px] right-[-80px] w-[400px] h-[400px] bg-blue-300 opacity-30 blur-xl rounded-full animate-float-slower"></div>
+      <div className="absolute top-1/3 left-1/4 w-[250px] h-[250px] bg-purple-200 opacity-20 blur-xl rounded-full animate-float-medium"></div>
+      <div className="absolute bottom-1/4 right-1/3 w-[300px] h-[300px] bg-yellow-100 opacity-20 blur-xl rounded-full animate-float-slowest"></div>
 
-      {/* Floating gradient particles - increased quantity and size */}
-      {[...Array(25)].map((_, i) => {
-        const size = Math.random() * 20 + 10;
-        const color = [
-          'bg-pink-300',
-          'bg-blue-300',
-          'bg-purple-300',
-          'bg-yellow-300',
-        ][Math.floor(Math.random() * 4)];
-
-        return (
-          <motion.div
-            key={i}
-            className={`absolute rounded-full ${color} opacity-30`}
-            style={{
-              width: `${size}px`,
-              height: `${size}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -100, -200, -300],
-              x: [0, Math.random() * 50 - 25, Math.random() * 50 - 25],
-              rotate: [0, 180, 360],
-              opacity: [0.3, 0.5, 0.3, 0],
-            }}
-            transition={{
-              duration: Math.random() * 15 + 15,
-              repeat: Infinity,
-              delay: Math.random() * 10,
-              ease: 'linear',
-            }}
-          />
-        );
-      })}
-
-      {/* Floating emojis - increased quantity and variety */}
-      {[...Array(35)].map((_, i) => {
-        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-        const size = Math.random() * 0.8 + 0.8; // Random size between 0.8 and 1.6rem
-
-        return (
-          <motion.div
-            key={`emoji-${i}`}
-            className="absolute pointer-events-none"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              fontSize: `${size}rem`,
-              opacity: 0.2 + Math.random() * 0.3, // Random opacity between 0.2 and 0.5
-              filter: 'drop-shadow(0 0 2px rgba(255,255,255,0.5))',
-            }}
-            animate={{
-              y: [0, -50, -100, -150, -200],
-              x: [0, Math.random() * 40 - 20, Math.random() * 40 - 20],
-              rotate: [0, Math.random() * 360],
-              scale: [1, 1.1, 1],
-            }}
-            transition={{
-              duration: Math.random() * 15 + 15,
-              repeat: Infinity,
-              delay: Math.random() * 10,
-              ease: 'linear',
-            }}
-          >
-            {emoji}
-          </motion.div>
-        );
-      })}
-
-      {/* Floating subtle sparkles - more dynamic */}
-      {[...Array(20)].map((_, i) => (
+      {/* Floating emojis - now using memoized data */}
+      {floatingEmojis.map((emojiData) => (
         <motion.div
-          key={`sparkle-${i}`}
-          className="absolute text-xl opacity-70 pointer-events-none"
+          key={emojiData.id}
+          className="absolute pointer-events-none select-none will-change-transform"
           style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            color: ['#f472b6', '#60a5fa', '#a78bfa', '#fbbf24'][
-              Math.floor(Math.random() * 4)
-            ],
+            left: `${emojiData.startX}vw`,
+            top: `${80 + emojiData.startYOffset}vh`,
+            fontSize: emojiData.size,
+            color: emojiData.color,
+            zIndex: 0,
+            filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.1))',
           }}
+          initial={{ y: 0, opacity: 0.8 }}
           animate={{
-            y: [0, -50, -100, -150],
-            x: [0, Math.random() * 20 - 10],
-            scale: [1, 1.2, 1],
-            opacity: [0, 0.5, 0],
+            y: [-100, -400, -700, -1000, -1300],
+            x: [
+              0,
+              emojiData.driftAmount * 0.3,
+              emojiData.driftAmount * 0.7,
+              emojiData.driftAmount,
+              emojiData.driftAmount * 0.5,
+            ],
+            rotate: [
+              emojiData.rotation,
+              emojiData.rotation + 180,
+              emojiData.rotation + 360,
+              emojiData.rotation + 540,
+              emojiData.rotation + 720,
+            ],
+            opacity: [0.8, 0.9, 0.7, 0.5, 0.2, 0],
           }}
           transition={{
-            duration: Math.random() * 8 + 8,
+            duration: emojiData.duration,
+            delay: emojiData.delay,
             repeat: Infinity,
-            delay: Math.random() * 5,
+            repeatDelay: 3,
+            ease: [0.4, 0.6, 0.2, 0.1],
           }}
         >
-          {['✨', '⭐', '❄️', '⚡'][Math.floor(Math.random() * 4)]}
+          {emojiData.emoji}
         </motion.div>
       ))}
 

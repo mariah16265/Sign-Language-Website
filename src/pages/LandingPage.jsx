@@ -56,19 +56,63 @@ const LandingPage = () => {
       <div className="absolute top-[-150px] left-[-100px] w-[500px] h-[500px] bg-purple-100 opacity-20 blur-xl rounded-full z-0 animate-float-slow"></div>
       <div className="absolute bottom-[-100px] right-[-150px] w-[500px] h-[500px] bg-blue-100 opacity-20 blur-xl rounded-full z-0 animate-float-slower"></div>
       <div className="absolute top-1/4 left-1/3 w-[250px] h-[250px] bg-pink-100 opacity-20 blur-xl rounded-full z-0 animate-float-medium"></div>
-
       {/* Floating elements */}
-      {[...Array(40)].map((_, i) => {
-        const row = Math.floor(i / 8);
-        const col = i % 8;
-        const startX = col * 12.5 + Math.random() * 5;
-        const startYOffset = row * 15;
-        const driftAmount = (Math.random() * 40 - 20) * (1 + row * 0.2);
+      {[...Array(60)].map((_, i) => {
+        const row = Math.floor(i / 10); // More rows for better distribution
+        const col = i % 10;
+        const startX = col * 10 + Math.random() * 5; // More even horizontal spread
+        const startYOffset = row * 12; // Tighter vertical spacing
+        const driftAmount = (Math.random() * 60 - 30) * (1 + row * 0.1); // More drift
         const rotation = Math.random() * 360;
-        const size = `${Math.random() * 12 + 14}px`;
-        const emoji = ['✋', '👐', '👆', '👇', '👈', '👉', '🤟', '🤘'][row % 8];
-        const duration = 25 + row * 2;
-        const delay = col * 0.05;
+        const size = `${Math.random() * 16 + 16}px`; // Slightly larger emojis
+        const emoji = [
+          '✋',
+          '🖐️',
+          '👋',
+          '👐',
+          '👆',
+          '👇',
+          '👈',
+          '👉',
+          '🤟',
+          '🤘',
+          '🤙',
+          '👌',
+          '👍',
+          '👎',
+          '✌️',
+          '🤞',
+          '🤝',
+          '🙌',
+          '👏',
+          '🙏',
+          '🌈',
+          '⭐',
+          '🌟',
+          '✨',
+          '🎈',
+          '🎀',
+          '🎁',
+          '🧸',
+          '🦄',
+          '🐝',
+        ][i % 30]; // More diverse emojis
+        const duration = 15 + row * 1.5; // Faster movement
+        const delay = col * 0.03; // Shorter delay
+
+        // More vibrant colors
+        const colors = [
+          '#a78bfa', // purple-400
+          '#f9a8d4', // pink-300
+          '#93c5fd', // blue-300
+          '#86efac', // green-300
+          '#fde047', // yellow-300
+          '#fca5a5', // red-300
+          '#7dd3fc', // light blue
+          '#c4b5fd', // light purple
+          '#bef264', // lime
+          '#fda4af', // rose
+        ];
 
         return (
           <motion.div
@@ -76,40 +120,37 @@ const LandingPage = () => {
             className="absolute pointer-events-none select-none will-change-transform"
             style={{
               left: `${startX}vw`,
-              top: `${110 + startYOffset}vh`,
+              top: `${80 + startYOffset}vh`, // Start higher on screen
               fontSize: size,
-              color: [
-                '#a78bfa', // purple-400
-                '#f9a8d4', // pink-300
-                '#93c5fd', // blue-300
-              ][row % 3],
+              color: colors[i % colors.length], // More color variety
               zIndex: 0,
+              filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.1))', // Soft shadow
             }}
             initial={{ y: 0, opacity: 0.8 }}
             animate={{
-              y: [-100, -300, -500, -700, -900],
+              y: [-100, -400, -700, -1000, -1300], // Faster movement
               x: [
                 0,
                 driftAmount * 0.3,
                 driftAmount * 0.7,
                 driftAmount,
-                driftAmount * 0.7,
+                driftAmount * 0.5,
               ],
               rotate: [
                 rotation,
-                rotation + 90,
                 rotation + 180,
-                rotation + 270,
                 rotation + 360,
+                rotation + 540,
+                rotation + 720,
               ],
-              opacity: [0.8, 0.9, 0.8, 0.6, 0.3, 0],
+              opacity: [0.8, 0.9, 0.7, 0.5, 0.2, 0],
             }}
             transition={{
               duration: duration,
               delay: delay,
               repeat: Infinity,
-              repeatDelay: 5,
-              ease: [0.5, 0.7, 0.3, 0.1],
+              repeatDelay: 3, // Shorter repeat delay
+              ease: [0.4, 0.6, 0.2, 0.1], // Snappier easing
             }}
           >
             {emoji}
@@ -223,9 +264,9 @@ const LandingPage = () => {
       </main>
 
       {/* Learning Cards */}
-      <section className="bg-white py-20 px-6 shadow-inner relative z-20">
+      <section className="bg-purple-50 py-12 px-6 relative z-20">
         <motion.h2
-          className="text-4xl md:text-5xl font-bold text-center mb-16"
+          className="text-3xl md:text-4xl font-bold text-center mb-10"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -236,59 +277,70 @@ const LandingPage = () => {
           </span>
         </motion.h2>
 
-        <div className="flex flex-wrap justify-center gap-10 max-w-6xl mx-auto">
+        <div className="flex flex-wrap justify-center gap-6 max-w-5xl mx-auto">
           {[
             {
               title: 'English',
-              icon: (
-                <FaSignLanguage className="text-5xl text-purple-500 mb-3" />
-              ),
+              icon: <FaSignLanguage className="text-4xl text-pink-500 mb-2" />,
               gif: englishGif,
-              bgColor: 'bg-purple-50',
-              borderColor: 'border-purple-200',
+              bgColor: 'bg-white',
+              borderColor: 'border-pink-100',
+              shadowColor: 'shadow-pink-100',
               delay: 0.1,
               content:
                 'Discover everyday words, colorful signs, and your favorite animals!',
+              textColor: 'text-pink-600',
+              buttonColor: 'bg-pink-100 hover:bg-pink-200',
             },
             {
               title: 'Math',
-              icon: <FaSignLanguage className="text-5xl text-pink-500 mb-3" />,
+              icon: (
+                <FaSignLanguage className="text-4xl text-purple-500 mb-2" />
+              ),
               gif: mathGif,
-              bgColor: 'bg-pink-50',
-              borderColor: 'border-pink-200',
+              bgColor: 'bg-purple-100',
+              borderColor: 'border-purple-100',
+              shadowColor: 'shadow-purple-100',
               delay: 0.2,
               content:
                 'Count, compare, and solve little puzzles with fruits and fun!',
+              textColor: 'text-purple-600',
+              buttonColor: 'bg-purple-100 hover:bg-purple-200',
             },
             {
               title: 'Arabic',
-              icon: <FaSignLanguage className="text-5xl text-blue-500 mb-3" />,
+              icon: (
+                <FaSignLanguage className="text-4xl text-indigo-500 mb-2" />
+              ),
               gif: arabicGif,
-              bgColor: 'bg-blue-50',
-              borderColor: 'border-blue-200',
+              bgColor: 'bg-indigo-50',
+              borderColor: 'border-indigo-100',
+              shadowColor: 'shadow-indigo-100',
               delay: 0.3,
               content:
                 'Learn kind greetings, explore letters, and speak a new language with joy!',
+              textColor: 'text-indigo-600',
+              buttonColor: 'bg-indigo-100 hover:bg-indigo-200',
             },
-          ].map((card, index) => (
+          ].map((card) => (
             <motion.div
               key={card.title}
               initial={{ opacity: 0, y: 60 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: card.delay }}
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.03 }}
               viewport={{ once: true }}
-              className={`${card.bgColor} w-80 md:w-96 text-center p-8 rounded-3xl shadow-md border-2 ${card.borderColor} cursor-default`}
+              className={`${card.bgColor} w-72 md:w-80 text-center p-6 rounded-2xl shadow-md border ${card.borderColor} cursor-default`}
             >
               <img
                 src={card.gif}
                 alt={card.title}
-                className="w-48 h-48 object-contain mb-6 mx-auto rounded-xl"
+                className="w-36 h-36 object-contain mb-4 mx-auto rounded-lg"
               />
-              <h3 className="text-3xl font-bold text-purple-800 mb-4">
+              <h3 className={`text-2xl font-bold ${card.textColor} mb-2`}>
                 {card.title}
               </h3>
-              <p className="text-xl text-purple-700">{card.content}</p>
+              <p className={`${card.textColor} text-lg`}>{card.content}</p>
             </motion.div>
           ))}
         </div>
