@@ -1,3 +1,4 @@
+// ALREADY THIS IS THERE IN THE LANDING PAGE. STILL KEEPING THIS, JUST INCASE I NEED IT WHEN REDESIGNING THE LANDING PAGE
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GiSpellBook, GiAbacus } from 'react-icons/gi';
