@@ -2,6 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaSignInAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
+import Navbar from '../components/Navbar';
+
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -103,7 +105,11 @@ const LoginPage = () => {
   }, []); // Empty dependency array means this only runs once
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center px-4 py-8 overflow-hidden bg-gradient-to-br from-blue-100 via-pink-50 to-purple-50">
+    <div className="relative min-h-screen flex items-center justify-center px-4 py-8 pt-24 overflow-hidden bg-gradient-to-br from-blue-100 via-pink-50 to-purple-50">
+      <div className="absolute top-0 left-0 w-full z-20">
+        <Navbar hideLoginButton={true} />
+      </div>
+
       {/* Background elements - matching signup page */}
       <div className="absolute top-[-50px] left-[-50px] w-[300px] h-[300px] bg-pink-200 opacity-30 blur-xl rounded-full animate-float-slow"></div>
       <div className="absolute bottom-[-80px] right-[-80px] w-[400px] h-[400px] bg-blue-300 opacity-30 blur-xl rounded-full animate-float-slower"></div>

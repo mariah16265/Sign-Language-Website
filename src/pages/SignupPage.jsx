@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import Navbar from '../components/Navbar';
+
 import {
   FaUser,
   FaChild,
@@ -9,11 +11,11 @@ import {
   FaEyeSlash,
   FaSignInAlt,
 } from 'react-icons/fa';
-import { MdEmail, MdPhone, MdDateRange } from 'react-icons/md';
+import { MdEmail, MdPhone } from 'react-icons/md';
 
 const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
+  // const [] = useState(false);
 
   // Updated emoji options with fewer hands and more fun elements
   const emojis = [
@@ -70,7 +72,11 @@ const SignupPage = () => {
   ];
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center px-4 py-8 overflow-hidden bg-gradient-to-br from-blue-100 via-pink-50 to-purple-50">
+    <div className="relative min-h-screen flex items-center justify-center px-4 py-8 pt-24 overflow-hidden bg-gradient-to-br from-blue-100 via-pink-50 to-purple-50">
+      <div className="absolute top-0 left-0 w-full z-20">
+        <Navbar hideLoginButton={true} />
+      </div>
+
       {/* Background elements */}
       <div className="absolute top-[-50px] left-[-50px] w-[300px] h-[300px] bg-pink-200 opacity-30 blur-xl rounded-full animate-float-slow"></div>
       <div className="absolute bottom-[-80px] right-[-80px] w-[400px] h-[400px] bg-blue-300 opacity-30 blur-xl rounded-full animate-float-slower"></div>
@@ -186,7 +192,10 @@ const SignupPage = () => {
                     className="input-field"
                     placeholder="Child's Full Name"
                     required
+                    minLength={2}
+                    title="Please enter at least 2 characters"
                   />
+
                   <div className="input-icon">
                     <span className="text-lg">👦</span>
                   </div>
@@ -252,7 +261,10 @@ const SignupPage = () => {
                     className="input-field"
                     placeholder="Your Name"
                     required
+                    minLength={2}
+                    title="Please enter at least 2 characters"
                   />
+
                   <div className="input-icon">
                     <FaUser />
                   </div>
@@ -264,7 +276,10 @@ const SignupPage = () => {
                     placeholder="Email"
                     type="email"
                     required
+                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                    title="Please enter a valid email address (e.g., name@example.com)"
                   />
+
                   <div className="input-icon">
                     <MdEmail />
                   </div>
@@ -276,7 +291,10 @@ const SignupPage = () => {
                     placeholder="Phone Number"
                     type="tel"
                     required
+                    pattern="^[0-9]{10,15}$"
+                    title="Phone number should be 10 to 15 digits"
                   />
+
                   <div className="input-icon">
                     <MdPhone />
                   </div>
@@ -314,7 +332,10 @@ const SignupPage = () => {
                     className="input-field"
                     placeholder="Create username"
                     required
+                    pattern="^[a-zA-Z0-9_]{4,16}$"
+                    title="Username should be 4–16 characters and only contain letters, numbers, or underscores"
                   />
+
                   <div className="input-icon">
                     <span className="text-lg">👑</span>
                   </div>
@@ -326,7 +347,10 @@ const SignupPage = () => {
                     placeholder="Create password"
                     type={showPassword ? 'text' : 'password'}
                     required
+                    minLength={6}
+                    title="Password must be at least 6 characters"
                   />
+
                   <div className="input-icon">
                     <FaLock />
                   </div>
