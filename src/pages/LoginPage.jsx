@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaSignInAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
+import FloatingEmojis from '../components/FloatingEmojis'; 
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -155,7 +156,7 @@ const LoginPage = () => {
       <div className="absolute bottom-1/4 right-1/3 w-[300px] h-[300px] bg-yellow-100 opacity-20 blur-xl rounded-full animate-float-slowest"></div>
 
       {/* Floating emojis - now using memoized data */}
-      {floatingEmojis.map((emojiData) => (
+      {/*{floatingEmojis.map((emojiData) => (
         <motion.div
           key={emojiData.id}
           className="absolute pointer-events-none select-none will-change-transform"
@@ -196,8 +197,8 @@ const LoginPage = () => {
         >
           {emojiData.emoji}
         </motion.div>
-      ))}
-
+      ))}*/}
+      <FloatingEmojis />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

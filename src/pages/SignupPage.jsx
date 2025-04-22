@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
+import FloatingEmojis from '../components/FloatingEmojis'; 
 
 import {
   FaUser,
@@ -128,7 +129,7 @@ const SignupPage = () => {
       <div className="absolute bottom-1/4 right-1/3 w-[300px] h-[300px] bg-yellow-100 opacity-20 blur-xl rounded-full animate-float-slowest"></div>
 
       {/* Floating emojis - enhanced version */}
-      {[...Array(60)].map((_, i) => {
+      {/*{[...Array(60)].map((_, i) => {
         const row = Math.floor(i / 10);
         const col = i % 10;
         const startX = col * 10 + Math.random() * 5;
@@ -196,7 +197,8 @@ const SignupPage = () => {
             {emoji}
           </motion.div>
         );
-      })}
+      })}*/} 
+      <FloatingEmojis />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

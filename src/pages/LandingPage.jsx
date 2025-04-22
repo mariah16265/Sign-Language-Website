@@ -165,7 +165,7 @@ const LandingPage = () => {
 
             {/* In your hero section */}
             <motion.p
-              className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed"
+              className="text-xl md:text-2xl text-black/90 mb-8 leading-relaxed"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.5 }}
