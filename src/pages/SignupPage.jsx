@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 
@@ -16,6 +16,50 @@ import { MdEmail, MdPhone } from 'react-icons/md';
 const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   // const [] = useState(false);
+  const [signupError, setSignupError] = useState('');
+
+  //to direct to another page
+  const navigate = useNavigate();
+
+  //sending data
+  const [formData, setFormData] = useState({
+    // Child info
+    Cname: "", Cdob: "", Cstyle: "", Cneeds: "",
+    // Grown-up info
+    Gname: "", Gemail: "", Gphone: "", Grelation: "",
+    // Account setup
+    username: "", password: "",
+  });
+  //updates formdata when user types in input feild
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+  //when user submits form, data is sent to backend 
+  const handleSubmit = async (e) => {
+    e.preventDefault();   //to prevent default html redirect to a page like ?username=...
+    try {
+      const response = await fetch('http://localhost:5000/api/users/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      //waits for the backend to reply 
+      const data = await response.json();
+
+      //if not ok throw and error which is used by catch block
+      if (!response.ok) {
+        throw new Error(data.message || 'Signup failed');
+      }
+      //success
+      console.log('User created:', data);
+      setTimeout(() => { navigate('/login');},1000);  //direct to login page
+    } catch (err) {
+      console.error('Signup error:', err.message); 
+      setSignupError(`❌ Signup failed: ${err.message}`);
+    }
+  };
 
   // Updated emoji options with fewer hands and more fun elements
   const emojis = [
@@ -174,7 +218,7 @@ const SignupPage = () => {
               Join our learning community today!
             </p>
           </div>
-          <form className="space-y-8">
+          <form className="space-y-8" onSubmit={handleSubmit}>
             {/* Child Information Section */}
             <motion.div
               className="space-y-5"
@@ -194,6 +238,9 @@ const SignupPage = () => {
                     required
                     minLength={2}
                     title="Please enter at least 2 characters"
+                    name="Cname"
+                    value={formData.Cname} 
+                    onChange={handleChange}
                   />
 
                   <div className="input-icon">
@@ -207,6 +254,9 @@ const SignupPage = () => {
                     type="date"
                     required
                     max={new Date().toISOString().split('T')[0]}
+                    name="Cdob"
+                    value={formData.Cdob} 
+                    onChange={handleChange}
                   />
                   <div className="input-icon">
                     <span className="text-lg">📅</span>
@@ -214,7 +264,7 @@ const SignupPage = () => {
                 </div>
 
                 <div className="relative">
-                  <select className="input-field" required>
+                  <select className="input-field" required name="Cstyle" value={formData.Cstyle} onChange={handleChange}>
                     <option value="">Current Communication Style</option>
                     <option>Mostly verbal/speaking</option>
                     <option>Uses some sign language</option>
@@ -228,7 +278,7 @@ const SignupPage = () => {
                 </div>
 
                 <div className="relative">
-                  <select className="input-field">
+                  <select className="input-field" name="Cneeds" value={formData.Cneeds} onChange={handleChange}>
                     <option value="">Communication Needs</option>
                     <option>Deaf or hard of hearing</option>
                     <option>Non-verbal / Speech challenges</option>
@@ -263,6 +313,9 @@ const SignupPage = () => {
                     required
                     minLength={2}
                     title="Please enter at least 2 characters"
+                    name="Gname"
+                    value={formData.Gname} 
+                    onChange={handleChange}
                   />
 
                   <div className="input-icon">
@@ -278,6 +331,9 @@ const SignupPage = () => {
                     required
                     pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
                     title="Please enter a valid email address (e.g., name@example.com)"
+                    name="Gemail"
+                    value={formData.Gemail} 
+                    onChange={handleChange}
                   />
 
                   <div className="input-icon">
@@ -293,6 +349,9 @@ const SignupPage = () => {
                     required
                     pattern="^[0-9]{10,15}$"
                     title="Phone number should be 10 to 15 digits"
+                    name="Gphone"
+                    value={formData.Gphone} 
+                    onChange={handleChange}
                   />
 
                   <div className="input-icon">
@@ -301,7 +360,7 @@ const SignupPage = () => {
                 </div>
 
                 <div className="relative">
-                  <select className="input-field" required>
+                  <select className="input-field" required name="Grelation" value={formData.Grelation} onChange={handleChange} >
                     <option value="">Relationship to child</option>
                     <option>Parent</option>
                     <option>Guardian</option>
@@ -334,6 +393,9 @@ const SignupPage = () => {
                     required
                     pattern="^[a-zA-Z0-9_]{4,16}$"
                     title="Username should be 4–16 characters and only contain letters, numbers, or underscores"
+                    name="username"
+                    value={formData.username} 
+                    onChange={handleChange}
                   />
 
                   <div className="input-icon">
@@ -349,6 +411,9 @@ const SignupPage = () => {
                     required
                     minLength={6}
                     title="Password must be at least 6 characters"
+                    name="password"
+                    value={formData.password} 
+                    onChange={handleChange}
                   />
 
                   <div className="input-icon">
@@ -368,6 +433,10 @@ const SignupPage = () => {
                 </div>
               </div>
             </motion.div>
+
+            {signupError && (
+                <p className="text-red-600 font-medium mt-2">{signupError}</p>
+            )}
 
             {/* Submit Button */}
             <motion.button
