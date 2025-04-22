@@ -1,12 +1,51 @@
 import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaSignInAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
+import FloatingEmojis from '../components/FloatingEmojis'; 
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [loginError, setLoginError] = useState('');
+
+  //sending login database
+  const navigate = useNavigate();
+  const [loginData, setLoginData] = useState({
+    username: '',
+    password: ''
+  });
+
+  const handleChange = (e) => {
+    setLoginData({ ...loginData, [e.target.name]: e.target.value });
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault(); 
+    try {
+      const response = await fetch('http://localhost:5000/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(loginData)
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+      //success
+      console.log('User created:', data);
+      //direct to login page
+      setTimeout(() => { navigate('/dashboard');},1000);
+    } catch (err) {
+      console.error('Login error:', err);
+      setLoginError(`❌ Login failed: ${err.message}`);
+    }
+  };
 
   // Updated emoji options to match signup page
   const emojis = [
@@ -117,7 +156,7 @@ const LoginPage = () => {
       <div className="absolute bottom-1/4 right-1/3 w-[300px] h-[300px] bg-yellow-100 opacity-20 blur-xl rounded-full animate-float-slowest"></div>
 
       {/* Floating emojis - now using memoized data */}
-      {floatingEmojis.map((emojiData) => (
+      {/*{floatingEmojis.map((emojiData) => (
         <motion.div
           key={emojiData.id}
           className="absolute pointer-events-none select-none will-change-transform"
@@ -158,8 +197,8 @@ const LoginPage = () => {
         >
           {emojiData.emoji}
         </motion.div>
-      ))}
-
+      ))}*/}
+      <FloatingEmojis />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -179,6 +218,7 @@ const LoginPage = () => {
         </div>
 
         <motion.form
+          onSubmit={handleLogin}
           className="bg-white/90 backdrop-blur-sm shadow-xl rounded-3xl p-8 space-y-6 border border-white/20"
           whileHover={{ scale: 1.01 }}
         >
@@ -191,6 +231,9 @@ const LoginPage = () => {
                 type="text"
                 className="w-full p-4 rounded-xl border-2 border-blue-100 focus:border-pink-300 focus:ring-2 focus:ring-pink-200 focus:outline-none transition-all duration-300"
                 placeholder="Enter your username or email"
+                name="username"
+                value={loginData.username}
+                onChange={handleChange}
               />
             </motion.div>
           </div>
@@ -204,6 +247,9 @@ const LoginPage = () => {
                 type={showPassword ? 'text' : 'password'}
                 className="w-full p-4 rounded-xl border-2 border-blue-100 focus:border-pink-300 focus:ring-2 focus:ring-pink-200 focus:outline-none transition-all duration-300 pr-12"
                 placeholder="Enter your password"
+                name="password"
+                value={loginData.password}
+                onChange={handleChange}
               />
               <button
                 type="button"
@@ -215,6 +261,10 @@ const LoginPage = () => {
             </motion.div>
           </div>
 
+          {loginError && (
+                <p className="text-red-600 font-medium mt-2">{loginError}</p>
+            )}
+            
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <input
