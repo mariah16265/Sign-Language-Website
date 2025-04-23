@@ -53,6 +53,7 @@ const LearningShowcase = () => {
       highlights: ['Alphabets', 'Numbers', 'Basic Addition'],
       gifs: [mathGif1, mathGif2, mathGif3],
     },
+    //WILL THIS BE PSUHED??
     Arabic: {
       icon: <div className="text-3xl font-arabic">أ</div>,
       color: 'from-blue-500 to-teal-500',
