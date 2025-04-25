@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaSignInAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
-import FloatingEmojis from '../components/FloatingEmojis'; 
+import FloatingEmojis from '../components/FloatingEmojis';
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,7 +14,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const [loginData, setLoginData] = useState({
     username: '',
-    password: ''
+    password: '',
   });
 
   const handleChange = (e) => {
@@ -22,25 +22,27 @@ const LoginPage = () => {
   };
 
   const handleLogin = async (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     try {
       const response = await fetch('http://localhost:5000/api/users/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(loginData)
+        body: JSON.stringify(loginData),
       });
-  
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
       }
       //success
       console.log('User created:', data);
       //direct to login page
-      setTimeout(() => { navigate('/dashboard');},1000);
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1000);
     } catch (err) {
       console.error('Login error:', err);
       setLoginError(`❌ Login failed: ${err.message}`);
@@ -262,9 +264,9 @@ const LoginPage = () => {
           </div>
 
           {loginError && (
-                <p className="text-red-600 font-medium mt-2">{loginError}</p>
-            )}
-            
+            <p className="text-red-600 font-medium mt-2">{loginError}</p>
+          )}
+
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <input
@@ -292,6 +294,7 @@ const LoginPage = () => {
             className="w-full bg-gradient-to-r from-pink-500 to-blue-500 hover:from-pink-600 hover:to-blue-600 text-white py-4 px-6 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            onClick={() => navigate('/studyplan')}
             onHoverStart={() => setIsHovered(true)}
             onHoverEnd={() => setIsHovered(false)}
           >

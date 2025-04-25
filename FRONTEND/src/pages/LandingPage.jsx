@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaStar, FaBookOpen, FaCalculator, FaLanguage } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
-import wavingHand from '../assets/hello1.webp';
-import englishGif from '../assets/england1.gif';
-import englishGif2 from '../assets/england2.gif';
-import englishGif3 from '../assets/england3.gif';
-import mathGif from '../assets/england2.gif';
-import mathGif2 from '../assets/england1.gif';
-import mathGif3 from '../assets/england3.gif';
-import arabicGif from '../assets/england3.gif';
-import arabicGif2 from '../assets/england1.gif';
-import arabicGif3 from '../assets/england2.gif';
+// import wavingHand from '/assets/hello1.webp';
+// import englishGif from '/assets/england1.gif';
+// import englishGif2 from '/assets/england2.gif';
+// import englishGif3 from '/assets/england3.gif';
+// import mathGif from '/assets/england2.gif';
+// import mathGif2 from '/assets/england1.gif';
+// import mathGif3 from '/assets/england3.gif';
+// import arabicGif from '/assets/england3.gif';
+// import arabicGif2 from '/assets/england1.gif';
+// import arabicGif3 from '/assets/england2.gif';
 
 const LandingPage = () => {
   const [stars, setStars] = useState([]);
@@ -31,72 +31,44 @@ const LandingPage = () => {
     };
     setStars([...stars.slice(-10), newStar]);
   };
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    // Ensure video plays and loops
+    if (videoRef.current) {
+      videoRef.current.play().catch((error) => {
+        console.log('Video autoplay prevented, trying to play manually');
+      });
+    }
+  }, []);
+  const arabicGifs = [
+    '/assets/england3.gif',
+    '/assets/england1.gif',
+    '/assets/england2.gif',
+  ];
 
   return (
     <div
       className="relative min-h-screen overflow-hidden font-sans cursor-default"
       onClick={addStar}
     >
-      {/* Background elements */}
-      {/* Replace the ENTIRE current background div with this: */}
-      <div className="absolute inset-0 z-0 overflow-hidden bg-gradient-to-br from-purple-100 via-pink-50 to-blue-50">
-        {/* Animated confetti elements */}
-        {[...Array(120)].map((_, i) => {
-          const colors = [
-            '#FF3CAC',
-            '#8E2DE2',
-            '#4A00E0',
-            '#00D2FF',
-            '#FF4E50',
-            '#F9D423',
-            '#56CCF2',
-            '#2F80ED',
-          ];
-          const shapes = ['circle', 'rect', 'polygon'];
-          const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
-          const randomColor = colors[Math.floor(Math.random() * colors.length)];
-          const size = Math.random() * 20 + 10;
-
-          return (
-            <motion.div
-              key={i}
-              className="absolute opacity-70"
-              style={{
-                width: `${size}px`,
-                height: `${size}px`,
-                left: `${Math.random() * 100}vw`,
-                top: `${Math.random() * 100}vh`,
-                background: randomColor,
-                borderRadius: randomShape === 'circle' ? '50%' : '4px',
-                clipPath:
-                  randomShape === 'polygon'
-                    ? 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)'
-                    : undefined,
-              }}
-              animate={{
-                y: [
-                  `${Math.random() * 100}vh`,
-                  `${Math.random() * 100 + 100}vh`,
-                ],
-                x: [
-                  `${Math.random() * 20 - 10}vw`,
-                  `${Math.random() * 20 - 10}vw`,
-                ],
-                rotate: [0, Math.random() * 360],
-                opacity: [0.8, 0],
-              }}
-              transition={{
-                duration: Math.random() * 10 + 5,
-                repeat: Infinity,
-                delay: Math.random() * 5,
-                ease: 'linear',
-              }}
-            />
-          );
-        })}
+      {/* Video Background */}
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
+        >
+          <source src="/assets/landingvidbg.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
       </div>
+
       {/* Semi-transparent overlay */}
-      <div className="absolute inset-0 bg-white/5 backdrop-blur-sm z-0"></div>
+      {/* <div className="absolute inset-0 bg-white/5 backdrop-blur-sm z-0"></div> */}
 
       {/* Interactive stars */}
       <AnimatePresence>
@@ -144,12 +116,12 @@ const LandingPage = () => {
               transition={{ duration: 0.12 }}
             >
               <motion.span
-                className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-purple-400"
+                className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-200 to-blue-200"
                 animate={{
                   backgroundImage: [
-                    'linear-gradient(to right, #9333ea, #8b5cf6)',
-                    'linear-gradient(to right, #8b5cf6, #a855f7)',
-                    'linear-gradient(to right, #a855f7, #9333ea)',
+                    'linear-gradient(to right, #d8b4fe, #fbcfe8, #bfdbfe)', // purple-300, pink-200, blue-200
+                    'linear-gradient(to right, #fbcfe8, #bfdbfe, #d8b4fe)',
+                    'linear-gradient(to right, #bfdbfe, #d8b4fe, #fbcfe8)',
                   ],
                 }}
                 transition={{
@@ -164,18 +136,20 @@ const LandingPage = () => {
             </motion.h1>
 
             {/* In your hero section */}
+            {/* Hero Section */}
             <motion.p
-              className="text-xl md:text-2xl text-black/90 mb-8 leading-relaxed"
+              className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.5 }}
             >
-              Explore the magical world of letters, numbers, and everyday
-              words—all through{' '}
-              <span className="font-bold text-purple-500">playful signs</span>{' '}
+              Embark on a joyful learning adventure where{' '}
+              <span className="font-bold text-purple-500">Arabic letters</span>,{' '}
+              <span className="font-bold text-purple-400">math concepts</span>,
               and{' '}
-              <span className="font-bold text-purple-600">friendly games</span>{' '}
-              made just for you!
+              <span className="font-bold text-purple-300">English words</span>{' '}
+              come alive through the magic of{' '}
+              <span className="font-bold text-purple-600">sign language</span>!
             </motion.p>
 
             <motion.div
@@ -198,9 +172,10 @@ const LandingPage = () => {
             transition={{ duration: 0.5 }}
           >
             <img
-              src={wavingHand}
+              src="/assets/hello1.webp"
               alt="Sign language welcome"
-              className="w-full h-full object-contain rounded-2xl shadow-lg"
+              className="w-full h-full object-contain
+            rounded-2xl shadow-lg"
             />
           </motion.div>
         </main>
@@ -282,7 +257,7 @@ const LandingPage = () => {
                           className="relative h-48 rounded-xl overflow-hidden shadow-lg border-2 border-white group-hover:border-purple-200 transition-all"
                         >
                           <img
-                            src={englishGif}
+                            src="/assets/england1.gif"
                             alt="English sign"
                             className="w-full h-full object-cover transition-transform group-hover:scale-105"
                           />
@@ -295,7 +270,7 @@ const LandingPage = () => {
                           className="relative h-48 rounded-xl overflow-hidden shadow-lg border-2 border-white group-hover:border-purple-300 transition-all"
                         >
                           <img
-                            src={englishGif2}
+                            src="/assets/england2.gif"
                             alt="English sign"
                             className="w-full h-full object-cover transition-transform group-hover:scale-105"
                           />
@@ -308,7 +283,7 @@ const LandingPage = () => {
                           className="relative h-48 rounded-xl overflow-hidden shadow-lg border-2 border-white group-hover:border-purple-400 transition-all col-span-2"
                         >
                           <img
-                            src={englishGif3}
+                            src="/assets/england3.gif"
                             alt="English sign"
                             className="w-full h-full object-cover transition-transform group-hover:scale-105"
                           />
@@ -381,7 +356,7 @@ const LandingPage = () => {
                           className="relative h-40 rounded-xl overflow-hidden shadow-lg border-2 border-white group-hover:border-purple-200 transition-all"
                         >
                           <img
-                            src={mathGif}
+                            src="/assets/england1.gif"
                             alt="Math sign"
                             className="w-full h-full object-cover transition-transform group-hover:scale-105"
                           />
@@ -393,7 +368,7 @@ const LandingPage = () => {
                           className="relative h-40 rounded-xl overflow-hidden shadow-lg border-2 border-white group-hover:border-purple-300 transition-all mt-6"
                         >
                           <img
-                            src={mathGif2}
+                            src="/assets/england2.gif"
                             alt="Math sign"
                             className="w-full h-full object-cover transition-transform group-hover:scale-105"
                           />
@@ -405,8 +380,8 @@ const LandingPage = () => {
                           className="relative h-40 rounded-xl overflow-hidden shadow-lg border-2 border-white group-hover:border-purple-400 transition-all"
                         >
                           <img
-                            src={mathGif3}
-                            alt="Math sign"
+                            src="/assets/england3.gif"
+                            alt="English sign"
                             className="w-full h-full object-cover transition-transform group-hover:scale-105"
                           />
                         </motion.div>
@@ -470,31 +445,29 @@ const LandingPage = () => {
                     </div>
                     <div className="md:w-3/5">
                       <div className="grid grid-cols-3 gap-4">
-                        {[arabicGif, arabicGif2, arabicGif3].map(
-                          (gif, index) => (
-                            <motion.div
-                              key={index}
-                              initial={{ opacity: 0, y: 30 }}
-                              whileInView={{ opacity: 1, y: 0 }}
-                              transition={{
-                                duration: 0.6,
-                                delay: 0.3 + index * 0.1,
-                                type: 'spring',
-                                stiffness: 100,
-                              }}
-                              className="relative h-40 rounded-xl overflow-hidden shadow-lg border-2 border-white group-hover:border-purple-300 transition-all"
-                              whileHover={{ y: -10 }}
-                            >
-                              <img
-                                src={gif}
-                                alt={`Arabic sign ${index + 1}`}
-                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                            </motion.div>
-                          )
-                        )}
-                      </div>
+                        {arabicGifs.map((gif, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{
+                              duration: 0.6,
+                              delay: 0.3 + index * 0.1,
+                              type: 'spring',
+                              stiffness: 100,
+                            }}
+                            className="relative h-40 rounded-xl overflow-hidden shadow-lg border-2 border-white group-hover:border-purple-300 transition-all"
+                            whileHover={{ y: -10 }}
+                          >
+                            <img
+                              src={gif}
+                              alt={`Arabic sign ${index + 1}`}
+                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                          </motion.div>
+                        ))}
+                      </div>{' '}
                     </div>
                   </div>
                 </div>
