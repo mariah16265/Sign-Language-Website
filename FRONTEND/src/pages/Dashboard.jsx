@@ -116,19 +116,35 @@ const Dashboard = () => {
   const COLORS = ['#8b5cf6', '#10b981', '#f59e0b']; // Purple, Emerald, Amber
 
   const [stats] = useState(() => {
+    // Get today's scheduled subjects
     const todaySubjects = studySchedule[dayName] || [];
-    const signsLearned = todaySubjects.includes('English Signs')
-      ? 25
-      : todaySubjects.includes('Arabic Signs')
-      ? 15
-      : 0;
+
+    // Calculate signs learned based on all subjects (not just English/Arabic)
+    const totalSignsLearned = subjectsData
+      .filter((subject) => todaySubjects.includes(subject.name))
+      .reduce((total, subject) => {
+        return (
+          total +
+          subject.modules.reduce((sum, module) => sum + module.progress, 0)
+        );
+      }, 0);
+
+    // Calculate completed modules
+    const completedModules = subjectsData
+      .filter((subject) => todaySubjects.includes(subject.name))
+      .reduce((total, subject) => {
+        return (
+          total +
+          subject.modules.filter((module) => module.progress === 100).length
+        );
+      }, 0);
 
     return [
       {
         icon: <FaHands className="text-2xl" />,
-        label: 'Signs Mastered',
-        value: 42,
-        change: '+5 this week',
+        label: "Today's Progress",
+        value: `${Math.round(totalSignsLearned / todaySubjects.length)}%`,
+        change: `${todaySubjects.length} subjects today`,
         color: 'bg-purple-100 text-purple-600',
       },
       {
@@ -140,14 +156,13 @@ const Dashboard = () => {
       },
       {
         icon: <FaMedal className="text-2xl" />,
-        label: 'Achievements',
-        value: '3/10',
-        change: 'Earned 1 new badge',
+        label: 'Modules Completed',
+        value: completedModules,
+        change: 'Keep going!',
         color: 'bg-blue-100 text-blue-600',
       },
     ];
   });
-
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 overflow-hidden">
       <Navbar userName="Michael Bob" userAvatar="/images/avatar.jpg" />
