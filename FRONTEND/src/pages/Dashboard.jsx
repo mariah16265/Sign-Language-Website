@@ -101,7 +101,12 @@ const Dashboard = () => {
       ],
     },
   ];
-
+  const [studySchedule] = useState({
+    Monday: ['English Signs', 'Arabic Signs'],
+    Wednesday: ['Math Signs', 'English Signs'],
+    Friday: ['Arabic Signs', 'Math Signs'],
+    Sunday: ['English Signs', 'Math Signs'],
+  });
   const [progressData] = useState([
     { name: 'English', score: 65 },
     { name: 'Arabic', score: 40 },
@@ -110,29 +115,38 @@ const Dashboard = () => {
 
   const COLORS = ['#8b5cf6', '#10b981', '#f59e0b']; // Purple, Emerald, Amber
 
-  const [stats] = useState([
-    {
-      icon: <FaHands className="text-2xl" />,
-      label: 'Signs Mastered',
-      value: 42,
-      change: '+5 this week',
-      color: 'bg-purple-100 text-purple-600',
-    },
-    {
-      icon: <FaFire className="text-2xl" />,
-      label: 'Current Streak',
-      value: '5 days 🔥',
-      change: 'Personal best: 12 days',
-      color: 'bg-orange-100 text-orange-600',
-    },
-    {
-      icon: <FaMedal className="text-2xl" />,
-      label: 'Achievements',
-      value: '3/10',
-      change: 'Earned 1 new badge',
-      color: 'bg-blue-100 text-blue-600',
-    },
-  ]);
+  const [stats] = useState(() => {
+    const todaySubjects = studySchedule[dayName] || [];
+    const signsLearned = todaySubjects.includes('English Signs')
+      ? 25
+      : todaySubjects.includes('Arabic Signs')
+      ? 15
+      : 0;
+
+    return [
+      {
+        icon: <FaHands className="text-2xl" />,
+        label: 'Signs Mastered',
+        value: 42,
+        change: '+5 this week',
+        color: 'bg-purple-100 text-purple-600',
+      },
+      {
+        icon: <FaFire className="text-2xl" />,
+        label: 'Current Streak',
+        value: '5 days 🔥',
+        change: 'Personal best: 12 days',
+        color: 'bg-orange-100 text-orange-600',
+      },
+      {
+        icon: <FaMedal className="text-2xl" />,
+        label: 'Achievements',
+        value: '3/10',
+        change: 'Earned 1 new badge',
+        color: 'bg-blue-100 text-blue-600',
+      },
+    ];
+  });
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 overflow-hidden">
@@ -177,16 +191,20 @@ const Dashboard = () => {
               animate={{ opacity: 1 }}
               transition={{ staggerChildren: 0.1 }}
             >
-              {subjectsData.map((subject, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <SubjectSlideshow subjects={[subject]} />
-                </motion.div>
-              ))}
+              {subjectsData
+                .filter((subject) =>
+                  studySchedule[dayName]?.includes(subject.name)
+                )
+                .map((subject, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <SubjectSlideshow subjects={[subject]} />
+                  </motion.div>
+                ))}
             </motion.div>
           ) : (
             <div className="bg-gradient-to-r from-purple-100 to-blue-100 p-8 rounded-2xl shadow-md text-center mb-8">

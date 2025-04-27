@@ -9,7 +9,20 @@ const SubjectSlideshow = ({ subjects }) => {
   const [currentIndex] = useState(0);
   const currentSubject = subjects[currentIndex];
   const lessonCount = currentSubject.modules.length;
-
+  if (currentSubject.modules.length === 0) {
+    return (
+      <div className="relative h-80 rounded-2xl overflow-hidden shadow-xl border-2 border-white">
+        <div
+          className={`absolute inset-0 bg-gradient-to-br ${currentSubject.gradient}`}
+        >
+          <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/asfalt-light.png')]" />
+        </div>
+        <div className="relative h-full flex items-center justify-center p-6 text-white">
+          <p>No lessons scheduled for today</p>
+        </div>
+      </div>
+    );
+  }
   // Calculate grid columns and lesson sizes
   const getLayoutConfig = () => {
     switch (lessonCount) {
