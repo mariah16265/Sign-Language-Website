@@ -22,6 +22,14 @@ export const useApiErrorHandler = () => {
   return { handleApiError };
 };
 
+export const clearAuthData = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('tokenExpiry');
+  localStorage.removeItem('userName');
+  localStorage.removeItem('userId');
+  localStorage.removeItem('isNewUser');
+};
+
 export const useCheckTokenValid = () => {
   const navigate = useNavigate();
   const checkTokenValid = () => {
@@ -29,10 +37,9 @@ export const useCheckTokenValid = () => {
     const expiry = localStorage.getItem('tokenExpiry');
     
     //If there is no token/expiry OR if the token expiry is less than the current time-expired 
-    if (!token || !expiry || Date.now() > expiry) {
+    if (!token || !expiry || Date.now() > (expiry)) {
       console.log('🚫 Error: Token missing or expired.');
-      localStorage.removeItem('token');
-      localStorage.removeItem('tokenExpiry');
+      clearAuthData();
       toast.error('Session expired. Please log in again.');
       navigate('/login');  return false;
     }

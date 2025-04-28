@@ -22,7 +22,10 @@ const LoginPage = () => {
     useEffect(() => {
       const token = localStorage.getItem('token');
       const expiry = localStorage.getItem('tokenExpiry');
-      if (token && expiry && Date.now() < expiry) {
+      console.log(`${token}`)
+      console.log(`${expiry}`)
+      console.log(`${Date.now()}`)
+      if (token && expiry && Date.now() < (expiry)) {
         const isNewUser = localStorage.getItem('isNewUser');
         if (isNewUser === "true") {
           navigate('/studyplan'); // Redirect to study plan if not a new user
