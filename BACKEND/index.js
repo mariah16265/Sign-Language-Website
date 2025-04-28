@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const userRoutes = require('./router/user.route');
+const signsDataSync = require('./utils/signsDataSync');   //syncs data
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ mongoose
   })
   .then(() => {
     console.log('MongoDB connected');
+    signsDataSync(); 
   })
   .catch((err) => {
     console.error('MongoDB connection error:', err);
