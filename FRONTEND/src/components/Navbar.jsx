@@ -10,8 +10,8 @@ import { useLocation } from 'react-router-dom';
 
 const Navbar = ({ hideLoginButton = false }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [userName, setUserName] = useState('');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); 
   const navigate = useNavigate();
   const toggleMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const location = useLocation();   //to get current page path
@@ -19,10 +19,8 @@ const Navbar = ({ hideLoginButton = false }) => {
   const isLandingPage = location.pathname === '/';
   const isSignupPage = location.pathname === '/signup';
   const isLoginPage = location.pathname === '/login';
-  // Check if login button should be shown
+  // Login button to be show for landing and sign up page, for others show username
   const shouldShowLoginButton = (isLandingPage || isSignupPage);
-
-  // Check if username should be shown
   const shouldShowUsername = (!isLandingPage && !isSignupPage && !isLoginPage && userName);
 
   const navLinks = ['Home', 'About', 'Curriculum'];
@@ -108,8 +106,7 @@ const Navbar = ({ hideLoginButton = false }) => {
           </div>
         </motion.li>
         ) : (
-        shouldShowLoginButton && (
-         // Otherwise show login button
+        shouldShowLoginButton && (  // Otherwise show login button
           <motion.li whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Link
               to="/login"

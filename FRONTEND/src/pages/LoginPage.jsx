@@ -22,9 +22,6 @@ const LoginPage = () => {
     useEffect(() => {
       const token = localStorage.getItem('token');
       const expiry = localStorage.getItem('tokenExpiry');
-      console.log(`${token}`)
-      console.log(`${expiry}`)
-      console.log(`${Date.now()}`)
       if (token && expiry && Date.now() < (expiry)) {
         const isNewUser = localStorage.getItem('isNewUser');
         if (isNewUser === "true") {
