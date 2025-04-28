@@ -74,7 +74,7 @@ async function signsDataSync() {
           module: folderModule.module
         });
        // console.log(`Deleted all existing lessons for module: ${folderModule.module} (${folderModule.subject})`);
-    }
+    }console.log('Syncing...') 
 
     // 2. Insert new lessons for the modules
     for (const folderModule of modulesFromFolder) {
@@ -83,7 +83,6 @@ async function signsDataSync() {
       await newModule.save();
       //console.log(`Created new module: ${folderModule.module} (${folderModule.subject})`);
     }
-
     console.log('✅ SignsData Synced with DB.');
   } catch (err) {
     console.error('Error during syncing:', err);

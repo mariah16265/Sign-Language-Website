@@ -19,20 +19,20 @@ const LoginPage = () => {
   });
 
   // Check if user already logged in-token exists and is valid on page load
-    useEffect(() => {
-      const token = localStorage.getItem('token');
-      const expiry = localStorage.getItem('tokenExpiry');
-      if (token && expiry && Date.now() < expiry) {
-        const isNewUser = localStorage.getItem('isNewUser');
-        if (isNewUser === "true") {
-          navigate('/studyplan'); // Redirect to study plan if not a new user
-        } else {
-          navigate('/dashboard'); // Redirect to dashboard if the user is new
-        }
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const expiry = localStorage.getItem('tokenExpiry');
+    if (token && expiry && Date.now() < expiry) {
+      const isNewUser = localStorage.getItem('isNewUser');
+      if (isNewUser === "true") {
+        navigate('/studyplan'); // Redirect to study plan if not a new user
+      } else {
+        navigate('/dashboard'); // Redirect to dashboard if the user is new
       }
-    }, [navigate]); 
-  
+    }
+  }, [navigate]); 
 
+ 
   const handleChange = (e) => {
     setLoginData({ ...loginData, [e.target.name]: e.target.value });
   };
@@ -58,7 +58,7 @@ const LoginPage = () => {
       localStorage.setItem('userName', data.user.username);
       localStorage.setItem('userId', data.user._id);
       localStorage.setItem('isNewUser',data.isNewUser);   
-  
+
       // Decode the token to get the expiry time (exp is in seconds, so multiply by 1000 for milliseconds)
       const decodedToken = jwtDecode(data.token);
       const tokenExpiry = decodedToken.exp * 1000; // Convert from seconds to milliseconds
@@ -75,7 +75,7 @@ const LoginPage = () => {
       setLoginError(`❌ Login failed: ${err.message}`);
     }
   };
-  
+
   // Updated emoji options to match signup page
   const emojis = [
     '🌈',
@@ -321,7 +321,7 @@ const LoginPage = () => {
             className="w-full bg-gradient-to-r from-pink-500 to-blue-500 hover:from-pink-600 hover:to-blue-600 text-white py-4 px-6 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            //onClick={() => navigate('/studyplan')}
+          //onClick={() => navigate('/studyplan')}
             onHoverStart={() => setIsHovered(true)}
             onHoverEnd={() => setIsHovered(false)}
           >

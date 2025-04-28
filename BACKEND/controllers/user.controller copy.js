@@ -74,13 +74,13 @@ const userLogin = async (req, res) => {
     const user = await User.findOne(isEmail ? { Gemail: username } : { username });
 
     if (!user) return res.status(404).json({ message: 'User not found' });
-    
+
     const studyplan = await Studyplan.findOne({ user: user._id });
     const isNewUser = !studyplan;
-    
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) return res.status(401).json({ message: 'Invalid password' });
-     //If password valid, send a token
+    //If password valid, send a token
     const token = jwt.sign(
       { id: user._id },       // small data to put inside token
       process.env.JWT_SECRET,  // Secret key (you will later put it in .env file)
