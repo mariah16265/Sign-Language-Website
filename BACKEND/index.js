@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const userRoutes = require('./router/user.route');
+const signsDataSync = require('./utils/signsDataSync');   //syncs data
+const signsDataRoutes = require('./router/signsData.route');  //sends data to frontend
+const studyPlanRoutes = require('./router/studyplan.route');
 
 dotenv.config();
 
@@ -23,6 +26,7 @@ mongoose
   })
   .then(() => {
     console.log('MongoDB connected');
+    signsDataSync(); 
   })
   .catch((err) => {
     console.error('MongoDB connection error:', err);
@@ -30,6 +34,12 @@ mongoose
 
 // Route for users
 app.use('/api/users', userRoutes);
+
+// Route to get modules data
+app.use('/api/modules', signsDataRoutes);
+
+//Route to save studyplan
+app.use('/api/studyplan', studyPlanRoutes);
 
 // Test Route (Optional)
 app.get('/', (req, res) => {

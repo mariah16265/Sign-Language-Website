@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
+import {  useApiErrorHandler, useCheckTokenValid } from '../utils/apiErrorHandler';
+import { useNavigate } from 'react-router-dom';
 
 import {
   FaBook,
@@ -22,13 +24,26 @@ const StudyPlanPage = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [studyPlan, setStudyPlan] = useState({
-    startingModules: { english: '', arabic: '', math: '' },
-    weeklyLessons: { english: 2, arabic: 2, math: 2 },
-    subjectDays: { english: [], arabic: [], math: [] },
+    startingModules: { English: '', Arabic: '', Math: '' },
+    weeklyLessons: { English: 2, Arabic: 2, Math: 2 },
+    subjectDays: { English: [], Arabic: [], Math: [] },
   });
+  //initialized to get modules,handle errors and token
+  const navigate = useNavigate();
+  const { handleApiError } = useApiErrorHandler();
+  const { checkTokenValid } = useCheckTokenValid();
+  const [modulesPerSubject, setModulesPerSubject] = useState({});
+  const token = localStorage.getItem('token');
+  const isNewUser = localStorage.getItem('isNewUser');
+    
+  useEffect(() => {
+    // Redirect to the dashboard if not a new user
+    if (isNewUser === "false") {
+      navigate('/dashboard');
+    }
+  }, [isNewUser, navigate]); 
 
   const videoRef = useRef(null);
-
   useEffect(() => {
     // Ensure video plays and loops
     if (videoRef.current) {
@@ -37,13 +52,70 @@ const StudyPlanPage = () => {
       });
     }
   }, []);
+
+    //BACKEND
+    //token validation, on expiry-when user click on a component or reloads-they will be alerted
+    useEffect(() => {
+      const isTokenValid = checkTokenValid();
+      if (!isTokenValid) { return; }
+    });
+  
+    //getting modules data from DB
+    const fetchModulesForSubject = async (subjectId) => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/modules/${subjectId}`);
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || 'Failed to fetch modules');
+        }
+        console.log('Fetched modules for subject', subjectId, ':', data); 
+        setModulesPerSubject((prev) => ({
+          ...prev,
+          [subjectId]: data,
+        }));
+      } catch (error) {
+        handleApiError(error); 
+      }
+    };
+  
+    const handleSubjectClick = (subject) => {
+      setSelectedSubject(subject);        
+      fetchModulesForSubject(subject.id); // Fetch modules for selected subject
+    };
+  
+    //save studyplan data to DB
+    const handleStudyPlan = async () => {
+      try {
+        //sending POST request with the token
+        const response = await fetch('http://localhost:5000/api/studyplan/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`, // Attach the JWT token
+          },
+          body: JSON.stringify({ 
+              startingModules: studyPlan.startingModules,
+              weeklyLessons: studyPlan.weeklyLessons,
+              subjectDays: studyPlan.subjectDays,
+          }), //break down study plan and send 
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message ||  'Failed to save the study plan');
+        }
+        navigate('/dashboard');  
+      } catch (error) {
+        handleApiError(error);
+      }
+    };
+    
   const subjects = [
     {
-      id: 'english',
+      id: 'English',
       name: 'English Adventure',
       icon: FaBook,
       color: 'from-blue-400 to-blue-600',
-      modules: [
+      /*modules: [
         {
           id: 'alphabet',
           name: 'Alphabet Safari',
@@ -59,14 +131,14 @@ const StudyPlanPage = () => {
           emoji: '🐘',
         },
         { id: 'nature', name: 'Nature Explorer', icon: BsTree, emoji: '🌳' },
-      ],
+      ],*/
     },
     {
-      id: 'arabic',
+      id: 'Arabic',
       name: 'Arabic Journey',
       icon: FaLanguage,
       color: 'from-emerald-400 to-teal-600',
-      modules: [
+      /*modules: [
         {
           id: 'alphabet',
           name: 'Arabic Letters',
@@ -75,14 +147,14 @@ const StudyPlanPage = () => {
         },
         { id: 'numbers', name: 'Counting Fun', icon: Bs123, emoji: '1️⃣' },
         { id: 'colors', name: 'Color World', icon: GiButterfly, emoji: '🎨' },
-      ],
+      ],*/
     },
     {
-      id: 'math',
+      id: 'Math',
       name: 'Math Wonderland',
       icon: FaCalculator,
       color: 'from-amber-400 to-pink-500',
-      modules: [
+      /*modules: [
         { id: 'numbers', name: 'Number Party', icon: Bs123, emoji: '🧮' },
         {
           id: 'shapes',
@@ -96,7 +168,7 @@ const StudyPlanPage = () => {
           icon: BsCarFront,
           emoji: '➕',
         },
-      ],
+      ],*/
     },
   ];
 
@@ -137,8 +209,8 @@ const StudyPlanPage = () => {
     });
   };
 
-  const allModulesSelected = Object.values(studyPlan.startingModules).every(
-    (m) => m !== ''
+  const allModulesSelected = subjects.every(
+    (subject) => studyPlan.startingModules[subject.id] && studyPlan.startingModules[subject.id] !== ''
   );
   const allSubjectsHaveDays = Object.values(studyPlan.subjectDays).every(
     (d) => d.length > 0
@@ -224,7 +296,7 @@ const StudyPlanPage = () => {
                       >
                         <div
                           className={`p-6 rounded-2xl cursor-pointer bg-gradient-to-br ${subject.color} text-white shadow-lg`}
-                          onClick={() => setSelectedSubject(subject)}
+                          onClick={() => handleSubjectClick(subject)}
                         >
                           <div className="flex flex-col items-center gap-4">
                             <subject.icon className="text-4xl" />
@@ -235,11 +307,11 @@ const StudyPlanPage = () => {
                               <span className="bg-white/20 px-3 py-1 rounded-full text-sm">
                                 Selected:{' '}
                                 {
-                                  subject.modules.find(
+                                  modulesPerSubject[subject.id]?.find(
                                     (m) =>
-                                      m.id ===
+                                      m._id ===
                                       studyPlan.startingModules[subject.id]
-                                  )?.name
+                                  )?.module
                                 }
                               </span>
                             )}
@@ -278,9 +350,13 @@ const StudyPlanPage = () => {
                             >
                               {' '}
                               {/* Only changed gap from 4 to 2 */}
-                              {selectedSubject.modules.map((module) => (
+                              {/* Filter to get unique modules based on module._id */}
+                              {modulesPerSubject[selectedSubject.id]
+                                 ?.filter((module, index, self) =>
+                                  index === self.findIndex((m) => m.module === module.module) // Ensure unique module names only
+                                ).map((module) => (
                                 <motion.div
-                                  key={module.id}
+                                  key={module._id}
                                   variants={cardVariants}
                                   initial="hidden"
                                   animate="visible"
@@ -291,14 +367,14 @@ const StudyPlanPage = () => {
                                     className={`h-full rounded-lg cursor-pointer flex items-center gap-3 border-2 px-4 ${
                                       studyPlan.startingModules[
                                         selectedSubject.id
-                                      ] === module.id
+                                      ] === module._id
                                         ? 'border-purple-500 bg-purple-50'
                                         : 'border-gray-200 hover:border-purple-300'
                                     }`}
                                     onClick={() =>
                                       selectModule(
                                         selectedSubject.id,
-                                        module.id
+                                        module._id
                                       )
                                     }
                                   >
@@ -307,7 +383,7 @@ const StudyPlanPage = () => {
                                     </span>
                                     <div className="min-w-0">
                                       <h4 className="font-bold">
-                                        {module.name}
+                                        {module.module}
                                       </h4>
                                     </div>
                                   </div>
@@ -371,6 +447,7 @@ const StudyPlanPage = () => {
                         {subjects.map((subject) => (
                           <motion.div
                             key={subject.id}
+                            onClick={() => handleSubjectClick(subject)}  // Passing whole subject object
                             whileHover={{ scale: 1.02 }}
                             className="bg-white p-5 rounded-xl shadow-md border-2 border-gray-100"
                           >
@@ -421,6 +498,7 @@ const StudyPlanPage = () => {
                         {subjects.map((subject) => (
                           <motion.div
                             key={subject.id}
+                            onClick={() => handleSubjectClick(subject)}  // Passing whole subject object
                             whileHover={{ scale: 1.02 }}
                             className="bg-white p-5 rounded-xl shadow-md border-2 border-gray-100"
                           >
@@ -477,7 +555,7 @@ const StudyPlanPage = () => {
                       }`}
                       whileHover={allSubjectsHaveDays ? { scale: 1.05 } : {}}
                       whileTap={allSubjectsHaveDays ? { scale: 0.98 } : {}}
-                      onClick={() => (window.location.href = '/dashboard')}
+                      onClick={handleStudyPlan}  
                       disabled={!allSubjectsHaveDays}
                     >
                       Complete Plan!
