@@ -63,7 +63,7 @@ const StudyPlanPage = () => {
     //getting modules data from DB
     const fetchModulesForSubject = async (subjectId) => {
       try {
-        const response = await fetch(`http://localhost:5000/api/modules/${subjectId}`);
+        const response = await fetch(`http://localhost:5000/api/modules/subject/${subjectId}`);
         const data = await response.json();
         if (!response.ok) {
           throw new Error(data.message || 'Failed to fetch modules');
@@ -94,7 +94,12 @@ const StudyPlanPage = () => {
             'Authorization': `Bearer ${token}`, // Attach the JWT token
           },
           body: JSON.stringify({ 
-              startingModules: studyPlan.startingModules,
+            startingModules: Object.fromEntries(
+              Object.entries(studyPlan.startingModules).map(([subject, mod]) => [
+                subject,
+                { name: mod.name } // Keep it as an object
+              ])
+            ),
               weeklyLessons: studyPlan.weeklyLessons,
               subjectDays: studyPlan.subjectDays,
           }), //break down study plan and send 
@@ -103,6 +108,8 @@ const StudyPlanPage = () => {
         if (!response.ok) {
           throw new Error(data.message ||  'Failed to save the study plan');
         }
+        //successfull
+        localStorage.setItem('isNewUser', 'false');
         navigate('/dashboard');  
       } catch (error) {
         handleApiError(error);
@@ -182,9 +189,20 @@ const StudyPlanPage = () => {
   };
 
   const selectModule = (subjectId, moduleId) => {
+    const selectedModule = modulesPerSubject[subjectId]?.find(
+      (module) => module._id === moduleId
+    );
+    const moduleName = selectedModule?.module; // Assuming this is the name
+  
     setStudyPlan((prev) => ({
       ...prev,
-      startingModules: { ...prev.startingModules, [subjectId]: moduleId },
+      startingModules: {
+        ...prev.startingModules,
+        [subjectId]: {
+          id: moduleId,
+          name: moduleName,
+        },
+      },
     }));
     setSelectedSubject(null);
   };
@@ -310,7 +328,7 @@ const StudyPlanPage = () => {
                                   modulesPerSubject[subject.id]?.find(
                                     (m) =>
                                       m._id ===
-                                      studyPlan.startingModules[subject.id]
+                                       studyPlan.startingModules[subject.id]?.id
                                   )?.module
                                 }
                               </span>
