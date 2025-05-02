@@ -1,91 +1,115 @@
 const path = require('path');
 const fs = require('fs');
 const SignsData = require('../models/signsData.model');
-const lessonGrouping = require('./lessonGrouping'); // Import the configuration file
+const lessonGrouping = require('./lessonGrouping');
+const mongoose = require('mongoose');
 
-// Path to Sign subject Videos
-const baseFolderPath = path.join(__dirname, '../../FRONTEND/src/Sign Language Videos');
+const baseFolderPath = path.join(__dirname, '../../FRONTEND/public/Sign Language Videos');
 
-// Function to group videos into lessons
+// Utility to group videos into lessons
 const groupVideosIntoLessons = (videos, videosPerLesson) => {
   const lessons = [];
   let lesson = [];
   for (let i = 0; i < videos.length; i++) {
     lesson.push(videos[i]);
-    // If the lesson reaches the limit, start a new lesson
     if (lesson.length === videosPerLesson) {
       lessons.push(lesson);
-      lesson = []; // Reset for the next lesson
+      lesson = [];
     }
   }
-  // Add any remaining videos to the last lesson
-  if (lesson.length > 0) {
-    lessons.push(lesson);}
+  if (lesson.length > 0) lessons.push(lesson);
   return lessons;
 };
 
 async function signsDataSync() {
   try {
-    const subjects = fs.readdirSync(baseFolderPath);   // All folders like English, Arabic, Maths
-    const existingModules = await SignsData.find({});   //Current records in MongoDB 
+    const subjects = fs.readdirSync(baseFolderPath);
+    const existingLessons = await SignsData.find({});
+    const existingLookup = new Map();
 
-    let modulesFromFolder = [];     //collects: subject, module name, lessons array with { title, videoUrl }
+    // Create a map of existing lessons
+    for (const doc of existingLessons) {
+      const key = `${doc.subject}-${doc.module}-${doc.lessonNumber}`;
+      existingLookup.set(key, doc._id);
+    }
 
-    //Loop through each subject folder inside "Sign subject Videos"
+    const validKeys = new Set(); // Store lessons that still exist in the folder
+
+    // Loop through folder structure
     for (const subject of subjects) {
       const subjectPath = path.join(baseFolderPath, subject);
-      //Check if the "subject" is actually a folder (Eng/Arabic/Maths)
-      if (fs.lstatSync(subjectPath).isDirectory()) {
-        const modules = fs.readdirSync(subjectPath);
-        //Loop through each module inside that subject folder (Alphabets, Intro..)
-        for (const module of modules) {
-          const modulePath = path.join(subjectPath, module);
-          // Check if the "module" is actually a folder
-          if (fs.lstatSync(modulePath).isDirectory()) {
-            const videos = fs.readdirSync(modulePath)
-              .filter(file => file.endsWith('.mp4'))
-              .map(file => ({
-                title: path.parse(file).name,
-                videoUrl: `/Sign Language Videos/${subject}/${module}/${file}`
-              }));
+      if (!fs.lstatSync(subjectPath).isDirectory()) continue;
 
-            // Get videosPerLesson from lessonGrouping
-            const videosPerLesson = lessonGrouping[subject] && lessonGrouping[subject][module]
-            ? lessonGrouping[subject][module]
-            : 3; // default to 3 if not specified
-            const groupedLessons = groupVideosIntoLessons(videos, videosPerLesson);
-            //Save the module (with lessons) to an array, push each lesson separately
-            groupedLessons.forEach((lesson, index) => {
-              modulesFromFolder.push({
-                subject,
-                module,
-                lessonNumber: index + 1, // lesson 1, 2, 3
-                signs: lesson
-              });
-            });
+      const modules = fs.readdirSync(subjectPath);
+      for (const module of modules) {
+        const modulePath = path.join(subjectPath, module);
+        if (!fs.lstatSync(modulePath).isDirectory()) continue;
+
+        const videoFiles = fs.readdirSync(modulePath).filter(file => file.endsWith('.mp4'));
+        const videos = videoFiles.map(file => ({
+          title: path.parse(file).name,
+          videoUrl: `/Sign Language Videos/${subject}/${module}/${file}`
+        }));
+
+        const videosPerLesson = lessonGrouping[subject]?.[module] || 3;
+        const groupedLessons = groupVideosIntoLessons(videos, videosPerLesson);
+
+        for (let lessonIndex = 0; lessonIndex < groupedLessons.length; lessonIndex++) {
+          const lessonNumber = lessonIndex + 1;
+          const key = `${subject}-${module}-${lessonNumber}`;
+          validKeys.add(key); // Mark as valid
+
+          // Look up the existing signs for the lesson
+          const oldLesson = existingLessons.find(doc => doc.subject === subject && doc.module === module && doc.lessonNumber === lessonNumber);
+          let existingSignsMap = new Map();
+
+          if (oldLesson) {
+            // Map existing signs by title to retain their signID
+            for (const sign of oldLesson.signs) {
+              existingSignsMap.set(sign.title, sign._id);
+            }
           }
+
+          // Enrich the new signs with the existing _id (if any)
+          const enrichedSigns = groupedLessons[lessonIndex].map(sign => ({
+            ...sign,
+            _id: existingSignsMap.get(sign.title) || new mongoose.Types.ObjectId() // Use existing signID or generate a new one
+          }));
+
+          const updateData = {
+            subject,
+            module,
+            lessonNumber,
+            signs: enrichedSigns
+          };
+
+          // Retain existing _id if present
+          if (existingLookup.has(key)) {
+            updateData._id = existingLookup.get(key);
+          }
+
+          await SignsData.findOneAndUpdate(
+            { subject, module, lessonNumber },
+            updateData,
+            { upsert: true, new: true, setDefaultsOnInsert: true }
+          );
         }
       }
     }
-    // 1. Delete all existing lessons for each subject/module before reinserting
-    for (const folderModule of modulesFromFolder) {
-        await SignsData.deleteMany({
-          subject: folderModule.subject,
-          module: folderModule.module
-        });
-       // console.log(`Deleted all existing lessons for module: ${folderModule.module} (${folderModule.subject})`);
-    }console.log('Syncing...') 
 
-    // 2. Insert new lessons for the modules
-    for (const folderModule of modulesFromFolder) {
-      // Directly insert the new module data
-      const newModule = new SignsData(folderModule);
-      await newModule.save();
-      //console.log(`Created new module: ${folderModule.module} (${folderModule.subject})`);
+    // Delete orphan lessons (no longer present in folders)
+    const allDbLessons = await SignsData.find({});
+    for (const doc of allDbLessons) {
+      const key = `${doc.subject}-${doc.module}-${doc.lessonNumber}`;
+      if (!validKeys.has(key)) {
+        await SignsData.deleteOne({ _id: doc._id });
+        console.log(`🗑️ Deleted orphan lesson: ${key}`);
+      }
     }
-    console.log('✅ SignsData Synced with DB.');
+
+    console.log('✅ SignsData synced successfully with stable IDs and folder match.');
   } catch (err) {
-    console.error('Error during syncing:', err);
+    console.error('❌ Error during syncing:', err);
   }
 }
 
