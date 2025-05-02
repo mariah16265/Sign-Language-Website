@@ -11,20 +11,15 @@ const StudyPlanSchema = new mongoose.Schema({
   //Each key is a subject name (English, Arabic, Math).
   //Each value is a String (the module name you start with).    
   startingModules: { 
-    type: Map, 
-    of: String, 
+    type: Object, 
     required: true 
   },
-  //{ English: 2, Arabic: 3, Math:2}
   weeklyLessons: { 
-    type: Map, 
-    of: Number, 
+    type: Object, 
     required: true 
   },
-  //{ "English": ["Monday", "Thursday"], "Arabic": ["Tuesday"], "Math": ["Friday"]}
   subjectDays: { 
-    type: Map, 
-    of: [String], 
+    type: Object, 
     required: true 
   },
 }, 
