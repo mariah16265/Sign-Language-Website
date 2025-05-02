@@ -6,21 +6,28 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import Dashboard from './pages/Dashboard';
 import StudyPlan from './pages/StudyPlan';
+
+import LearningPage from './pages/LearningPage';
+import QuizPage from './pages/QuizPage';
+
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
+
 import './App.css';
 
 function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gradient-to-br from-yellow-100 via-pink-100 to-purple-100 font-sans">
-      <ToastContainer /> {/* Add ToastContainer outside of Routes */}
+      <ToastContainer /> 
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/studyplan" element={<StudyPlan />} />
+          <Route path="/learn" element={<LearningPage />} />
+          <Route path="/quiz" element={<QuizPage />} />
         </Routes>
       </div>
     </Router>
