@@ -1,9 +1,9 @@
 // controllers/user.controller.js
 //defines functions for wht happens when req hits endpoint
-//
-
 const User = require('../models/user.model');
+const Studyplan = require('../models/studyplan.model');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 // Get all users
 const getAllUsers = async (req, res) => {
@@ -74,11 +74,19 @@ const userLogin = async (req, res) => {
     const user = await User.findOne(isEmail ? { Gemail: username } : { username });
 
     if (!user) return res.status(404).json({ message: 'User not found' });
-
+    
+    const studyplan = await Studyplan.findOne({ user: user._id });
+    const isNewUser = !studyplan;
+    
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) return res.status(401).json({ message: 'Invalid password' });
-
-    res.status(200).json({ message: 'Login successful', user });
+     //If password valid, send a token
+    const token = jwt.sign(
+      { id: user._id },       // small data to put inside token
+      process.env.JWT_SECRET,  // Secret key (you will later put it in .env file)
+      { expiresIn: '1d' }     // Expire after 7 days (you can choose)
+    );
+    res.status(200).json({ message: 'Login successful', token, isNewUser, user });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ message: 'Internal server error' });

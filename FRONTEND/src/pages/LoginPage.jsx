@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaSignInAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
 import FloatingEmojis from '../components/FloatingEmojis';
+import {jwtDecode} from 'jwt-decode';
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +17,21 @@ const LoginPage = () => {
     username: '',
     password: '',
   });
+
+  // Check if user already logged in-token exists and is valid on page load
+    useEffect(() => {
+      const token = localStorage.getItem('token');
+      const expiry = localStorage.getItem('tokenExpiry');
+      if (token && expiry && Date.now() < (expiry)) {
+        const isNewUser = localStorage.getItem('isNewUser');
+        if (isNewUser === "true") {
+          navigate('/studyplan'); // Redirect to study plan if not a new user
+        } else {
+          navigate('/dashboard'); // Redirect to dashboard if the user is new
+        }
+      }
+    }, [navigate]); 
+  
 
   const handleChange = (e) => {
     setLoginData({ ...loginData, [e.target.name]: e.target.value });
@@ -33,22 +49,33 @@ const LoginPage = () => {
       });
 
       const data = await response.json();
-
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
       }
-      //success
-      console.log('User created:', data);
-      //direct to login page
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 1000);
-    } catch (err) {
+      //login successfull
+      console.log('Logged IN:', data);
+      localStorage.setItem('token', data.token);    //Store the token in localStorage
+      localStorage.setItem('userName', data.user.username);
+      localStorage.setItem('userId', data.user._id);
+      localStorage.setItem('isNewUser',data.isNewUser);   
+  
+      // Decode the token to get the expiry time (exp is in seconds, so multiply by 1000 for milliseconds)
+      const decodedToken = jwtDecode(data.token);
+      const tokenExpiry = decodedToken.exp * 1000; // Convert from seconds to milliseconds
+      localStorage.setItem('tokenExpiry', tokenExpiry); // Store expiry time in localStorage
+      //direct to page
+      if (data.isNewUser) {
+        navigate('/studyplan'); // Redirect new users to the study plan page
+      } else {
+        navigate('/dashboard'); // Redirect existing users to their dashboard
+      }
+    }
+    catch (err) {
       console.error('Login error:', err);
       setLoginError(`❌ Login failed: ${err.message}`);
     }
   };
-
+  
   // Updated emoji options to match signup page
   const emojis = [
     '🌈',
@@ -294,7 +321,7 @@ const LoginPage = () => {
             className="w-full bg-gradient-to-r from-pink-500 to-blue-500 hover:from-pink-600 hover:to-blue-600 text-white py-4 px-6 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => navigate('/studyplan')}
+            //onClick={() => navigate('/studyplan')}
             onHoverStart={() => setIsHovered(true)}
             onHoverEnd={() => setIsHovered(false)}
           >
