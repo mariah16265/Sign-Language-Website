@@ -1,9 +1,9 @@
-import SignsData from '../models/signsData.model.js';
-import WeeklySchedule from '../models/dashboard.model.js';
-import moment from 'moment'; // Importing moment in ES Module syntax
+const SignsData = require('../models/signsData.model.js');
+const WeeklySchedule = require('../models/dashboard.model.js');
+const moment = require('moment');
 
 // Get today's schedule with sign video URLs
-export const  getTodaysScheduleWithSigns = async (userId) => {
+const getTodaysScheduleWithSigns = async (userId) => {
   const today = moment().format('YYYY-MM-DD');
   //console.log('Today\'s date:', today);
 
@@ -39,10 +39,11 @@ export const  getTodaysScheduleWithSigns = async (userId) => {
       });
 
       // Map the signs to only include relevant fields (title, videoUrl)
-      const formattedSigns = signDoc?.signs?.map(sign => ({
-        title: sign.title,
-        videoUrl: sign.videoUrl
-      })) || [];
+      const formattedSigns =
+        signDoc?.signs?.map((sign) => ({
+          title: sign.title,
+          videoUrl: sign.videoUrl,
+        })) || [];
 
       return {
         ...lesson,
@@ -51,6 +52,7 @@ export const  getTodaysScheduleWithSigns = async (userId) => {
     })
   );
 
-//console.log('Lessons with signs:', lessonsWithSigns);
-return lessonsWithSigns;
-}
+  //console.log('Lessons with signs:', lessonsWithSigns);
+  return lessonsWithSigns;
+};
+module.exports = { getTodaysScheduleWithSigns };

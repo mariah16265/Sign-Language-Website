@@ -1,14 +1,16 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
-const lessonSchema = new mongoose.Schema({
-  date: String,         // e.g., "2025-05-01"
-  day: String,          // e.g., "Monday"
-  subject: String,      // e.g., "English"
-  module: String,       // e.g., "MOdule 1 Alphabet"
-  lesson: String ,       // e.g., "A to E"
-  lessonId: mongoose.Schema.Types.ObjectId
-
-}, { _id: false });
+const lessonSchema = new mongoose.Schema(
+  {
+    date: String,
+    day: String,
+    subject: String,
+    module: String,
+    lesson: String,
+    lessonId: mongoose.Schema.Types.ObjectId,
+  },
+  { _id: false }
+);
 
 const weeklyScheduleSchema = new mongoose.Schema({
   userId: {
@@ -16,8 +18,8 @@ const weeklyScheduleSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
-  weekStartDate: String, // e.g., "2025-04-29"
-  schedule: [lessonSchema]
+  weekStartDate: String,
+  schedule: [lessonSchema],
 });
 
-export default mongoose.model('WeeklySchedule', weeklyScheduleSchema);
+module.exports = mongoose.model('WeeklySchedule', weeklyScheduleSchema);

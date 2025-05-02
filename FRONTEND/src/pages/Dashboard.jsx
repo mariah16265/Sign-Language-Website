@@ -1,11 +1,14 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import SubjectSlideshow from '../components/SubjectSlideshow';
-import {  useApiErrorHandler, useCheckTokenValid } from '../utils/apiErrorHandler';
+import {
+  useApiErrorHandler,
+  useCheckTokenValid,
+} from '../utils/apiErrorHandler';
 import {
   BarChart,
   Bar,
@@ -31,7 +34,7 @@ const Dashboard = () => {
 
   const { handleApiError } = useApiErrorHandler();
   const { checkTokenValid } = useCheckTokenValid();
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
 
   // Check for valid token on mount
   useEffect(() => {
@@ -44,17 +47,21 @@ const Dashboard = () => {
     const setupDashboard = async () => {
       try {
         // 1.----------Generate Weekly Schedule--------------
-        const weekResponse = await fetch('http://localhost:5000/api/dashboard/generate-weekly', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+        const weekResponse = await fetch(
+          'http://localhost:5000/api/dashboard/generate-weekly',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
+        );
 
         const weekData = await weekResponse.json();
-        if (!weekResponse.ok) throw new Error(weekData.message || 'Generation failed');
-        console.log("✅ Weekly schedule generated:", weekData);
+        if (!weekResponse.ok)
+          throw new Error(weekData.message || 'Generation failed');
+        console.log('✅ Weekly schedule generated:', weekData);
 
         const weeklySchedule = weekData.schedule || [];
 
@@ -73,8 +80,8 @@ const Dashboard = () => {
           }
 
           const upcomingDates = Object.keys(groupedByDate)
-            .map(time => new Date(Number(time)))
-            .filter(d => d > today)
+            .map((time) => new Date(Number(time)))
+            .filter((d) => d > today)
             .sort((a, b) => a - b);
 
           return upcomingDates.length > 0 ? upcomingDates[0] : null;
@@ -82,43 +89,57 @@ const Dashboard = () => {
 
         const nextStudyDate = getNextStudyDay(weeklySchedule);
         setNextStudyDate(nextStudyDate);
-        console.log("📅 Next Study Day:", nextStudyDate?.toDateString() || "None");
+        console.log(
+          '📅 Next Study Day:',
+          nextStudyDate?.toDateString() || 'None'
+        );
 
         // 3.-----------------Fetch today's schedule-------------
-        const todayResponse = await fetch('http://localhost:5000/api/dashboard/today-schedule', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+        const todayResponse = await fetch(
+          'http://localhost:5000/api/dashboard/today-schedule',
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         const todayData = await todayResponse.json();
-        if (!todayResponse.ok) throw new Error(todayData.message || 'Fetch failed');
+        if (!todayResponse.ok)
+          throw new Error(todayData.message || 'Fetch failed');
 
-        const cleanedData = Array.isArray(todayData.todaySchedule) ? todayData.todaySchedule : [];
+        const cleanedData = Array.isArray(todayData.todaySchedule)
+          ? todayData.todaySchedule
+          : [];
         console.log("✅ Today's Schedule Assigned", cleanedData);
         setTodaysSchedule(cleanedData);
 
         // 4.----------Fetch per-lesson progress--------------
         const progressMap = {};
-        const userId = localStorage.getItem("userId");
+        const userId = localStorage.getItem('userId');
 
         for (const lesson of cleanedData) {
           const lessonId = lesson.lessonId;
 
-          const progressResponse = await fetch(`http://localhost:5000/api/progress/user/${userId}/lesson/${lessonId}`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-            },
-          });
+          const progressResponse = await fetch(
+            `http://localhost:5000/api/progress/user/${userId}/lesson/${lessonId}`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
 
           if (!progressResponse.ok) throw new Error('Progress fetch failed');
 
           const progressData = await progressResponse.json();
-          const watchedSignIds = new Set(progressData.map(progress => progress.signId));
+          const watchedSignIds = new Set(
+            progressData.map((progress) => progress.signId)
+          );
           progressMap[lessonId] = watchedSignIds;
         }
 
@@ -131,70 +152,85 @@ const Dashboard = () => {
 
         for (const subject of subjects) {
           try {
-            const subjectResponse = await fetch(`http://localhost:5000/api/progress/subject-progress/${userId}/${subject}`,{
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-              },
-            });
-    
+            const subjectResponse = await fetch(
+              `http://localhost:5000/api/progress/subject-progress/${userId}/${subject}`,
+              {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+
             const subjectData = await subjectResponse.json();
-            if (!subjectResponse.ok) throw new Error('Subject Progress fetch failed');
+            if (!subjectResponse.ok)
+              throw new Error('Subject Progress fetch failed');
 
             lessonsArray.push({
               name: subject,
               completed: subjectData.completedLessons,
-              total: subjectData.totalLessons
+              total: subjectData.totalLessons,
             });
             modulesArray.push({
               name: subject,
               completed: subjectData.completedModules,
             });
-
           } catch (err) {
-            console.error(`❌ Failed to fetch subject progress for ${subject}`, err);
+            console.error(
+              `❌ Failed to fetch subject progress for ${subject}`,
+              err
+            );
           }
         }
 
         setLessonsCompleted(lessonsArray);
 
         const totalCompletedModules = modulesArray.reduce(
-          (sum, subject) => sum + subject.completed, 0);
+          (sum, subject) => sum + subject.completed,
+          0
+        );
         setModulesCompleted(totalCompletedModules);
 
         // 6.------------------Fetch weekly signs learned---------------
-        const signsResponse = await fetch(`http://localhost:5000/api/progress/weekly-signs/${userId}`,{
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+        const signsResponse = await fetch(
+          `http://localhost:5000/api/progress/weekly-signs/${userId}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-        if (!signsResponse.ok){
-           throw new Error('Failed to fetch weekly signs learned');}
+        if (!signsResponse.ok) {
+          throw new Error('Failed to fetch weekly signs learned');
+        }
 
         const signsData = await signsResponse.json(); // { signsLearnedThisWeek: number }
         setSignsCompleted(signsData.signsLearnedThisWeek);
 
         // ✅ 6. Get active streak
-        const streakResponse = await fetch(`http://localhost:5000/api/progress/streak/${userId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+        const streakResponse = await fetch(
+          `http://localhost:5000/api/progress/streak/${userId}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         const streakData = await streakResponse.json();
-        if (!streakResponse.ok) throw new Error(streakData.message || 'Fetch failed');
+        if (!streakResponse.ok)
+          throw new Error(streakData.message || 'Fetch failed');
 
         setStreak({
           currentStreak: streakData.currentStreak,
           bestStreak: streakData.bestStreak,
         });
-
       } catch (err) {
         handleApiError(err);
       }
@@ -210,7 +246,7 @@ const Dashboard = () => {
     if (!groupedBySubject[subject]) {
       groupedBySubject[subject] = {
         subject: subject,
-        gradient: "from-indigo-500 to-purple-500", // default or can be made dynamic
+        gradient: 'from-indigo-500 to-purple-500', // default or can be made dynamic
         lessons: [],
       };
     }
@@ -221,7 +257,7 @@ const Dashboard = () => {
       module: item.module,
       signs: item.signs,
       completedSigns: progressData[item.lessonId]?.size || 0,
-      totalSigns: item.signs.length
+      totalSigns: item.signs.length,
     };
 
     groupedBySubject[subject].lessons.push(lesson);
@@ -246,20 +282,27 @@ const Dashboard = () => {
   // Color palette for charts or cards
   const COLORS = ['#8b5cf6', '#10b981', '#f59e0b']; // Purple, Emerald, Amber
 
-   //------------Stats Data-----------
-const stats = [
+  //------------Stats Data-----------
+  const stats = [
     {
       icon: <FaHands className="text-2xl" />,
-      label: "Weekly Progress",
-      value: signsCompleted > 0 ? `${signsCompleted} signs` : 'Let’s start learning!',
+      label: 'Weekly Progress',
+      value:
+        signsCompleted > 0
+          ? `${signsCompleted} signs`
+          : 'Let’s start learning!',
       change: signsCompleted > 0 ? 'Great job this week!' : '',
       color: 'bg-purple-100 text-purple-600',
     },
     {
       icon: <FaFire className="text-2xl" />,
       label: 'Current Streak',
-      value: streak.currentStreak > 0 ? `${streak.currentStreak} days 🔥` : 'Start your streak!',
-      change: streak.bestStreak > 0 ? `Personal best: ${streak.bestStreak} days` : '',
+      value:
+        streak.currentStreak > 0
+          ? `${streak.currentStreak} days 🔥`
+          : 'Start your streak!',
+      change:
+        streak.bestStreak > 0 ? `Personal best: ${streak.bestStreak} days` : '',
       color: 'bg-orange-100 text-orange-600',
     },
     {
@@ -278,13 +321,11 @@ const stats = [
     Friday: ['Arabic Signs', 'Math Signs'],
     Sunday: ['English Signs', 'Math Signs'],
   });
-  const [progressData] = useState([
+  const [chartProgressData] = useState([
     { name: 'English', score: 65 },
     { name: 'Arabic', score: 40 },
     { name: 'Math', score: 80 },
   ]);
-
-  const COLORS = ['#8b5cf6', '#10b981', '#f59e0b']; // Purple, Emerald, Amber
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 overflow-hidden">
@@ -330,36 +371,45 @@ const stats = [
               transition={{ staggerChildren: 0.1 }}
             >
               {groupedSubjects.map((subjectItem, index) => {
-                return (               
+                return (
                   <motion.div
                     key={index}
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: index * 0.1 }}
                   >
-<SubjectSlideshow
+                    <SubjectSlideshow
                       subjects={[
                         {
                           name: subjectItem.subject,
                           gradient:
-                          subjectItem.subject === "English"
-                            ? "from-blue-500 to-indigo-500"
-                            : subjectItem.subject === "Arabic"
-                            ? "from-green-500 to-emerald-500"
-                            : "from-purple-500 to-pink-500",
-                          description: "",
+                            subjectItem.subject === 'English'
+                              ? 'from-blue-500 to-indigo-500'
+                              : subjectItem.subject === 'Arabic'
+                              ? 'from-green-500 to-emerald-500'
+                              : 'from-purple-500 to-pink-500',
+                          description: '',
 
                           lessons: subjectItem.lessons.map((lessonItem, i) => {
-                            const firstSign = lessonItem.signs[0]?.title || "";
-                            const lastSign = lessonItem.signs[lessonItem.signs.length - 1]?.title || "";
+                            const firstSign = lessonItem.signs[0]?.title || '';
+                            const lastSign =
+                              lessonItem.signs[lessonItem.signs.length - 1]
+                                ?.title || '';
 
                             return {
                               id: lessonItem.lessonId,
                               title: lessonItem.lesson,
                               subtitle: `${firstSign} - ${lastSign}`,
-                              moduleName: lessonItem.module.split("-")[1] || lessonItem.module,
+                              moduleName:
+                                lessonItem.module.split('-')[1] ||
+                                lessonItem.module,
                               path: `/lesson/${lessonItem.lessonId}`,
-                              progress: Math.round((lessonItem.completedSigns / lessonItem.totalSigns) * 100) || 0
+                              progress:
+                                Math.round(
+                                  (lessonItem.completedSigns /
+                                    lessonItem.totalSigns) *
+                                    100
+                                ) || 0,
                             };
                           }),
                         },
@@ -368,14 +418,17 @@ const stats = [
                   </motion.div>
                 );
               })}
-             </motion.div>
+            </motion.div>
           ) : (
             <div className="bg-gradient-to-r from-purple-100 to-blue-100 p-8 rounded-2xl shadow-md text-center mb-8">
               <p className="text-purple-800 text-xl">
                 Enjoy your rest day! Come back on your next study day.
               </p>
               <p className="mt-2 text-purple-700">
-              Next study day: {nextStudyDate ? new Date(nextStudyDate).toDateString() : "None"}
+                Next study day:{' '}
+                {nextStudyDate
+                  ? new Date(nextStudyDate).toDateString()
+                  : 'None'}
               </p>
             </div>
           )}
@@ -430,7 +483,7 @@ const stats = [
 
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={lessonsCompleted}>
+                  <BarChart data={chartProgressData}>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       stroke="#f3f4f6"

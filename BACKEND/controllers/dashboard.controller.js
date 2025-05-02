@@ -1,39 +1,45 @@
-import { startOfWeek, addDays, format } from 'date-fns';
-import StudyPlan from '../models/studyplan.model.js';
-import SignsData from '../models/signsData.model.js';
-import WeeklySchedule from '../models/dashboard.model.js';
-import Progress from '../models/progress.model.js';
-import { getTodaysScheduleWithSigns } from './schedule.controller.js';
+const { startOfWeek, addDays, format } = require('date-fns');
+const StudyPlan = require('../models/studyplan.model.js');
+const SignsData = require('../models/signsData.model.js');
+const WeeklySchedule = require('../models/dashboard.model.js');
+const Progress = require('../models/progress.model.js');
+const { getTodaysScheduleWithSigns } = require('./schedule.controller.js');
 
-export const generateWeeklySchedule = async (req, res) => {
+const generateWeeklySchedule = async (req, res) => {
   try {
     const userId = req.user.id;
     //-------------Scheduling Generation On Monday--------------
     const today = new Date();
-    const isMonday = today.getDay() === 5; // 1 = Monday, 5=Friday
+    const isMonday = today.getDay() === 6; // 1 = Monday, 5=Friday
     if (!isMonday) {
-      return res.status(200).json({ message: 'Schedule already exists'});
+      return res.status(200).json({ message: 'Schedule already exists' });
     }
 
     const weekStart = startOfWeek(today, { weekStartsOn: 5 });
     const weekStartDateString = format(weekStart, 'yyyy-MM-dd');
 
     // Check if schedule already exists for this week
-    const existingSchedule = await WeeklySchedule.findOne({ userId, weekStartDate: weekStartDateString });
+    const existingSchedule = await WeeklySchedule.findOne({
+      userId,
+      weekStartDate: weekStartDateString,
+    });
     if (existingSchedule) {
       return res.status(200).json({
         message: 'Schedule already exists',
-        schedule: existingSchedule.schedule
+        schedule: existingSchedule.schedule,
       });
     }
 
     const studyPlan = await StudyPlan.findOne({ user: userId });
-    if (!studyPlan) return res.status(404).json({ message: 'Study plan not found' });
+    if (!studyPlan)
+      return res.status(404).json({ message: 'Study plan not found' });
 
     const rawSignsData = await SignsData.find();
 
     const watchedProgress = await Progress.find({ userId, status: 'watched' });
-    const watchedSignIds = new Set(watchedProgress.map(p => p.signId.toString()));
+    const watchedSignIds = new Set(
+      watchedProgress.map((p) => p.signId.toString())
+    );
 
     const groupedData = {};
     for (const doc of rawSignsData) {
@@ -42,7 +48,9 @@ export const generateWeeklySchedule = async (req, res) => {
 
       if (!groupedData[subject]) groupedData[subject] = [];
 
-      let moduleGroup = groupedData[subject].find(m => m.moduleName === module);
+      let moduleGroup = groupedData[subject].find(
+        (m) => m.moduleName === module
+      );
       if (!moduleGroup) {
         moduleGroup = { moduleName: module, moduleNumber, lessons: [] };
         groupedData[subject].push(moduleGroup);
@@ -52,7 +60,7 @@ export const generateWeeklySchedule = async (req, res) => {
         lessonName: `Lesson ${lessonNumber}`,
         lessonNumber,
         lessonId: doc._id,
-        signs: doc.signs
+        signs: doc.signs,
       });
     }
 
@@ -84,9 +92,13 @@ export const generateWeeklySchedule = async (req, res) => {
           continue;
         }
 
-        const startIndex = subjectModules.findIndex(m => m.moduleName === startingModuleName);
+        const startIndex = subjectModules.findIndex(
+          (m) => m.moduleName === startingModuleName
+        );
         if (startIndex === -1) {
-          console.log(`Starting module ${startingModuleName} not found in subject ${subjectName}`);
+          console.log(
+            `Starting module ${startingModuleName} not found in subject ${subjectName}`
+          );
           continue;
         }
 
@@ -95,7 +107,9 @@ export const generateWeeklySchedule = async (req, res) => {
 
         for (const module of subjectModules.slice(startIndex)) {
           for (const lesson of module.lessons) {
-            const allSignsWatched = lesson.signs.every(sign => watchedSignIds.has(sign._id.toString()));
+            const allSignsWatched = lesson.signs.every((sign) =>
+              watchedSignIds.has(sign._id.toString())
+            );
             if (allSignsWatched) continue;
 
             lessons.push({
@@ -104,7 +118,7 @@ export const generateWeeklySchedule = async (req, res) => {
               subject: subjectName,
               module: module.moduleName,
               lesson: lesson.lessonName,
-              lessonId: lesson.lessonId
+              lessonId: lesson.lessonId,
             });
 
             lessonsCount++;
@@ -124,21 +138,21 @@ export const generateWeeklySchedule = async (req, res) => {
     );
 
     console.log(`Weekly schedule generated`);
-    res.status(200).json({ message: 'Schedule generated successfully', schedule });
-
+    res
+      .status(200)
+      .json({ message: 'Schedule generated successfully', schedule });
   } catch (err) {
     console.error('Error generating weekly schedule:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-
-export const getDashboardData = async (req, res) => {
+const getDashboardData = async (req, res) => {
   const userId = req.user.id;
 
   try {
     const todaySchedule = await getTodaysScheduleWithSigns(userId);
-    
+
     // ... fetch other dashboard data if needed
     //console.log(`todays schedule: ${todaySchedule}`);
     res.json({
@@ -150,3 +164,4 @@ export const getDashboardData = async (req, res) => {
     res.status(500).json({ error: 'Dashboard fetch failed' });
   }
 };
+module.exports = { generateWeeklySchedule, getDashboardData };
