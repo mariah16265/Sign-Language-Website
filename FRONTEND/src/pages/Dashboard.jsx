@@ -23,6 +23,7 @@ const Dashboard = () => {
     'Sunday',
     'Monday',
     'Wednesday',
+    'Thursday',
     'Friday',
   ]);
   const today = new Date();
@@ -104,6 +105,7 @@ const Dashboard = () => {
   const [studySchedule] = useState({
     Monday: ['English Signs', 'Arabic Signs'],
     Wednesday: ['Math Signs', 'English Signs'],
+    Thursday: ['Math Signs', 'English Signs'],
     Friday: ['Arabic Signs', 'Math Signs'],
     Sunday: ['English Signs', 'Math Signs'],
   });

@@ -6,6 +6,8 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import Dashboard from './pages/Dashboard';
 import StudyPlan from './pages/StudyPlan';
+import LearningPage from './pages/LearningPage';
+import QuizPage from './pages/QuizPage';
 import './App.css';
 
 function App() {
@@ -18,6 +20,8 @@ function App() {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/studyplan" element={<StudyPlan />} />
+          <Route path="/learn" element={<LearningPage />} />
+          <Route path="/quiz" element={<QuizPage />} />
         </Routes>
       </div>
     </Router>
