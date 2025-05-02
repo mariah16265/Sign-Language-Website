@@ -2,6 +2,8 @@
 //defines functions for wht happens when req hits endpoint
 const User = require('../models/user.model');
 const Studyplan = require('../models/studyplan.model');
+const LoginActivity = require('../models/loginactivity.model');
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -80,7 +82,17 @@ const userLogin = async (req, res) => {
     
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) return res.status(401).json({ message: 'Invalid password' });
-     //If password valid, send a token
+
+// ✅ Record today's login
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+  
+    const alreadyLogged = await LoginActivity.findOne({ userId: user._id, date: today });
+    if (!alreadyLogged) {
+      await LoginActivity.create({ userId: user._id, date: today });
+    }     
+    
+    //If password valid, send a token
     const token = jwt.sign(
       { id: user._id },       // small data to put inside token
       process.env.JWT_SECRET,  // Secret key (you will later put it in .env file)

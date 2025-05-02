@@ -4,10 +4,13 @@ const router = express.Router();
 // Import the controllers
 const { 
     getAllModules, 
-    getModulesBySub } = require('../controllers/signsData.controller');
+    getModulesBySub,
+    getLessonsByMod } = require('../controllers/signsData.controller');
 
-// Routes to GET data
-router.get('/', getAllModules); // fetch ALL modules (if needed)
-router.get('/:subjectId', getModulesBySub); // fetch modules by subject (english, arabic etc.) 
+
+router.get('/:lessonId', getLessonsByMod); // fetch lessons by modules
+
+//for studyplan and learn page
+router.get('/subject/:subjectId', getModulesBySub); // fetch modules by subject (english, arabic etc.) 
 
 module.exports = router;
