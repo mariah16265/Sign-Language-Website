@@ -45,7 +45,14 @@ async function signsDataSync() {
         const modulePath = path.join(subjectPath, module);
         if (!fs.lstatSync(modulePath).isDirectory()) continue;
 
-        const videoFiles = fs.readdirSync(modulePath).filter(file => file.endsWith('.mp4'));
+        const videoFiles = fs.readdirSync(modulePath)
+          .filter(file => file.endsWith('.mp4'))
+          .sort((a, b) => {
+            const numA = parseInt(path.parse(a).name);
+            const numB = parseInt(path.parse(b).name);
+            return numA - numB;
+          });
+        
         const videos = videoFiles.map(file => ({
           title: path.parse(file).name,
           videoUrl: `/Sign Language Videos/${subject}/${module}/${file}`
