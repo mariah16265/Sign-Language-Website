@@ -1,4 +1,4 @@
-const { startOfWeek, addDays, format } = require('date-fns');
+const { differenceInCalendarDays, addDays, format } = require('date-fns');
 const StudyPlan = require('../models/studyplan.model.js');
 const SignsData = require('../models/signsData.model.js');
 const WeeklySchedule = require('../models/dashboard.model.js');
@@ -8,15 +8,20 @@ const { getTodaysScheduleWithSigns } = require('./schedule.controller.js');
 const generateWeeklySchedule = async (req, res) => {
   try {
     const userId = req.user.id;
-    //-------------Scheduling Generation On Monday--------------
+  //-------------DYNAMIC Schedule Generation--------------
     const today = new Date();
-    const isMonday = today.getDay() === 6; // 1 = Monday, 5=Friday
-    if (!isMonday) {
-      return res.status(200).json({ message: 'Schedule already exists' });
-    }
-
-    const weekStart = startOfWeek(today, { weekStartsOn: 5 });
+    
+    const studyPlan = await StudyPlan.findOne({ user: userId });
+    if (!studyPlan) {
+      return res.status(404).json({ message: 'Study plan not found' });}
+    
+    // Calculate custom week start based on study plan creation date
+    const studyPlanCreatedDate = new Date(studyPlan.createdAt);
+    const daysSinceStart = differenceInCalendarDays(today, studyPlanCreatedDate);
+    const fullWeeksPassed = Math.floor(daysSinceStart / 7);
+    const weekStart = addDays(studyPlanCreatedDate, fullWeeksPassed * 7);
     const weekStartDateString = format(weekStart, 'yyyy-MM-dd');
+
 
     // Check if schedule already exists for this week
     const existingSchedule = await WeeklySchedule.findOne({
@@ -29,11 +34,6 @@ const generateWeeklySchedule = async (req, res) => {
         schedule: existingSchedule.schedule,
       });
     }
-
-    const studyPlan = await StudyPlan.findOne({ user: userId });
-    if (!studyPlan)
-      return res.status(404).json({ message: 'Study plan not found' });
-
     const rawSignsData = await SignsData.find();
 
     const watchedProgress = await Progress.find({ userId, status: 'watched' });

@@ -278,9 +278,11 @@ const Dashboard = () => {
       icon: <FaHands className="text-2xl" />,
       label: 'Weekly Progress',
       value:
-        signsCompleted > 0
-          ? `${signsCompleted} signs`
-          : 'Let’s start learning!',
+        signsCompleted > 1
+        ? `${signsCompleted} signs`
+        : signsCompleted === 1
+        ? `${signsCompleted} sign`
+        : 'Let’s start learning!',
       change: signsCompleted > 0 ? 'Great job this week!' : '',
       color: 'bg-purple-100 text-purple-600',
     },
@@ -288,11 +290,17 @@ const Dashboard = () => {
       icon: <FaFire className="text-2xl" />,
       label: 'Current Streak',
       value:
-        streak.currentStreak > 0
-          ? `${streak.currentStreak} days 🔥`
-          : 'Start your streak!',
+        streak.currentStreak > 1
+        ? `${streak.currentStreak} days 🔥`
+        : streak.currentStreak === 1
+        ? `${streak.currentStreak} day 🔥`
+        : 'Start your streak!',
       change:
-        streak.bestStreak > 0 ? `Personal best: ${streak.bestStreak} days` : '',
+        streak.bestStreak > 1
+        ? `Personal best: ${streak.bestStreak} days`
+        : streak.bestStreak === 1
+        ? `Personal best: ${streak.bestStreak} day`
+        : '',
       color: 'bg-orange-100 text-orange-600',
     },
     {
