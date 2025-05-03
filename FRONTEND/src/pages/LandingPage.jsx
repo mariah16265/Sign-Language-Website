@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FaStar } from 'react-icons/fa';
+import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import { FaBookOpen, FaCalculator, FaLanguage } from 'react-icons/fa';
 
@@ -20,14 +19,10 @@ const LandingPage = () => {
     };
     setStars([...stars.slice(-10), newStar]);
   };
-  const arabicGifs = [
-    '/assets/england3.gif',
-    '/assets/england1.gif',
-    '/assets/england2.gif',
-  ];
+
   const colors = {
     primary: '#FF6B6B',
-    secondary: '#4ECDC4',
+    secondary: '#E68A4C',
     accent: '#FFD166',
     text: '#26547C',
   };
@@ -165,12 +160,12 @@ const LandingPage = () => {
           </motion.div>
         </main>
 
-        {/* Learning Cards Section */}
+        {/* Learning Cards Section - Slider Version */}
         <section className="py-12 md:py-16 px-6 overflow-hidden relative">
           <div className="max-w-7xl mx-auto">
             <div className="w-full flex justify-center">
               <motion.h2
-                className="text-4xl md:text-5xl lg:text-[60px] text-center mb-8 md:mb-10 relative"
+                className="text-4xl md:text-5xl lg:text-[60px] text-center mb-12 md:mb-16 relative"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -178,16 +173,14 @@ const LandingPage = () => {
                 style={{
                   fontFamily: "'Fredoka One', cursive",
                   fontWeight: 500,
-                  color: '#5C6BC0', // Dark cool purple
-                  // background:
-                  //   'linear-gradient(90deg, #4ECDC4, #A0E7E5, #BDE0FE)', // Aqua gradient                  letterSpacing: '0.5px',
+                  color: '#5C6BC0',
                   lineHeight: '1.2',
-                  paddingBottom: '20px', // Only bottom padding
+                  paddingBottom: '20px',
                 }}
               >
                 <span className="bg-gradient-to-r from-[#8E7BEF] via-[#4D96FF] to-[#6BCBDB] bg-clip-text text-transparent">
-                  Let's Learn With Fun!
-                </span>{' '}
+                  Our Learning Subjects
+                </span>
                 <motion.span
                   initial={{ scaleX: 0 }}
                   whileInView={{
@@ -198,426 +191,337 @@ const LandingPage = () => {
                       ease: [0.22, 1, 0.36, 1],
                     },
                   }}
-                  className="absolute left-0 right-0 mx-auto" // Center horizontally
+                  className="absolute left-0 right-0 mx-auto"
                   style={{
                     bottom: '6px',
-                    width: '100%', // Full width of text
+                    width: '100%',
                     height: '10px',
                     background:
                       'linear-gradient(90deg, #FF9E5E, #FF6B6B, #C445F4)',
                     borderRadius: '6px',
                     zIndex: -1,
-                    transformOrigin: 'center', // Scale from center
+                    transformOrigin: 'center',
                   }}
                 />
               </motion.h2>
             </div>
-            <div className="grid gap-6 md:gap-8">
-              {' '}
-              {/* English Card */}
+
+            {/* Slider Container */}
+            <div className="relative">
+              {/* English Slide */}
               <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                className="bg-white/40 backdrop-blur-md p-8 md:p-10 rounded-3xl shadow-xl mb-12"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
                 transition={{ duration: 0.6 }}
-                viewport={{ once: true, amount: 0.3 }}
-                className="relative group"
+                viewport={{ once: true }}
               >
-                <div className="relative bg-white/90 backdrop-blur-sm p-6 md:p-8 rounded-3xl shadow-lg border-4 border-[#4ECDC4] overflow-hidden group-hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center gap-4 mb-6">
                   <div
-                    className="absolute top-0 right-0 p-2 text-xl"
+                    className="p-3 rounded-xl shadow-sm"
+                    style={{
+                      backgroundColor: '#E0F7FA',
+                      border: `2px solid ${colors.secondary}`,
+                    }}
+                  >
+                    <FaBookOpen
+                      className="text-3xl md:text-4xl"
+                      style={{ color: colors.secondary }}
+                    />
+                  </div>
+                  <h3
+                    className="text-3xl md:text-4xl font-bold"
                     style={{ color: colors.secondary }}
                   >
-                    📚
-                  </div>
+                    English Signs
+                  </h3>
+                </div>
 
-                  <div className="flex flex-col md:flex-row items-center gap-8 md:gap-10">
-                    <div className="md:w-2/5">
-                      <motion.div
-                        initial={{ scale: 0.9 }}
-                        whileInView={{ scale: 1 }}
-                        transition={{ duration: 0.5 }}
-                        className="flex items-center gap-4 mb-6"
-                      >
-                        <div
-                          className="p-3 rounded-xl shadow-sm"
-                          style={{
-                            backgroundColor: '#E0F7FA',
-                            border: `2px solid ${colors.secondary}`,
-                          }}
-                        >
-                          <FaBookOpen
-                            className="text-3xl md:text-4xl"
-                            style={{ color: colors.secondary }}
-                          />
-                        </div>
-                        <h3
-                          className="text-2xl md:text-3xl font-bold"
-                          style={{ color: colors.secondary }}
-                        >
-                          English Adventures
-                        </h3>
-                      </motion.div>
-                      <motion.p
-                        className="mb-6"
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                        style={{ color: colors.text }}
-                      >
-                        Discover everyday words, colorful signs, and your
-                        favorite animals through interactive storytelling!
-                      </motion.p>
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="flex gap-2 flex-wrap"
-                      >
-                        {['Vocabulary', 'Storytelling', 'Animals'].map(
-                          (tag, i) => (
-                            <motion.span
-                              key={tag}
-                              initial={{ scale: 0.8 }}
-                              whileInView={{ scale: 1 }}
-                              transition={{ duration: 0.3, delay: 0.1 * i }}
-                              className="px-3 py-1 rounded-full text-sm font-medium border"
-                              style={{
-                                backgroundColor: '#E0F7FA',
-                                color: colors.secondary,
-                                borderColor: colors.secondary,
-                              }}
-                            >
-                              {tag}
-                            </motion.span>
-                          )
-                        )}
-                      </motion.div>
-                    </div>
-                    <div className="md:w-3/5">
-                      <div className="grid grid-cols-2 gap-3 md:gap-4">
-                        {['/assets/england1.gif', '/assets/england2.gif'].map(
-                          (gif, i) => (
-                            <motion.div
-                              key={i}
-                              initial={{ opacity: 0, x: i === 0 ? -20 : 20 }}
-                              whileInView={{ opacity: 1, x: 0 }}
-                              transition={{ duration: 0.5, delay: 0.1 * i }}
-                              className="relative h-40 md:h-48 rounded-xl overflow-hidden shadow-md border-2 border-white transition-all"
-                              style={{ borderColor: colors.secondary }}
-                            >
-                              <img
-                                src={gif}
-                                alt="English sign"
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                            </motion.div>
-                          )
-                        )}
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.5, delay: 0.2 }}
-                          className="relative h-40 md:h-48 rounded-xl overflow-hidden shadow-md border-2 border-white transition-all col-span-2"
-                          style={{ borderColor: colors.secondary }}
-                        >
-                          <img
-                            src="/assets/england3.gif"
-                            alt="English sign"
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                        </motion.div>
-                      </div>
-                    </div>
-                  </div>
+                <p className="text-xl mb-8" style={{ color: colors.text }}>
+                  Learn alphabet signs, colors, animals and everyday vocabulary
+                  through clear video demonstrations.
+                </p>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {[
+                    '/Sign Language Videos/English/Module 8- Sports/Bowling.mp4',
+                    '/Sign Language Videos/English/Module 3- Colors/blue.mp4',
+                    '/Sign Language Videos/English/Module 6- Natural World/Clouds.mp4',
+                    // add more video paths here
+                  ].map((video, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: i * 0.1 }}
+                      className="relative h-48 md:h-56 rounded-xl overflow-hidden shadow-lg"
+                    >
+                      <video
+                        src={video}
+                        className="w-full h-full object-cover"
+                        muted
+                        autoPlay
+                        loop
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                    </motion.div>
+                  ))}
                 </div>
               </motion.div>
-              {/* Math Card */}
+
+              {/* Math Slide */}
               <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                viewport={{ once: true, amount: 0.3 }}
-                className="relative group"
+                className="bg-white/40 backdrop-blur-md p-8 md:p-10 rounded-3xl shadow-xl mb-12"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                viewport={{ once: true }}
               >
-                <div className="relative bg-white/90 backdrop-blur-sm p-6 md:p-8 rounded-3xl shadow-lg border-4 border-[#FF6B6B] overflow-hidden group-hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center gap-4 mb-6">
                   <div
-                    className="absolute top-0 right-0 p-2 text-xl"
+                    className="p-3 rounded-xl shadow-sm"
+                    style={{
+                      backgroundColor: '#FFEEEE',
+                      border: `2px solid ${colors.primary}`,
+                    }}
+                  >
+                    <FaCalculator
+                      className="text-3xl md:text-4xl"
+                      style={{ color: colors.primary }}
+                    />
+                  </div>
+                  <h3
+                    className="text-3xl md:text-4xl font-bold"
                     style={{ color: colors.primary }}
                   >
-                    🧮
-                  </div>
+                    Math Signs
+                  </h3>
+                </div>
 
-                  <div className="flex flex-col md:flex-row-reverse items-center gap-8 md:gap-10">
-                    <div className="md:w-2/5">
-                      <motion.div
-                        initial={{ scale: 0.9 }}
-                        whileInView={{ scale: 1 }}
-                        transition={{ duration: 0.5 }}
-                        className="flex items-center gap-4 mb-6 justify-end md:justify-start"
-                      >
-                        <h3
-                          className="text-2xl md:text-3xl font-bold"
-                          style={{ color: colors.primary }}
-                        >
-                          Math Magic
-                        </h3>
-                        <div
-                          className="p-3 rounded-xl shadow-sm"
-                          style={{
-                            backgroundColor: '#FFEEEE',
-                            border: `2px solid ${colors.primary}`,
-                          }}
-                        >
-                          <FaCalculator
-                            className="text-3xl md:text-4xl"
-                            style={{ color: colors.primary }}
-                          />
-                        </div>
-                      </motion.div>
-                      <motion.p
-                        className="mb-6 text-right md:text-left"
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                        style={{ color: colors.text }}
-                      >
-                        Count, compare, and solve puzzles with animated numbers
-                        and playful challenges!
-                      </motion.p>
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="flex gap-2 flex-wrap justify-end md:justify-start"
-                      >
-                        {['Counting', 'Puzzles', 'Shapes'].map((tag, i) => (
-                          <motion.span
-                            key={tag}
-                            initial={{ scale: 0.8 }}
-                            whileInView={{ scale: 1 }}
-                            transition={{ duration: 0.3, delay: 0.1 * i }}
-                            className="px-3 py-1 rounded-full text-sm font-medium border"
-                            style={{
-                              backgroundColor: '#FFEEEE',
-                              color: colors.primary,
-                              borderColor: colors.primary,
-                            }}
-                          >
-                            {tag}
-                          </motion.span>
-                        ))}
-                      </motion.div>
-                    </div>
-                    <div className="md:w-3/5">
-                      <div className="grid grid-cols-3 gap-3 md:gap-4">
-                        {[
-                          '/assets/england1.gif',
-                          '/assets/england2.gif',
-                          '/assets/england3.gif',
-                        ].map((gif, i) => (
-                          <motion.div
-                            key={i}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.5, delay: 0.1 * i }}
-                            className={`relative h-32 md:h-40 rounded-xl overflow-hidden shadow-md border-2 border-white transition-all ${
-                              i === 1 ? 'mt-6' : ''
-                            }`}
-                            style={{ borderColor: colors.primary }}
-                          >
-                            <img
-                              src={gif}
-                              alt="Math sign"
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                <p className="text-xl mb-8" style={{ color: colors.text }}>
+                  Master counting, basic operations, and shape recognition
+                  through visual sign language lessons.
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 relative">
+                  {/* Portrait Video - Left */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                    className="relative h-full rounded-xl overflow-hidden shadow-lg bg-black flex items-center justify-center"
+                  >
+                    <video
+                      src="/Sign Language Videos/Math/Module 2- Numbers in Arabic(1-20)/14.mp4"
+                      className="h-full w-auto max-w-full object-contain"
+                      muted
+                      autoPlay
+                      loop
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                  </motion.div>
+
+                  {/* First Landscape Video - Top Right */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="relative aspect-video rounded-xl overflow-hidden shadow-lg bg-black"
+                  >
+                    <video
+                      src="/Sign Language Videos/Math/Module 1-Numbers in English(1-20)/9.mp4"
+                      className="w-full h-full object-cover"
+                      muted
+                      autoPlay
+                      loop
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                  </motion.div>
+
+                  {/* Second Landscape Video - Bottom Right (Shifted Down) */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    className="relative aspect-video rounded-xl overflow-hidden shadow-lg bg-black md:mt-32" // Added md:mt-8 here
+                  >
+                    <video
+                      src="/Sign Language Videos/Math/Module 1-Numbers in English(1-20)/11.mp4"
+                      className="w-full h-full object-cover"
+                      muted
+                      autoPlay
+                      loop
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                  </motion.div>
                 </div>
               </motion.div>
-              {/* Arabic Card */}
-              <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                viewport={{ once: true, amount: 0.3 }}
-                className="relative group"
-              >
-                <div className="relative bg-white/90 backdrop-blur-sm p-6 md:p-8 rounded-3xl shadow-lg border-4 border-[#FFD166] overflow-hidden group-hover:shadow-xl transition-all duration-300">
-                  <div
-                    className="absolute top-0 right-0 p-2 text-xl"
-                    style={{ color: colors.accent }}
-                  >
-                    🌍
-                  </div>
 
-                  <div className="flex flex-col md:flex-row items-center gap-8 md:gap-10">
-                    <div className="md:w-2/5">
-                      <motion.div
-                        initial={{ scale: 0.9 }}
-                        whileInView={{ scale: 1 }}
-                        transition={{ duration: 0.5 }}
-                        className="flex items-center gap-4 mb-6"
-                      >
-                        <div
-                          className="p-3 rounded-xl shadow-sm"
-                          style={{
-                            backgroundColor: '#FFF8E1',
-                            border: `2px solid ${colors.accent}`,
-                          }}
-                        >
-                          <FaLanguage
-                            className="text-3xl md:text-4xl"
-                            style={{ color: colors.accent }}
-                          />
-                        </div>
-                        <h3
-                          className="text-2xl md:text-3xl font-bold"
-                          style={{ color: colors.accent }}
-                        >
-                          Arabic Wonders
-                        </h3>
-                      </motion.div>
-                      <motion.p
-                        className="mb-6"
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                        style={{ color: colors.text }}
-                      >
-                        Explore beautiful Arabic letters, kind greetings, and
-                        cultural stories through sign language!
-                      </motion.p>
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="flex gap-2 flex-wrap"
-                      >
-                        {['Alphabet', 'Culture', 'Greetings'].map((tag, i) => (
-                          <motion.span
-                            key={tag}
-                            initial={{ scale: 0.8 }}
-                            whileInView={{ scale: 1 }}
-                            transition={{ duration: 0.3, delay: 0.1 * i }}
-                            className="px-3 py-1 rounded-full text-sm font-medium border"
-                            style={{
-                              backgroundColor: '#FFF8E1',
-                              color: colors.accent,
-                              borderColor: colors.accent,
-                            }}
-                          >
-                            {tag}
-                          </motion.span>
-                        ))}
-                      </motion.div>
-                    </div>
-                    <div className="md:w-3/5">
-                      <div className="grid grid-cols-3 gap-3 md:gap-4">
-                        {arabicGifs.map((gif, i) => (
-                          <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{
-                              duration: 0.5,
-                              delay: 0.1 * i,
-                              type: 'spring',
-                              stiffness: 100,
-                            }}
-                            className="relative h-32 md:h-40 rounded-xl overflow-hidden shadow-md border-2 border-white transition-all"
-                            style={{ borderColor: colors.accent }}
-                            whileHover={{ y: -5 }}
-                          >
-                            <img
-                              src={gif}
-                              alt={`Arabic sign ${i + 1}`}
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </div>
+              {/* Arabic Slide */}
+              <motion.div
+                className="bg-white/40 backdrop-blur-md p-8 md:p-10 rounded-3xl shadow-xl mb-12"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                viewport={{ once: true }}
+              >
+                <div className="flex items-center gap-4 mb-6">
+                  <div
+                    className="p-3 rounded-xl shadow-sm"
+                    style={{
+                      backgroundColor: '#FFF8E1',
+                      border: `2px solid ${colors.text}`,
+                    }}
+                  >
+                    <FaLanguage
+                      className="text-3xl md:text-4xl"
+                      style={{ color: colors.text }}
+                    />
                   </div>
+                  <h3
+                    className="text-3xl md:text-4xl font-bold"
+                    style={{ color: colors.text }}
+                  >
+                    Arabic Signs
+                  </h3>
+                </div>
+
+                <p className="text-xl mb-8" style={{ color: colors.text }}>
+                  Discover Arabic alphabet, greetings, and cultural vocabulary
+                  through sign language videos.
+                </p>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {[
+                    '/Sign Language Videos/Arabic/Module 1- Alphabets/ك.mp4',
+                    '/Sign Language Videos/Arabic/Module 3- Greetings/How are you.mp4',
+                    '/Sign Language Videos/Arabic/Module 6- Emirates/Ras al Khaimah.mp4',
+                    // add more video paths here
+                  ].map((video, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: i * 0.1 }}
+                      className="relative h-48 md:h-56 rounded-xl overflow-hidden shadow-lg"
+                    >
+                      <video
+                        src={video}
+                        className="w-full h-full object-cover"
+                        muted
+                        autoPlay
+                        loop
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                    </motion.div>
+                  ))}
                 </div>
               </motion.div>
             </div>
           </div>
         </section>
-        {/* New Sign-Up Section */}
-        <section className="py-16 px-6 ">
-          <div className="max-w-4xl mx-auto text-center">
+
+        {/* Enhanced Colorful Sign-Up Section */}
+        <section className="pt-4 pb-16 px-6">
+          <div className="max-w-3xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="bg-white rounded-3xl p-8 md:p-12 shadow-xl border-t-4 border-[#4ECDC4]"
+              className="relative overflow-hidden rounded-[2rem] p-8 md:p-10 shadow-2xl"
+              style={{
+                background: 'rgba(255, 255, 255, 0.9)',
+                backdropFilter: 'blur(16px)',
+                border: '3px solid rgba(255, 255, 255, 0.4)',
+                boxShadow: '0 10px 30px -10px rgba(142, 123, 239, 0.2)',
+              }}
             >
-              <h2
-                className="text-3xl md:text-4xl font-bold mb-6"
-                style={{
-                  color: colors.text,
-                  fontFamily: "'Fredoka One', cursive",
-                }}
-              >
-                Ready to Start Learning? 🎉
-              </h2>
-              <p
-                className="text-xl mb-8 max-w-2xl mx-auto"
-                style={{
-                  fontFamily: "'Quicksand', sans-serif",
-                }}
-              >
-                Join our community of young learners and give your child the
-                gift of communication!
-              </p>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-8 py-4 rounded-full text-lg font-bold text-white shadow-lg transition-all duration-300"
-                style={{
-                  background: `linear-gradient(45deg, ${colors.primary}, ${colors.accent})`,
-                  fontFamily: "'Comfortaa', cursive",
-                }}
-              >
-                Sign Up for Free Today
-              </motion.button>
-              <p
-                className="mt-6 text-gray-600"
-                style={{
-                  fontFamily: "'Quicksand', sans-serif",
-                }}
-              >
-                Already have an account?{' '}
-                <a
-                  href="/login"
-                  className="text-[#4ECDC4] font-bold hover:underline"
+              {/* Colorful decorative elements */}
+              <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-[#FFD166]/30 blur-2xl"></div>
+              <div className="absolute -bottom-16 -left-16 w-40 h-40 rounded-full bg-[#4ECDC4]/30 blur-2xl"></div>
+              <div className="absolute top-1/4 -left-8 w-24 h-24 rounded-full bg-[#FF6B6B]/20 blur-xl"></div>
+
+              <div className="relative text-center space-y-7">
+                <h2
+                  className="text-4xl md:text-5xl font-medium "
+                  style={{
+                    background: 'linear-gradient(45deg, #8E7BEF, #5C6BC0)',
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text',
+                    color: 'transparent',
+                    fontFamily: "'Fredoka One', cursive",
+                    textShadow: '2px 2px 4px rgba(0,0,0,0.05)',
+                    lineHeight: '1.2', // or remove for default
+                  }}
                 >
-                  Log in here
-                </a>
-              </p>
+                  Let's Begin the
+                  <br />
+                  Learning Adventure!
+                </h2>
+
+                <p
+                  className="text-xl font-medium italic max-w-xl mx-auto px-4"
+                  style={{
+                    fontFamily: "'Quicksand', sans-serif",
+                    lineHeight: '1.6',
+                    color: '#1a1a1a',
+                  }}
+                >
+                  Unlock your child's communication potential with our fun sign
+                  language lessons
+                </p>
+
+                {/* Enhanced button */}
+                <Link to="/signup">
+                  <motion.button
+                    whileHover={{
+                      scale: 1.05,
+                      boxShadow: '0 10px 25px -5px rgba(142, 123, 239, 0.4)',
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                    className="mt-5 px-10 py-5 text-xl font-light rounded-full relative overflow-hidden group"
+                    style={{
+                      background: 'linear-gradient(45deg, #8E7BEF, #6BCBDB)',
+                      color: 'white',
+                      fontFamily: "'Fredoka One', cursive",
+                      border: 'none',
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    <span className="relative z-10 flex items-center justify-center gap-2">
+                      Start Learning Now
+                      <motion.span
+                        animate={{ x: [0, 5, 0] }}
+                        transition={{
+                          duration: 1.5,
+                          repeat: Infinity,
+                        }}
+                      >
+                        →
+                      </motion.span>
+                    </span>
+                    <span className="absolute inset-0 bg-gradient-to-r from-[#FF6B6B] to-[#C445F4] opacity-0 group-hover:opacity-100 transition-opacity duration-300 mix-blend-overlay"></span>
+                  </motion.button>
+                </Link>
+              </div>
             </motion.div>
           </div>
         </section>
-
         {/* Footer */}
         <footer
-          className="text-center py-4"
-          style={{ backgroundColor: colors.text, color: 'white' }}
+          className="text-center py-4 backdrop-blur-md"
+          style={{
+            backgroundColor: 'rgba(38, 84, 124, 0.85)', // colors.text with ~85% opacity
+            color: 'white',
+          }}
         >
-          <motion.div whileHover={{ scale: 1.05 }} className="mb-2">
+          <div className="mb-2">
             <span className="text-xl">✋</span>
             <span className="font-bold text-lg ml-2">
               Built with care, signs, and smiles!
             </span>
-          </motion.div>
+          </div>
           <p className="text-sm">
             © 2025 LittleSigns | Making learning magical!
           </p>
