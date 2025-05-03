@@ -312,7 +312,7 @@ const LandingPage = () => {
                     className="relative h-full rounded-xl overflow-hidden shadow-lg bg-black flex items-center justify-center"
                   >
                     <video
-                      src="/Sign Language Videos/Math/Module 2- Numbers in Arabic(1-20)/14.mp4"
+                      src="/Sign Language Videos/Math/Module 2- Numbers in Arabic(1 to 20)/14.mp4"
                       className="h-full w-auto max-w-full object-contain"
                       muted
                       autoPlay
@@ -329,7 +329,7 @@ const LandingPage = () => {
                     className="relative aspect-video rounded-xl overflow-hidden shadow-lg bg-black"
                   >
                     <video
-                      src="/Sign Language Videos/Math/Module 1-Numbers in English(1-20)/9.mp4"
+                      src="/Sign Language Videos/Math/Module 1-Numbers in English(1 to 20)/9.mp4"
                       className="w-full h-full object-cover"
                       muted
                       autoPlay
@@ -346,7 +346,7 @@ const LandingPage = () => {
                     className="relative aspect-video rounded-xl overflow-hidden shadow-lg bg-black md:mt-32" // Added md:mt-8 here
                   >
                     <video
-                      src="/Sign Language Videos/Math/Module 1-Numbers in English(1-20)/11.mp4"
+                      src="/Sign Language Videos/Math/Module 1-Numbers in English(1 to 20)/11.mp4"
                       className="w-full h-full object-cover"
                       muted
                       autoPlay

@@ -279,10 +279,10 @@ const Dashboard = () => {
       label: 'Weekly Progress',
       value:
         signsCompleted > 1
-        ? `${signsCompleted} signs`
-        : signsCompleted === 1
-        ? `${signsCompleted} sign`
-        : 'Let’s start learning!',
+          ? `${signsCompleted} signs`
+          : signsCompleted === 1
+          ? `${signsCompleted} sign`
+          : 'Let’s start learning!',
       change: signsCompleted > 0 ? 'Great job this week!' : '',
       color: 'bg-purple-100 text-purple-600',
     },
@@ -291,16 +291,16 @@ const Dashboard = () => {
       label: 'Current Streak',
       value:
         streak.currentStreak > 1
-        ? `${streak.currentStreak} days 🔥`
-        : streak.currentStreak === 1
-        ? `${streak.currentStreak} day 🔥`
-        : 'Start your streak!',
+          ? `${streak.currentStreak} days 🔥`
+          : streak.currentStreak === 1
+          ? `${streak.currentStreak} day 🔥`
+          : 'Start your streak!',
       change:
         streak.bestStreak > 1
-        ? `Personal best: ${streak.bestStreak} days`
-        : streak.bestStreak === 1
-        ? `Personal best: ${streak.bestStreak} day`
-        : '',
+          ? `Personal best: ${streak.bestStreak} days`
+          : streak.bestStreak === 1
+          ? `Personal best: ${streak.bestStreak} day`
+          : '',
       color: 'bg-orange-100 text-orange-600',
     },
     {
