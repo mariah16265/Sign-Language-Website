@@ -23,7 +23,6 @@ import { FaHands, FaFire, FaMedal, FaChartLine } from 'react-icons/fa';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-
   const [todaysSchedule, setTodaysSchedule] = useState([]);
   const [progressData, setProgressData] = useState({});
   const [lessonsCompleted, setLessonsCompleted] = useState([]);
@@ -266,15 +265,6 @@ const Dashboard = () => {
   const groupedSubjects = Object.values(groupedBySubject);
 
   //-------------------Date Formatting-------------------
-
-  const [selectedStudyDays] = useState([
-    'Sunday',
-    'Monday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-  ]);
-
   const today = new Date();
   const dayName = format(today, 'EEEE');
   const dateString = format(today, 'MMMM do, yyyy');
@@ -313,19 +303,6 @@ const Dashboard = () => {
       color: 'bg-blue-100 text-blue-600',
     },
   ];
-
-  const [studySchedule] = useState({
-    Monday: ['English Signs', 'Arabic Signs'],
-    Wednesday: ['Math Signs', 'English Signs'],
-    Thursday: ['Math Signs', 'English Signs'],
-    Friday: ['Arabic Signs', 'Math Signs'],
-    Sunday: ['English Signs', 'Math Signs'],
-  });
-  const [chartProgressData] = useState([
-    { name: 'English', score: 65 },
-    { name: 'Arabic', score: 40 },
-    { name: 'Math', score: 80 },
-  ]);
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 overflow-hidden">
@@ -483,7 +460,7 @@ const Dashboard = () => {
 
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartProgressData}>
+                  <BarChart data={lessonsCompleted}>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       stroke="#f3f4f6"
