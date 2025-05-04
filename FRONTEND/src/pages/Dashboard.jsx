@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import SubjectSlideshow from '../components/SubjectSlideshow';
+import {
+  useApiErrorHandler,
+  useCheckTokenValid,
+} from '../utils/apiErrorHandler';
 import {
   BarChart,
   Bar,
@@ -19,152 +23,295 @@ import { FaHands, FaFire, FaMedal, FaChartLine } from 'react-icons/fa';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [selectedStudyDays] = useState([
-    'Sunday',
-    'Monday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-  ]);
+  const [todaysSchedule, setTodaysSchedule] = useState([]);
+  const [progressData, setProgressData] = useState({});
+  const [lessonsCompleted, setLessonsCompleted] = useState([]);
+  const [modulesCompleted, setModulesCompleted] = useState([]);
+  const [signsCompleted, setSignsCompleted] = useState([]);
+  const [nextStudyDate, setNextStudyDate] = useState([]);
+  const [streak, setStreak] = useState({ currentStreak: 0, bestStreak: 0 });
+
+  const { handleApiError } = useApiErrorHandler();
+  const { checkTokenValid } = useCheckTokenValid();
+  const token = localStorage.getItem('token');
+
+  // Check for valid token on mount
+  useEffect(() => {
+    const isTokenValid = checkTokenValid();
+    if (!isTokenValid) return;
+  }, []);
+
+  //  Main dashboard data fetch
+  useEffect(() => {
+    const setupDashboard = async () => {
+      try {
+        // 1.----------Generate Weekly Schedule--------------
+        const weekResponse = await fetch(
+          'http://localhost:5000/api/dashboard/generate-weekly',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const weekData = await weekResponse.json();
+        if (!weekResponse.ok)
+          throw new Error(weekData.message || 'Generation failed');
+        console.log('✅ Weekly schedule generated:', weekData);
+
+        const weeklySchedule = weekData.schedule || [];
+
+        // 2. ------------Get next study day from weekly schedule------------
+        const getNextStudyDay = (flatSchedule) => {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          const groupedByDate = {};
+          for (const lesson of flatSchedule) {
+            const lessonDate = new Date(lesson.date);
+            lessonDate.setHours(0, 0, 0, 0);
+            const key = lessonDate.getTime();
+            if (!groupedByDate[key]) groupedByDate[key] = [];
+            groupedByDate[key].push(lesson);
+          }
+
+          const upcomingDates = Object.keys(groupedByDate)
+            .map((time) => new Date(Number(time)))
+            .filter((d) => d > today)
+            .sort((a, b) => a - b);
+
+          return upcomingDates.length > 0 ? upcomingDates[0] : null;
+        };
+
+        const nextStudyDate = getNextStudyDay(weeklySchedule);
+        setNextStudyDate(nextStudyDate);
+        console.log(
+          '📅 Next Study Day:',
+          nextStudyDate?.toDateString() || 'None'
+        );
+
+        // 3.-----------------Fetch today's schedule-------------
+        const todayResponse = await fetch(
+          'http://localhost:5000/api/dashboard/today-schedule',
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const todayData = await todayResponse.json();
+        if (!todayResponse.ok)
+          throw new Error(todayData.message || 'Fetch failed');
+
+        const cleanedData = Array.isArray(todayData.todaySchedule)
+          ? todayData.todaySchedule
+          : [];
+        console.log("✅ Today's Schedule Assigned", cleanedData);
+        setTodaysSchedule(cleanedData);
+
+        // 4.----------Fetch per-lesson progress--------------
+        const progressMap = {};
+        const userId = localStorage.getItem('userId');
+
+        for (const lesson of cleanedData) {
+          const lessonId = lesson.lessonId;
+
+          const progressResponse = await fetch(
+            `http://localhost:5000/api/progress/user/${userId}/lesson/${lessonId}`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (!progressResponse.ok) throw new Error('Progress fetch failed');
+
+          const progressData = await progressResponse.json();
+          const watchedSignIds = new Set(
+            progressData.map((progress) => progress.signId)
+          );
+          progressMap[lessonId] = watchedSignIds;
+        }
+
+        setProgressData(progressMap);
+
+        // 5.------------Fetch completed lessons and modules per subject-------
+        const subjects = ['English', 'Arabic', 'Math'];
+        const lessonsArray = [];
+        const modulesArray = [];
+
+        for (const subject of subjects) {
+          try {
+            const subjectResponse = await fetch(
+              `http://localhost:5000/api/progress/subject-progress/${userId}/${subject}`,
+              {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+
+            const subjectData = await subjectResponse.json();
+            if (!subjectResponse.ok)
+              throw new Error('Subject Progress fetch failed');
+
+            lessonsArray.push({
+              name: subject,
+              completed: subjectData.completedLessons,
+              total: subjectData.totalLessons,
+            });
+            modulesArray.push({
+              name: subject,
+              completed: subjectData.completedModules,
+            });
+          } catch (err) {
+            console.error(
+              `❌ Failed to fetch subject progress for ${subject}`,
+              err
+            );
+          }
+        }
+
+        setLessonsCompleted(lessonsArray);
+
+        const totalCompletedModules = modulesArray.reduce(
+          (sum, subject) => sum + subject.completed,
+          0
+        );
+        setModulesCompleted(totalCompletedModules);
+
+        // 6.------------------Fetch weekly signs learned---------------
+        const signsResponse = await fetch(
+          `http://localhost:5000/api/progress/weekly-signs/${userId}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!signsResponse.ok) {
+          throw new Error('Failed to fetch weekly signs learned');
+        }
+
+        const signsData = await signsResponse.json(); // { signsLearnedThisWeek: number }
+        setSignsCompleted(signsData.signsLearnedThisWeek);
+
+        // ✅ 6. Get active streak
+        const streakResponse = await fetch(
+          `http://localhost:5000/api/progress/streak/${userId}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const streakData = await streakResponse.json();
+        if (!streakResponse.ok)
+          throw new Error(streakData.message || 'Fetch failed');
+
+        setStreak({
+          currentStreak: streakData.currentStreak,
+          bestStreak: streakData.bestStreak,
+        });
+      } catch (err) {
+        handleApiError(err);
+      }
+    };
+
+    setupDashboard();
+  }, [navigate]);
+
+  //----------------Group today's schedule by subject--------------
+  const groupedBySubject = {};
+  todaysSchedule.forEach((item) => {
+    const subject = item.subject;
+    if (!groupedBySubject[subject]) {
+      groupedBySubject[subject] = {
+        subject: subject,
+        gradient: 'from-indigo-500 to-purple-500', // default or can be made dynamic
+        lessons: [],
+      };
+    }
+
+    const lesson = {
+      lessonId: item.lessonId,
+      lesson: item.lesson,
+      module: item.module,
+      signs: item.signs,
+      completedSigns: progressData[item.lessonId]?.size || 0,
+      totalSigns: item.signs.length,
+    };
+
+    groupedBySubject[subject].lessons.push(lesson);
+    // console.log(`✅ Lesson Progress: ${lesson.lesson} - Completed: ${lesson.completedSigns}, Total: ${lesson.totalSigns}`);
+  });
+  const groupedSubjects = Object.values(groupedBySubject);
+
+  //-------------------Date Formatting-------------------
   const today = new Date();
   const dayName = format(today, 'EEEE');
   const dateString = format(today, 'MMMM do, yyyy');
 
-  // Subjects data
-  const subjectsData = [
-    {
-      name: 'English Signs',
-      description: 'Learn basic English words in sign language',
-      gradient: 'from-purple-500 to-indigo-600',
-      modules: [
-        {
-          id: 1,
-          title: 'Alphabet',
-          subtitle: 'A-Z signs',
-          emoji: '🔤',
-          path: '/english/1',
-          progress: 65,
-        },
-        {
-          id: 2,
-          title: 'Greetings',
-          subtitle: 'Hello, Thank you',
-          emoji: '👋',
-          path: '/english/2',
-          progress: 40,
-        },
-        {
-          id: 3,
-          title: 'Greetings',
-          subtitle: 'Hello, Thank you',
-          emoji: '👋',
-          path: '/english/2',
-          progress: 40,
-        },
-      ],
-    },
-    {
-      name: 'Arabic Signs',
-      description: 'Essential Arabic words in sign language',
-      gradient: 'from-emerald-500 to-teal-600',
-      modules: [
-        {
-          id: 1,
-          title: 'Colors',
-          subtitle: 'Red, Blue, Green',
-          emoji: '🎨',
-          path: '/arabic/1',
-          progress: 30,
-        },
-      ],
-    },
-    {
-      name: 'Math Signs',
-      description: 'Numbers and basic math concepts',
-      gradient: 'from-amber-500 to-orange-600',
-      modules: [
-        {
-          id: 1,
-          title: 'Numbers',
-          subtitle: '1-20 signs',
-          emoji: '🔢',
-          path: '/math/1',
-          progress: 80,
-        },
-        {
-          id: 2,
-          title: 'Shapes',
-          subtitle: 'Circle, Square',
-          emoji: '⭐',
-          path: '/math/2',
-          progress: 50,
-        },
-      ],
-    },
-  ];
-  const [studySchedule] = useState({
-    Monday: ['English Signs', 'Arabic Signs'],
-    Wednesday: ['Math Signs', 'English Signs'],
-    Thursday: ['Math Signs', 'English Signs'],
-    Friday: ['Arabic Signs', 'Math Signs'],
-    Sunday: ['English Signs', 'Math Signs'],
-  });
-  const [progressData] = useState([
-    { name: 'English', score: 65 },
-    { name: 'Arabic', score: 40 },
-    { name: 'Math', score: 80 },
-  ]);
-
+  // Color palette for charts or cards
   const COLORS = ['#8b5cf6', '#10b981', '#f59e0b']; // Purple, Emerald, Amber
 
-  const [stats] = useState(() => {
-    // Get today's scheduled subjects
-    const todaySubjects = studySchedule[dayName] || [];
+  //------------Stats Data-----------
+  const stats = [
+    {
+      icon: <FaHands className="text-2xl" />,
+      label: 'Weekly Progress',
+      value:
+        signsCompleted > 1
+          ? `${signsCompleted} signs`
+          : signsCompleted === 1
+          ? `${signsCompleted} sign`
+          : 'Let’s start learning!',
+      change: signsCompleted > 0 ? 'Great job this week!' : '',
+      color: 'bg-purple-100 text-purple-600',
+    },
+    {
+      icon: <FaFire className="text-2xl" />,
+      label: 'Current Streak',
+      value:
+        streak.currentStreak > 1
+          ? `${streak.currentStreak} days 🔥`
+          : streak.currentStreak === 1
+          ? `${streak.currentStreak} day 🔥`
+          : 'Start your streak!',
+      change:
+        streak.bestStreak > 1
+          ? `Personal best: ${streak.bestStreak} days`
+          : streak.bestStreak === 1
+          ? `Personal best: ${streak.bestStreak} day`
+          : '',
+      color: 'bg-orange-100 text-orange-600',
+    },
+    {
+      icon: <FaMedal className="text-2xl" />,
+      label: 'Modules Completed',
+      value: modulesCompleted > 0 ? modulesCompleted : 'Let’s begin! 🚀',
+      change: modulesCompleted > 0 ? 'Keep going!' : '',
+      color: 'bg-blue-100 text-blue-600',
+    },
+  ];
 
-    // Calculate signs learned based on all subjects (not just English/Arabic)
-    const totalSignsLearned = subjectsData
-      .filter((subject) => todaySubjects.includes(subject.name))
-      .reduce((total, subject) => {
-        return (
-          total +
-          subject.modules.reduce((sum, module) => sum + module.progress, 0)
-        );
-      }, 0);
-
-    // Calculate completed modules
-    const completedModules = subjectsData
-      .filter((subject) => todaySubjects.includes(subject.name))
-      .reduce((total, subject) => {
-        return (
-          total +
-          subject.modules.filter((module) => module.progress === 100).length
-        );
-      }, 0);
-
-    return [
-      {
-        icon: <FaHands className="text-2xl" />,
-        label: "Today's Progress",
-        value: `${Math.round(totalSignsLearned / todaySubjects.length)}%`,
-        change: `${todaySubjects.length} subjects today`,
-        color: 'bg-purple-100 text-purple-600',
-      },
-      {
-        icon: <FaFire className="text-2xl" />,
-        label: 'Current Streak',
-        value: '5 days 🔥',
-        change: 'Personal best: 12 days',
-        color: 'bg-orange-100 text-orange-600',
-      },
-      {
-        icon: <FaMedal className="text-2xl" />,
-        label: 'Modules Completed',
-        value: completedModules,
-        change: 'Keep going!',
-        color: 'bg-blue-100 text-blue-600',
-      },
-    ];
-  });
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 overflow-hidden">
       <Navbar userName="Michael Bob" userAvatar="/images/avatar.jpg" />
@@ -186,7 +333,7 @@ const Dashboard = () => {
                 </p>
               </div>
 
-              {selectedStudyDays.includes(dayName) ? (
+              {todaysSchedule.length > 0 ? (
                 <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1">
                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                   Study Day
@@ -201,27 +348,61 @@ const Dashboard = () => {
           </div>
 
           {/* Subjects Grid */}
-          {selectedStudyDays.includes(dayName) ? (
+          {groupedSubjects.length > 0 ? (
             <motion.div
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ staggerChildren: 0.1 }}
             >
-              {subjectsData
-                .filter((subject) =>
-                  studySchedule[dayName]?.includes(subject.name)
-                )
-                .map((subject, index) => (
+              {groupedSubjects.map((subjectItem, index) => {
+                return (
                   <motion.div
                     key={index}
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <SubjectSlideshow subjects={[subject]} />
+                    <SubjectSlideshow
+                      subjects={[
+                        {
+                          name: subjectItem.subject,
+                          gradient:
+                            subjectItem.subject === 'English'
+                              ? 'from-blue-500 to-indigo-500'
+                              : subjectItem.subject === 'Arabic'
+                              ? 'from-green-500 to-emerald-500'
+                              : 'from-purple-500 to-pink-500',
+                          description: '',
+
+                          lessons: subjectItem.lessons.map((lessonItem, i) => {
+                            const firstSign = lessonItem.signs[0]?.title || '';
+                            const lastSign =
+                              lessonItem.signs[lessonItem.signs.length - 1]
+                                ?.title || '';
+
+                            return {
+                              id: lessonItem.lessonId,
+                              title: lessonItem.lesson,
+                              subtitle: `${firstSign} - ${lastSign}`,
+                              moduleName:
+                                lessonItem.module.split('-')[1] ||
+                                lessonItem.module,
+                              path: `/lesson/${lessonItem.lessonId}`,
+                              progress:
+                                Math.round(
+                                  (lessonItem.completedSigns /
+                                    lessonItem.totalSigns) *
+                                    100
+                                ) || 0,
+                            };
+                          }),
+                        },
+                      ]}
+                    />
                   </motion.div>
-                ))}
+                );
+              })}
             </motion.div>
           ) : (
             <div className="bg-gradient-to-r from-purple-100 to-blue-100 p-8 rounded-2xl shadow-md text-center mb-8">
@@ -229,7 +410,10 @@ const Dashboard = () => {
                 Enjoy your rest day! Come back on your next study day.
               </p>
               <p className="mt-2 text-purple-700">
-                Next study day: {selectedStudyDays[0]}
+                Next study day:{' '}
+                {nextStudyDate
+                  ? new Date(nextStudyDate).toDateString()
+                  : 'None'}
               </p>
             </div>
           )}
@@ -278,13 +462,13 @@ const Dashboard = () => {
                 </h3>
                 <div className="flex items-center gap-2">
                   <FaChartLine className="text-purple-500" />
-                  <span className="text-sm text-gray-600">Weekly Update</span>
+                  <span className="text-sm text-gray-600">Forever Update</span>
                 </div>
               </div>
 
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={progressData}>
+                  <BarChart data={lessonsCompleted}>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       stroke="#f3f4f6"
@@ -314,12 +498,12 @@ const Dashboard = () => {
                       labelStyle={{ color: '#6b7280', fontWeight: 'bold' }}
                     />
                     <Bar
-                      dataKey="score"
+                      dataKey="completed"
                       radius={[6, 6, 0, 0]}
                       animationDuration={1800}
                       barSize={60} // Adjusted for better width
                     >
-                      {progressData.map((entry, index) => (
+                      {lessonsCompleted.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
                           fill={COLORS[index % COLORS.length]}
@@ -331,7 +515,7 @@ const Dashboard = () => {
               </div>
 
               <div className="flex justify-center gap-6 mt-4">
-                {progressData.map((subject, index) => (
+                {lessonsCompleted.map((subject, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <div
                       className="w-3 h-3 rounded-full"
