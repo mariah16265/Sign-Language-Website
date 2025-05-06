@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useLocation  } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import { motion } from 'framer-motion';
@@ -7,14 +7,15 @@ import { FaLayerGroup, FaRegClipboard } from 'react-icons/fa';
 import './ModulePage.css'; // <-- You'll create this for styles
 
 function ModulesPage() {
-  const [subjects] = useState(["English", "Arabic", "Math"]);
   const [lessonProgress, setLessonProgress] = useState({});
-  const [selectedSubject, setSelectedSubject] = useState("English");
   const [modules, setModules] = useState([]);
   const [openModule, setOpenModule] = useState(null);
+
   const userId = localStorage.getItem('userId');
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
+  const location = useLocation();  
+  const selectedSubject = location.state?.subject || 'English'; 
 
   useEffect(() => {
     if (selectedSubject) {
@@ -76,12 +77,6 @@ const toggleModule = (moduleName) => {
       <Navbar userName="Michael Bob" userAvatar="/images/avatar.jpg" />
       <div className="flex flex-col lg:flex-row min-h-screen z-10 relative">
         <Sidebar
-          subjects={subjects}
-          selectedSubject={selectedSubject}
-          onSelectSubject={(subject) => {
-            setSelectedSubject(subject);
-            setOpenModule(null);
-          }}
         />
 
         <div className="flex-1 flex flex-col lg:flex-row">
