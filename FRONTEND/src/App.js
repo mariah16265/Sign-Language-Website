@@ -8,9 +8,9 @@ import Dashboard from './pages/Dashboard';
 import StudyPlan from './pages/StudyPlan';
 
 import LearningPage from './pages/LearningPage';
-import QuizPage from './pages/QuizPage';
-import LessonPage from './pages/LessonPage';
 import ModulesPage from './pages/ModulesPage';
+import LessonPage from './pages/LessonPage';
+import QuizPage from './pages/QuizPage';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
@@ -29,9 +29,9 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/studyplan" element={<StudyPlan />} />
           <Route path="/learn" element={<LearningPage />} />
-          <Route path="/quiz" element={<QuizPage />} />
+          <Route path="/learn/subjects" element={<ModulesPage />} />
           <Route path="/lesson" element={<LessonPage />} />
-          <Route path="/modulespage" element={<ModulesPage />} />
+          <Route path="/quiz" element={<QuizPage />} />
         </Routes>
       </div>
     </Router>
