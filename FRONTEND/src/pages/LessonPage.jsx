@@ -141,7 +141,7 @@ const LessonPage = () => {
   
           {/* Title */}
         <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-6 text-purple-700 drop-shadow-lg">
-          Lesson {lessonData.lessonNumber}: {lessonData.module}
+        {lessonData.module.split('-')[1]?.trim()} - Lesson {lessonData.lessonNumber}
         </h2>
   
           {/* Video Player */}
