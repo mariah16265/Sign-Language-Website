@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import { motion } from 'framer-motion';
-import { FaBookOpen, FaGraduationCap, FaChevronDown, FaChevronUp, FaLayerGroup, FaRegClipboard } from 'react-icons/fa';
+import { FaLayerGroup, FaRegClipboard } from 'react-icons/fa';
+import './ModulePage.css'; // <-- You'll create this for styles
 
 function LearnPage() {
   const [subjects, setSubjects] = useState(["English", "Arabic", "Math"]);
   const [selectedSubject, setSelectedSubject] = useState("English");
   const [modules, setModules] = useState([]);
   const [openModule, setOpenModule] = useState(null);
-  const [openLessonId, setOpenLessonId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,7 +25,7 @@ function LearnPage() {
         { _id: "1-1", module: "Grammar", lessonNumber: 1, signs: [
             { _id: "1a", title: "Nouns" }, { _id: "1b", title: "Verbs" },
             { _id: "1c", title: "Adjectives" }, { _id: "1d", title: "Adverbs" },
-            { _id: "1e", title: "Prepositions" }
+            { _id: "1e", title: "Prepositions"}, { _id: "1f", title: "Conjunction"} ,{ _id: "1g", title: "Proverbs" }
         ]},
         { _id: "1-2", module: "Grammar", lessonNumber: 2, signs: [
             { _id: "2a", title: "Nouns" }, { _id: "2b", title: "Verbs" },
@@ -67,7 +67,6 @@ function LearnPage() {
         { _id: "3", module: "Syntax", lessonNumber: 1, signs: [
             { _id: "3a", title: "Sentence Structure" }, { _id: "3b", title: "Word Types" }
         ]}
-
       ],
       Math: [
         { _id: "4", module: "Algebra", lessonNumber: 1, signs: [
@@ -79,17 +78,15 @@ function LearnPage() {
       ]
     };
 
+
     const subjectModules = dataBySubject[subject] || [];
     setModules(subjectModules);
     if (subjectModules.length > 0) setOpenModule(subjectModules[0].module);
   };
 
-  const getLessonsForModule = (moduleName) => modules.filter(lesson => lesson.module === moduleName);
+  const getLessonsForModule = (moduleName) =>
+    modules.filter((lesson) => lesson.module === moduleName);
 
-  const toggleLesson = (lessonId) => {
-    setOpenLessonId(prev => (prev === lessonId ? null : lessonId));
-  };
-  
   const uniqueModules = Array.from(new Map(modules.map(item => [item.module, item])).values());
 
   return (
@@ -99,7 +96,10 @@ function LearnPage() {
         <Sidebar
           subjects={subjects}
           selectedSubject={selectedSubject}
-          onSelectSubject={(subject) => { setSelectedSubject(subject); setOpenModule(null); }}
+          onSelectSubject={(subject) => {
+            setSelectedSubject(subject);
+            setOpenModule(null);
+          }}
         />
 
         <div className="flex-1 flex flex-col lg:flex-row">
@@ -108,83 +108,79 @@ function LearnPage() {
             <h2 className="text-3xl font-bold text-center text-pink-600 mb-4">
               <FaLayerGroup className="inline mr-2" /> Modules
             </h2>
-            <div className="space-y-6">
-              {uniqueModules.map((mod, index) => (
-                <motion.div
-                  key={mod._id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.2, delay: index * 0.05, ease: "easeOut" }}
-                  className={`rounded-2xl p-4 text-center cursor-pointer shadow-md transition-all ${
-                    openModule === mod.module ? "bg-purple-600 text-white font-bold" : "bg-white hover:bg-pink-200 text-gray-700 font-bold"
-                  }`}
-                  onClick={() => setOpenModule(mod.module)}
-                >
-                  <span className="text-xl">{mod.module}</span>
-                </motion.div>
-              ))}
-            </div>
+            {uniqueModules.map((mod, index) => (
+              <motion.div
+                key={mod._id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.2, delay: index * 0.05 }}
+                className={`rounded-2xl p-4 text-center cursor-pointer shadow-md ${
+                  openModule === mod.module
+                    ? "bg-purple-600 text-white font-bold"
+                    : "bg-white hover:bg-purple-200 text-black font-bold"
+                }`}
+                onClick={() => setOpenModule(mod.module)}
+              >
+                <span className="text-xl">{mod.module}</span>
+              </motion.div>
+            ))}
           </div>
 
-          {/* Lesson List */}
-          <div
-            className="w-full lg:w-3/4 p-8 rounded-tl-3xl overflow-y-auto"
-            style={{
-              background: "linear-gradient(135deg, rgba(233, 246, 255, 0.9), rgba(243, 249, 255, 0.9))", // super light gradient for a soft look
-              boxShadow: "inset 0 0 30px rgba(0,0,0,0.03)"
-            }}
-          >
+          <div className="w-full lg:w-3/4 p-8 overflow-y-auto bg-gradient-to-br from-purple-200 via-pink-100 to-white">
+          {/* <div className="w-full lg:w-3/4 p-8 overflow-y-auto"> */}
+
+
             {openModule && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
-                <h2 className="text-3xl font-extrabold text-center text-purple-600 mb-6">
+              <>
+                <h2 className="text-4xl font-extrabold text-center text-pink-600 mb-8">
                   <FaRegClipboard className="inline mr-2" />
                   Lessons for {openModule}
                 </h2>
-                <div className="space-y-6">
-                  {getLessonsForModule(openModule).map((lesson) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                  {getLessonsForModule(openModule).map((lesson, index) => (
                     <motion.div
                       key={lesson._id}
-                      className="bg-white p-4 rounded-xl shadow hover:shadow-lg transition-all"
+                      className="lesson-card flex flex-col h-full"  // <-- added flex-col h-full
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.4 }}
+                      transition={{ duration: 0.1 }}
+                      whileHover={{ scale: 1.05, y: -5 }}
                     >
-                      <div
-                        className="flex justify-between items-center cursor-pointer"
-                        onClick={() => toggleLesson(lesson._id)}
-                      >
-                        <h4 className="text-lg font-bold text-pink-700">
-                          Lesson {lesson.lessonNumber}
-                        </h4>
-                        <span className="text-purple-600 text-xl">
-                        {openLessonId === lesson._id ? <FaChevronUp /> : <FaChevronDown />}
-                        </span>
+                      <h4 className="lesson-title text-center mb-4">
+                        Lesson {lesson.lessonNumber}
+                      </h4>
+
+                      <div className="relative flex-1 pl-4 sm:pl-8 overflow-hidden">
+                        <div className="absolute left-0 top-2 bottom-2 w-1 bg-gradient-to-b from-pink-400 to-purple-500 rounded-full"></div>
+                        <div className="signs-container overflow-y-auto pr-2">
+                          <div className="space-y-4">
+                            {lesson.signs.map((sign, idx) => (
+                              <motion.div
+                                key={sign._id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.4, delay: idx * 0.1 }}
+                                className="lesson-signs bg-white rounded-xl shadow-md border-l-4 border-purple-500 p-3 ml-2 sm:ml-4 hover:shadow-lg transition-transform hover:translate-x-1"
+                              >
+                                <h5>{sign.title}</h5>
+                              </motion.div>
+                            ))}
+                          </div>
+                        </div>
                       </div>
 
-                      {openLessonId === lesson._id && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                          {lesson.signs.map((sign, idx) => (
-                            <motion.div
-                              key={sign._id}
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              className="bg-white border-2 border-blue-300 p-4 rounded-2xl shadow-md cursor-pointer hover:bg-purple-100 transition duration-300 ease-in-out overflow-hidden"
-                              onClick={() => navigate(`/lesson/${sign._id}`)}
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              transition={{ duration: 0.3, delay: idx * 0.1 }}
-                            >
-                              <h5 className="text-md font-semibold text-purple-700">
-                                {lesson.lessonNumber}.{idx + 1} {sign.title}
-                              </h5>
-                            </motion.div>
-                          ))}
-                        </div>
-                      )}
+                      <div className="flex-center mt-4 mb-2">
+                        <button
+                          onClick={() => navigate(`/lesson/${lesson._id}`)}
+                          className="button-soft"
+                        >
+                          Get Started
+                        </button>
+                      </div>
                     </motion.div>
                   ))}
                 </div>
-              </motion.div>
+              </>
             )}
           </div>
         </div>

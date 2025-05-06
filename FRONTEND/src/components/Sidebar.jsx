@@ -1,4 +1,4 @@
-import { FaBookOpen, FaPuzzlePiece, FaChartBar } from 'react-icons/fa';
+import { FaBookOpen, FaPuzzlePiece, FaChartBar, FaChalkboardTeacher} from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Sidebar = () => {
@@ -6,6 +6,12 @@ const Sidebar = () => {
   const location = useLocation();
 
   const tabs = [
+    {
+      icon: <FaChalkboardTeacher className="text-2xl" />, 
+      label: 'Dashboard',
+      color: 'bg-sky-400 hover:bg-sky-500',
+      path: '/dashboard',
+    },
     {
       icon: <FaBookOpen className="text-2xl" />, 
       label: 'Learn',
