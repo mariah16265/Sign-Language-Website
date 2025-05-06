@@ -384,7 +384,7 @@ const Dashboard = () => {
                             return {
                               id: lessonItem.lessonId,
                               title: lessonItem.lesson,
-                              subtitle: `${firstSign} - ${lastSign}`,
+                              subtitle: `${firstSign.replace(/^\./, '')} - ${lastSign.replace(/^\./, '')}`,
                               moduleName:
                                 lessonItem.module.split('-')[1] ||
                                 lessonItem.module,
