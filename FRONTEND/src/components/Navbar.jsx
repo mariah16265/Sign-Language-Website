@@ -45,7 +45,7 @@ const Navbar = ({ hideLoginButton = false }) => {
   };
 
   return (
-    <nav className="bg-white/90 backdrop-blur-md shadow-sm px-6 py-4 flex justify-between items-center sticky top-0 z-40">
+  <nav className="bg-white shadow-sm px-6 py-4 flex justify-between items-center sticky top-0 z-40">
       {/* Logo */}
       <motion.div
         className="flex items-center space-x-3"
