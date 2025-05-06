@@ -11,6 +11,8 @@ import LearningPage from './pages/LearningPage';
 import QuizPage from './pages/QuizPage';
 import LessonPage from './pages/LessonPage';
 import ModulesPage from './pages/ModulesPage';
+import SignDictionaryPage from './pages/SignDictionaryPage';
+import SignVideoPage from './pages/SignVideoPage';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
@@ -31,7 +33,9 @@ function App() {
           <Route path="/learn" element={<LearningPage />} />
           <Route path="/quiz" element={<QuizPage />} />
           <Route path="/lesson" element={<LessonPage />} />
-          <Route path="/modulespage" element={<ModulesPage />} />
+          <Route path="/modules" element={<ModulesPage />} />
+          <Route path="/signdictionary" element={<SignDictionaryPage />} />
+          <Route path="/signvideo" element={<SignDictionaryPage />} />
         </Routes>
       </div>
     </Router>
