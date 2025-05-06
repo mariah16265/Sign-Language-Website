@@ -131,7 +131,7 @@ const LessonPage = () => {
           {/* Back Button */}
           <div className="flex items-center justify-start mb-4">
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => navigate('/learn/subjects', { state: { subject: lessonData.subject }})}
               className="flex items-center gap-3 bg-gradient-to-r from-purple-600 to-indigo-500 text-white font-bold hover:from-purple-700 hover:to-indigo-600 shadow-lg text-lg py-3 px-6 rounded-full transition duration-300"
             >
               <FaArrowLeft />
