@@ -5,11 +5,13 @@ import Navbar from '../components/Navbar';
 import { motion } from 'framer-motion';
 import { FaLayerGroup, FaRegClipboard } from 'react-icons/fa';
 import './ModulePage.css'; // <-- You'll create this for styles
+import { useCheckTokenValid } from '../utils/apiErrorHandler';
 
-function ModulesPage() {
+const ModulesPage = () => {
   const [lessonProgress, setLessonProgress] = useState({});
   const [modules, setModules] = useState([]);
   const [openModule, setOpenModule] = useState(null);
+  const { checkTokenValid } = useCheckTokenValid();
 
   const userId = localStorage.getItem('userId');
   const token = localStorage.getItem('token');
@@ -17,6 +19,12 @@ function ModulesPage() {
   const location = useLocation();  
   const selectedSubject = location.state?.subject || 'English'; 
 
+  // Check for valid token on mount
+    useEffect(() => {
+      const isTokenValid = checkTokenValid();
+      if (!isTokenValid) return;
+    }, []);
+    
   useEffect(() => {
     if (selectedSubject) {
       fetchModulesForSubject(selectedSubject);
