@@ -45,10 +45,8 @@ const Navbar = ({ hideLoginButton = false }) => {
   };
 
   return (
-
-    <nav className="bg-white shadow-sm px-6 py-4 flex justify-between items-center sticky top-0 z-40">
-    {/* Logo */}
-
+  <nav className="bg-white shadow-sm px-6 py-4 flex justify-between items-center sticky top-0 z-40">
+      {/* Logo */}
       <motion.div
         className="flex items-center space-x-3"
         whileHover={{ scale: 1.05 }}

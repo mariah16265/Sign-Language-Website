@@ -8,14 +8,11 @@ import Dashboard from './pages/Dashboard';
 import StudyPlan from './pages/StudyPlan';
 
 import LearningPage from './pages/LearningPage';
+import QuizPage from './pages/QuizPage';
+import LessonPage from './pages/LessonPage';
 import ModulesPage from './pages/ModulesPage';
-<<<<<<< HEAD
 import SignDictionaryPage from './pages/SignDictionaryPage';
 import SignVideoPage from './pages/SignVideoPage';
-=======
-import LessonPage from './pages/LessonPage';
-import QuizPage from './pages/QuizPage';
->>>>>>> origin/syeda-studyplan-and-dashboard
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
@@ -34,16 +31,11 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/studyplan" element={<StudyPlan />} />
           <Route path="/learn" element={<LearningPage />} />
-          <Route path="/learn/subjects" element={<ModulesPage />} />
-          <Route path="/lesson/:lessonId/"element={<LessonPage />} />
           <Route path="/quiz" element={<QuizPage />} />
-<<<<<<< HEAD
           <Route path="/lesson" element={<LessonPage />} />
           <Route path="/modules" element={<ModulesPage />} />
           <Route path="/signdictionary" element={<SignDictionaryPage />} />
           <Route path="/signvideo" element={<SignDictionaryPage />} />
-=======
->>>>>>> origin/syeda-studyplan-and-dashboard
         </Routes>
       </div>
     </Router>

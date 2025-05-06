@@ -1,30 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate,useLocation  } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import { motion } from 'framer-motion';
 import { FaLayerGroup, FaRegClipboard } from 'react-icons/fa';
 import './ModulePage.css'; // <-- You'll create this for styles
-import { useCheckTokenValid } from '../utils/apiErrorHandler';
 
-const ModulesPage = () => {
-  const [lessonProgress, setLessonProgress] = useState({});
+function LearnPage() {
+  const [subjects, setSubjects] = useState(["English", "Arabic", "Math"]);
+  const [selectedSubject, setSelectedSubject] = useState("English");
   const [modules, setModules] = useState([]);
   const [openModule, setOpenModule] = useState(null);
-  const { checkTokenValid } = useCheckTokenValid();
-
-  const userId = localStorage.getItem('userId');
-  const token = localStorage.getItem('token');
   const navigate = useNavigate();
-  const location = useLocation();  
-  const selectedSubject = location.state?.subject || 'English'; 
 
-  // Check for valid token on mount
-    useEffect(() => {
-      const isTokenValid = checkTokenValid();
-      if (!isTokenValid) return;
-    }, []);
-    
   useEffect(() => {
     if (selectedSubject) {
       fetchModulesForSubject(selectedSubject);
@@ -32,59 +20,86 @@ const ModulesPage = () => {
   }, [selectedSubject]);
 
   const fetchModulesForSubject = async (subject) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/modules/subject/${subject}`,{
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch modules');
-      }
-      setModules(data);
-      const progressMap = {};
-      for (const lesson of data) {
-        const res = await fetch(`http://localhost:5000/api/progress/user/${userId}/lesson/${lesson._id}`,{
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });;
-        const progress = await res.json();
-        progressMap[lesson._id] = progress; //full progress object
-      }
-    setLessonProgress(progressMap);
-  } catch (error) {
-    console.error('Error fetching modules:', error);
-  }
-};
+    const dataBySubject = {
+      English: [
+        { _id: "1-1", module: "Grammar", lessonNumber: 1, signs: [
+            { _id: "1a", title: "Nouns" }, { _id: "1b", title: "Verbs" },
+            { _id: "1c", title: "Adjectives" }, { _id: "1d", title: "Adverbs" },
+            { _id: "1e", title: "Prepositions"}, { _id: "1f", title: "Conjunction"} ,{ _id: "1g", title: "Proverbs" }
+        ]},
+        { _id: "1-2", module: "Grammar", lessonNumber: 2, signs: [
+            { _id: "2a", title: "Nouns" }, { _id: "2b", title: "Verbs" },
+            { _id: "2c", title: "Adjectives" }, { _id: "2d", title: "Adverbs" },
+            { _id: "2e", title: "Prepositions" }
+        ]},
+        { _id: "1-3", module: "Grammar", lessonNumber: 3, signs: [
+            { _id: "3a", title: "Nouns" }, { _id: "3b", title: "Verbs" },
+            { _id: "3c", title: "Adjectives" }, { _id: "3d", title: "Adverbs" },
+            { _id: "3e", title: "Prepositions" }
+        ]},
+        { _id: "1-4", module: "Grammar", lessonNumber: 4, signs: [
+            { _id: "4a", title: "Nouns" }, { _id: "4b", title: "Verbs" },
+            { _id: "4c", title: "Adjectives" }, { _id: "4d", title: "Adverbs" },
+            { _id: "4e", title: "Prepositions" }
+        ]},
+        { _id: "2", module: "Literature", lessonNumber: 1, signs: [
+            { _id: "2a", title: "Poetry" }, { _id: "2b", title: "Prose" },
+            { _id: "2c", title: "Shakespeare" }, { _id: "2d", title: "Modern Literature" },
+            { _id: "2e", title: "Short Stories" }
+        ]},
+        { _id: "3", module: "Writing", lessonNumber: 1, signs: [
+            { _id: "3a", title: "Essays" }, { _id: "3b", title: "Reports" },
+            { _id: "3c", title: "Creative Writing" }, { _id: "3d", title: "Research Papers" },
+            { _id: "3e", title: "Letters" }
+        ]},
+        { _id: "4", module: "Reading Comprehension", lessonNumber: 1, signs: [
+            { _id: "4a", title: "Main Idea" }, { _id: "4b", title: "Supporting Details" },
+            { _id: "4c", title: "Inference" }, { _id: "4d", title: "Summarizing" },
+            { _id: "4e", title: "Context Clues" }
+        ]},
+        { _id: "5", module: "Spelling and Vocabulary", lessonNumber: 1, signs: [
+            { _id: "5a", title: "Commonly Misspelled Words" }, { _id: "5b", title: "Word Roots" },
+            { _id: "5c", title: "Prefixes and Suffixes" }, { _id: "5d", title: "Synonyms and Antonyms" },
+            { _id: "5e", title: "Word Meanings in Context" }
+        ]}
+      ],
+      Arabic: [
+        { _id: "3", module: "Syntax", lessonNumber: 1, signs: [
+            { _id: "3a", title: "Sentence Structure" }, { _id: "3b", title: "Word Types" }
+        ]}
+      ],
+      Math: [
+        { _id: "4", module: "Algebra", lessonNumber: 1, signs: [
+            { _id: "4a", title: "Linear Equations" }, { _id: "4b", title: "Quadratic Equations" }
+        ]},
+        { _id: "5", module: "Geometry", lessonNumber: 1, signs: [
+            { _id: "5a", title: "Triangles" }, { _id: "5b", title: "Circles" }
+        ]}
+      ]
+    };
 
-  // Extract unique modules based on module title
-  const uniqueModules = Array.from(
-    new Map(modules.map(item => [item.module, item])).values()
-  );
 
- // Group lessons under each module
- const getLessonsForModule = (moduleName) => {
-  return modules.filter((lesson) => lesson.module === moduleName);
-};
+    const subjectModules = dataBySubject[subject] || [];
+    setModules(subjectModules);
+    if (subjectModules.length > 0) setOpenModule(subjectModules[0].module);
+  };
 
-const toggleModule = (moduleName) => {
-  if (openModule === moduleName) {
-    setOpenModule(null); // close if already open
-  } else {
-    setOpenModule(moduleName); // open the clicked one
-  }
-};
+  const getLessonsForModule = (moduleName) =>
+    modules.filter((lesson) => lesson.module === moduleName);
+
+  const uniqueModules = Array.from(new Map(modules.map(item => [item.module, item])).values());
+
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-yellow-100 via-pink-100 to-purple-100 overflow-hidden">
       <Navbar userName="Michael Bob" userAvatar="/images/avatar.jpg" />
       <div className="flex flex-col lg:flex-row min-h-screen z-10 relative">
         <Sidebar
+          subjects={subjects}
+          selectedSubject={selectedSubject}
+          onSelectSubject={(subject) => {
+            setSelectedSubject(subject);
+            setOpenModule(null);
+          }}
         />
 
         <div className="flex-1 flex flex-col lg:flex-row">
@@ -122,9 +137,7 @@ const toggleModule = (moduleName) => {
                   Lessons for {openModule}
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-                {getLessonsForModule(openModule).map((lesson, index) => {
-                  const hasProgress = lessonProgress[lesson._id]?.length > 0;
-                  return(
+                  {getLessonsForModule(openModule).map((lesson, index) => (
                     <motion.div
                       key={lesson._id}
                       className="lesson-card flex flex-col h-full"  // <-- added flex-col h-full
@@ -161,12 +174,11 @@ const toggleModule = (moduleName) => {
                           onClick={() => navigate(`/lesson/${lesson._id}`)}
                           className="button-soft"
                         >
-                          {hasProgress ? 'Resume Lesson' : 'Start Lesson'}
-                         </button>
+                          Get Started
+                        </button>
                       </div>
                     </motion.div>
-                  );
-                })}
+                  ))}
                 </div>
               </>
             )}
@@ -177,4 +189,4 @@ const toggleModule = (moduleName) => {
   );
 }
 
-export default ModulesPage;
+export default LearnPage;
