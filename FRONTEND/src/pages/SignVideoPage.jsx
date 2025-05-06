@@ -1,74 +1,73 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import Sidebar from '../components/Sidebar';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
-
-
+import Sidebar from '../components/Sidebar';
+import Navbar from '../components/Navbar';
 
 const SignVideoPage = () => {
-    const [videoUrl, setVideoUrl] = useState('');
-
-  const { subject, title } = useParams();
   const navigate = useNavigate();
+  const { lessonId } = useParams();
+  const [lessonData, setLessonData] = useState(null);
+  const videoRef = useRef(null);
+
   useEffect(() => {
-    const fetchVideo = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5000/api/signs/dictionary`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
-  
-        const data = await response.json();
-        const subjectData = data.find(d => d.subject === subject);
-        const sign = subjectData?.signs.find(s => s.title === decodeURIComponent(title));
-        setVideoUrl(sign?.videoUrl);
-      } catch (error) {
-        console.error('Error fetching video data:', error);
-      }
+    // Static lesson data (or fetch from API)
+    const staticLessonData = {
+      _id: "lesson123",
+      lessonNumber: 1,
+      module: "Introduction to Sign Language",
+      subject: "Basics",
+      signs: [
+        { _id: "sign1", title: "Hello", videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4" },
+        { _id: "sign2", title: "Thank You", videoUrl: "https://www.w3schools.com/html/movie.mp4" },
+        { _id: "sign3", title: "Please", videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4" },
+      ],
     };
-  
-    fetchVideo();
-  }, [subject, title]);
+    setLessonData(staticLessonData);
+  }, [lessonId]);
+
+  if (!lessonData) return <div className="p-6 text-center text-lg">Loading lesson...</div>;
+
+  // We'll just display the **first sign** (or change logic as needed)
+  const currentSign = lessonData.signs[0];
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 overflow-hidden">
+    <div
+      className="relative w-full min-h-screen bg-cover bg-center"
+      style={{ backgroundImage: "url('/assets/lessonbg.jpg')" }}
+    >
       <Navbar userName="Michael Bob" userAvatar="/images/avatar.jpg" />
-      <div className="flex flex-col lg:flex-row min-h-screen z-10 relative">
-        <Sidebar />
+      <div className="flex flex-col lg:flex-row min-h-screen">
+        <Sidebar className="h-full" />
+        <div className="flex-1 px-2 py-4 md:px-4 md:py-6 lg:px-8 lg:py-8 flex flex-col justify-start items-center">
+          <div className="bg-white bg-opacity-90 backdrop-blur-sm rounded-3xl shadow-2xl p-4 md:p-6 lg:p-8 w-full max-w-6xl">
+            {/* Back Button */}
+            <div className="flex items-center justify-start mb-4">
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-3 bg-gradient-to-r from-purple-600 to-indigo-500 text-white font-bold hover:from-purple-700 hover:to-indigo-600 shadow-lg text-lg py-3 px-6 rounded-full transition duration-300"
+              >
+                <FaArrowLeft />
+                Back to Sign Dictionary
+              </button>
+            </div>
 
-        <div className="flex-1 p-4 md:p-6 lg:p-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="bg-white rounded-2xl shadow-xl p-6 max-w-3xl mx-auto"
-          >
-            <h1 className="text-3xl font-bold text-purple-700 mb-4">{decodeURIComponent(title)}</h1>
-            {videoUrl ? (
+            {/* Title */}
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-6 text-purple-700 drop-shadow-lg">
+              Word from {lessonData.lessonNumber}: {lessonData.module}
+            </h2>
+
+            {/* Video Player */}
+            <div className="w-full flex justify-center mb-6 md:mb-8">
               <video
-                src={videoUrl}
+                ref={videoRef}
+                src={currentSign.videoUrl}
                 controls
-                className="rounded-xl w-full max-h-[400px] mx-auto mb-6 shadow-md"
+                loop
+                className="rounded-2xl w-full max-h-[400px] md:max-h-[450px] lg:max-h-[500px] object-cover shadow-xl"
               />
-            ) : (
-              <p className="text-red-600 font-semibold">Video not found.</p>
-            )}
-                <motion.button
-                    onClick={() => navigate(-1)}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-400 to-purple-500 text-white text-lg font-semibold rounded-full shadow-lg hover:from-pink-500 hover:to-purple-600 transition-all duration-300"
-                >
-                    <FaArrowLeft className="text-white" />
-                    Back to Dictionary
-                </motion.button>
-          </motion.div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

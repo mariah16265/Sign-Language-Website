@@ -35,7 +35,7 @@ function App() {
           <Route path="/lesson" element={<LessonPage />} />
           <Route path="/modules" element={<ModulesPage />} />
           <Route path="/signdictionary" element={<SignDictionaryPage />} />
-          <Route path="/signvideo" element={<SignDictionaryPage />} />
+          <Route path="/signvideo" element={<SignVideoPage />} />
         </Routes>
       </div>
     </Router>
