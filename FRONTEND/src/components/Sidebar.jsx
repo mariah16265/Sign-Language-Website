@@ -1,4 +1,4 @@
-import { FaBookOpen, FaPuzzlePiece, FaChartBar, FaChalkboardTeacher} from 'react-icons/fa';
+import { FaSearch, FaBookOpen, FaPuzzlePiece, FaChartBar, FaChalkboardTeacher} from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Sidebar = () => {
@@ -30,6 +30,12 @@ const Sidebar = () => {
       color: 'bg-emerald-500 hover:bg-emerald-600',
       path: '/progress',
     },
+    {
+      icon: <FaSearch className="text-xl" />,
+      label: 'Sign Dictionary',
+      color: 'bg-cyan-500 hover:bg-cyan-600',
+      path: '/dictionary',
+    },
   ];
 
   return (
@@ -49,7 +55,7 @@ const Sidebar = () => {
                 <span className="absolute left-0 top-0 bottom-0 w-1.5 bg-white rounded-r-full animate-pulse"></span>
               )}
               {icon}
-              <span className="font-bold text-lg drop-shadow-sm tracking-wide">{label}</span>
+              <span className="font-bold text-base drop-shadow-sm tracking-wide">{label}</span>
             </button>
           );
         })}

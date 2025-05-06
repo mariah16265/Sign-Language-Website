@@ -10,6 +10,8 @@ import StudyPlan from './pages/StudyPlan';
 import LearningPage from './pages/LearningPage';
 import ModulesPage from './pages/ModulesPage';
 import LessonPage from './pages/LessonPage';
+import SignDictionaryPage from './pages/SignDictionaryPage.jsx';
+import SignVideoPage from './pages/SignVideoPage.jsx';
 import QuizPage from './pages/QuizPage';
 
 import { ToastContainer } from 'react-toastify';
@@ -31,6 +33,8 @@ function App() {
           <Route path="/learn" element={<LearningPage />} />
           <Route path="/learn/subjects" element={<ModulesPage />} />
           <Route path="/lesson/:lessonId/"element={<LessonPage />} />
+          <Route path="/dictionary" element={<SignDictionaryPage />} />
+          <Route path="/sign/:subject/:title" element={<SignVideoPage />} />
           <Route path="/quiz" element={<QuizPage />} />
         </Routes>
       </div>
