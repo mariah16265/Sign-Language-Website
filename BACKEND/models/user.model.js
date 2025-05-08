@@ -56,8 +56,9 @@ const userSchema = new mongoose.Schema(
       enum: ['male', 'female'],
     },
     Cdisability: {
+      // Now optional
       type: String,
-      required: true,
+      required: false, // Explicitly set to false
       enum: [
         'hearing_impairment',
         'speech_disorder',

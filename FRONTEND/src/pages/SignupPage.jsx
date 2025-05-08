@@ -38,7 +38,7 @@ const SignupPage = () => {
     Cname: '',
     Cdob: '',
     Cgender: '',
-    Cdisability: '',
+    Cdisability: null,
     username: '',
     password: '',
   });
@@ -309,7 +309,6 @@ const SignupPage = () => {
                       <div className="relative w-full">
                         <select
                           className="input-field w-full"
-                          required
                           name="Cdisability"
                           value={formData.Cdisability}
                           onChange={handleChange}
