@@ -135,12 +135,14 @@ const SignupPage = () => {
                         <FaUser />
                       </div>
                     </div>
-
                     <div className="relative">
                       <input
                         className="input-field"
                         placeholder="Organization Name"
-                        required
+                        required={
+                          formData.Frole !== 'parent' &&
+                          formData.Frole !== 'caregiver'
+                        }
                         name="Forganization"
                         value={formData.Forganization}
                         onChange={handleChange}
@@ -149,7 +151,6 @@ const SignupPage = () => {
                         <MdBusiness />
                       </div>
                     </div>
-
                     {/* Facilitator Role Dropdown */}
                     <div className="relative">
                       <select
@@ -175,11 +176,14 @@ const SignupPage = () => {
                         <GiTeacher />
                       </div>
                     </div>
-
                     <div className="relative">
                       <input
                         className="input-field"
                         placeholder="Organization Address"
+                        required={
+                          formData.Frole !== 'parent' &&
+                          formData.Frole !== 'caregiver'
+                        }
                         name="Faddress"
                         value={formData.Faddress}
                         onChange={handleChange}
@@ -188,7 +192,6 @@ const SignupPage = () => {
                         <FaSchool />
                       </div>
                     </div>
-
                     <div className="relative">
                       <input
                         className="input-field"
@@ -206,7 +209,6 @@ const SignupPage = () => {
                         <MdEmail />
                       </div>
                     </div>
-
                     <div className="relative">
                       <input
                         className="input-field"

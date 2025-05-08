@@ -10,7 +10,9 @@ const userSchema = new mongoose.Schema(
     },
     Forganization: {
       type: String,
-      required: true,
+      required: function () {
+        return !['parent', 'caregiver'].includes(this.Frole);
+      },
     },
     Frole: {
       type: String,
@@ -34,6 +36,9 @@ const userSchema = new mongoose.Schema(
     },
     Faddress: {
       type: String,
+      required: function () {
+        return !['parent', 'caregiver'].includes(this.Frole);
+      },
     },
 
     // Child Information
