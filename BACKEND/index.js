@@ -8,6 +8,7 @@ const signsDataRoutes = require('./router/signsData.route');  //sends data to fr
 const studyPlanRoutes = require('./router/studyplan.route');
 const dashboardRoutes = require('./router/dashboard.route');
 const progressRoutes = require('./router/progress.route');
+const signDictionaryRoutes = require('./router/signdictionary.route');
 
 dotenv.config();
 
@@ -51,6 +52,9 @@ app.use('/api/dashboard', dashboardRoutes);
 
 // Progress API
 app.use('/api/progress', progressRoutes);   //to get lesson's & subjects progress
+
+//Route to get dictionary content
+app.use('/api/signs', signDictionaryRoutes);
 
 // Test Route (Optional)
 app.get('/', (req, res) => {
