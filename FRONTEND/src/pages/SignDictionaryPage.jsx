@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useApiErrorHandler, useCheckTokenValid } from '../utils/apiErrorHandler';
 import { useNavigate } from 'react-router-dom';
 
-const subjects = ['English', 'Arabic', 'Math'];
+const subjects = ['English', 'Arabic'];
 
 const SignDictionary = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -70,6 +70,15 @@ const SignDictionary = () => {
     return matchesSubject && matchesSearch;
   });
 
+  const groupedSigns = filteredSigns.reduce((acc, sign) => {
+    const firstLetter = sign.title[0].toUpperCase();
+    if (!acc[firstLetter]) {
+      acc[firstLetter] = [];
+    }
+    acc[firstLetter].push(sign);
+    return acc;
+  }, {});
+
   return (
     <div
       className="relative min-h-screen overflow-hidden"
@@ -103,7 +112,7 @@ const SignDictionary = () => {
                 className="p-3 text-base border border-purple-500 ring-2 rounded-xl shadow ring-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-600 md:basis-3/4 transition"
               />
 
-              <div className="relative md:basis-1/4" ref={dropdownRef}>
+                <div className="relative md:basis-1/4 z-20" ref={dropdownRef}>
                 <button
                   onClick={() => setDropdownOpen((prev) => !prev)}
                   className="w-full p-3 text-base border border-purple-500 rounded-xl shadow bg-white text-gray-700 text-left flex justify-between items-center ring-2 ring-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-600 transition"
@@ -115,11 +124,11 @@ const SignDictionary = () => {
                 <AnimatePresence>
                   {dropdownOpen && (
                     <motion.ul
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-30"
                     >
                       {subjects.map((subject) => (
                         <li
@@ -160,36 +169,54 @@ const SignDictionary = () => {
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     <AnimatePresence>
-                      {filteredSigns.length === 0 ? (
+                      {Object.keys(groupedSigns).sort().map((letter) => (
+                        <React.Fragment key={letter}>
+                          <motion.tr
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -5 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <td
+                              colSpan="1"
+                              className="bg-purple-100 px-6 py-3 text-lg font-bold text-purple-700 sticky top-0 z-10"
+                            >
+                              {letter}
+                            </td>
+                          </motion.tr>
+                          {groupedSigns[letter].map((sign, idx) => (
+                            <motion.tr
+                              key={sign.title + idx}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              transition={{ duration: 0.3, ease: 'easeOut' }}
+                              onClick={() =>
+                                navigate(`/sign/${sign.subject}/${encodeURIComponent(sign.title)}`)
+                              }
+                              className="hover:bg-purple-50 cursor-pointer transition"
+                            >
+                              <td className="px-6 py-4 font-medium text-purple-800">{sign.title}</td>
+                            </motion.tr>
+                          ))}
+                        </React.Fragment>
+                      ))}
+
+                      {filteredSigns.length === 0 && (
                         <motion.tr
                           key="no-results"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
                         >
-                          <td colSpan="2" className="px-6 py-5 text-center text-gray-500">
+                          <td colSpan="1" className="px-6 py-5 text-center text-gray-500">
                             No matching signs found.
                           </td>
                         </motion.tr>
-                      ) : (
-                        filteredSigns.map((sign, idx) => (
-                          <motion.tr
-                            key={sign.title + idx}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.3, ease: 'easeOut' }}
-                            onClick={() =>
-                              navigate(`/sign/${sign.subject}/${encodeURIComponent(sign.title)}`)
-                            }
-                            className="hover:bg-purple-50 cursor-pointer transition"
-                          >
-                            <td className="px-6 py-4 font-medium text-purple-800">{sign.title}</td>
-                          </motion.tr>
-                        ))
                       )}
                     </AnimatePresence>
                   </tbody>
+
 
                 </table>
               </div>
