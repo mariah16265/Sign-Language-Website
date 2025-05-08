@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
-import FloatingEmojis from '../components/FloatingEmojis';
 import {
   FaUser,
   FaChild,
@@ -10,8 +9,16 @@ import {
   FaEye,
   FaEyeSlash,
   FaSignInAlt,
+  FaSchool,
+  FaHandsHelping,
 } from 'react-icons/fa';
-import { MdEmail, MdPhone } from 'react-icons/md';
+import {
+  MdEmail,
+  MdPhone,
+  MdBusiness,
+  MdOutlineAccessibility,
+} from 'react-icons/md';
+import { GiTeacher } from 'react-icons/gi';
 
 const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -19,14 +26,19 @@ const SignupPage = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
+    // Your Information
+    Fname: '',
+    Forganization: '',
+    Frole: '', // Changed from 'teacher' to empty string
+    Femail: '',
+    Fphone: '',
+    Faddress: '',
+
+    // Child Info
     Cname: '',
     Cdob: '',
-    Cstyle: '',
-    Cneeds: '',
-    Gname: '',
-    Gemail: '',
-    Gphone: '',
-    Grelation: '',
+    Cgender: '',
+    Cdisability: '',
     username: '',
     password: '',
   });
@@ -79,8 +91,6 @@ const SignupPage = () => {
           style={{
             background:
               'linear-gradient(135deg, rgba(255,0,150,0.07) 0%, rgba(0,100,255,0.05) 100%)',
-            // backdropFilter: 'blur(2px)', // Optional blur effect
-            // WebkitBackdropFilter: 'blur(2px)', // For Safari
           }}
         />
 
@@ -102,113 +112,80 @@ const SignupPage = () => {
                   Join our learning community today!
                 </p>
               </div>
-              <form className="space-y-6" onSubmit={handleSubmit}>
-                {/* Child Information Section */}
+
+              <form className="space-y-4" onSubmit={handleSubmit}>
+                {/* Facilitator Information - Now First Section */}
+
                 <motion.div className="space-y-3">
-                  <h2 className="font-poppins text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-orange-400 mb-1 flex items-center">
-                    <span className="mr-2 text-3xl">👶</span> Child Information
+                  <h2 className="font-poppins text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-500 mb-3 flex items-center">
+                    <span className="mr-2 text-2xl">👤</span> Your Information
                   </h2>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
-                    <div className="relative">
-                      <input
-                        className="input-field border-rose-100 focus:border-rose-300"
-                        placeholder="Child's Full Name"
-                        required
-                        minLength={2}
-                        title="Please enter at least 2 characters"
-                        name="Cname"
-                        value={formData.Cname}
-                        onChange={handleChange}
-                      />
-
-                      <div className="input-icon text-rose-500">
-                        <span className="text-lg">👦</span>
-                      </div>
-                    </div>
-
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-7 gap-y-2">
                     <div className="relative">
                       <input
                         className="input-field"
-                        type="date"
+                        placeholder="Full Name"
                         required
-                        max={new Date().toISOString().split('T')[0]}
-                        name="Cdob"
-                        value={formData.Cdob}
-                        onChange={handleChange}
-                        onClick={(e) => e.target.showPicker()} // Add this
-                      />
-                      <div className="input-icon text-yellow-500">
-                        {' '}
-                        {/* Changed color */}
-                        <span className="text-lg">📅</span>
-                      </div>
-                    </div>
-
-                    <div className="relative">
-                      <select
-                        className="input-field"
-                        required
-                        name="Cstyle"
-                        value={formData.Cstyle}
-                        onChange={handleChange}
-                      >
-                        <option value="">Current Communication Style</option>
-                        <option>Mostly verbal/speaking</option>
-                        <option>Uses some sign language</option>
-                        <option>Primarily uses sign language</option>
-                        <option>Uses gestures/other communication</option>
-                        <option>Not yet communicating verbally</option>
-                      </select>
-                      <div className="input-icon">
-                        <span className="text-lg">💬</span>
-                      </div>
-                    </div>
-
-                    <div className="relative">
-                      <select
-                        className="input-field"
-                        name="Cneeds"
-                        value={formData.Cneeds}
-                        onChange={handleChange}
-                      >
-                        <option value="">Communication Needs</option>
-                        <option>Deaf or hard of hearing</option>
-                        <option>Non-verbal / Speech challenges</option>
-                        <option>Autism spectrum</option>
-                        <option>Down syndrome</option>
-                        <option>Other communication difference</option>
-                        <option>Typically developing</option>
-                      </select>
-                      <div className="input-icon">
-                        <span className="text-lg">🦻</span>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* Parent/Guardian Information */}
-                <motion.div className="space-y-3">
-                  <h2 className="font-poppins text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-500 mb-2 flex items-center">
-                    <span className="mr-2 text-2xl">👪</span> Grown-Up
-                    Information
-                  </h2>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
-                    <div className="relative">
-                      <input
-                        className="input-field border-teal-100 focus:border-teal-300"
-                        placeholder="Your Name"
-                        required
-                        minLength={2}
-                        title="Please enter at least 2 characters"
-                        name="Gname"
-                        value={formData.Gname}
+                        name="Fname"
+                        value={formData.Fname}
                         onChange={handleChange}
                       />
-
                       <div className="input-icon text-teal-500">
                         <FaUser />
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      <input
+                        className="input-field"
+                        placeholder="Organization Name"
+                        required
+                        name="Forganization"
+                        value={formData.Forganization}
+                        onChange={handleChange}
+                      />
+                      <div className="input-icon text-blue-500">
+                        <MdBusiness />
+                      </div>
+                    </div>
+
+                    {/* Facilitator Role Dropdown */}
+                    <div className="relative">
+                      <select
+                        className="input-field"
+                        required
+                        name="Frole"
+                        value={formData.Frole}
+                        onChange={handleChange}
+                      >
+                        <option value="" disabled className="text-gray-400">
+                          Select your role
+                        </option>
+                        <option value="teacher">Teacher/Educator</option>
+                        <option value="ngo_worker">NGO/CBO Worker</option>
+                        <option value="caregiver">Caregiver</option>
+
+                        <option value="speech_therapist">
+                          Speech Therapist
+                        </option>
+                        <option value="parent">Parent/Guardian</option>
+                      </select>
+                      <div className="input-icon text-purple-500">
+                        <GiTeacher />
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      <input
+                        className="input-field"
+                        placeholder="Organization Address"
+                        name="Faddress"
+                        value={formData.Faddress}
+                        onChange={handleChange}
+                      />
+                      <div className="input-icon text-green-500">
+                        <FaSchool />
                       </div>
                     </div>
 
@@ -220,8 +197,8 @@ const SignupPage = () => {
                         required
                         pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
                         title="Please enter a valid email address (e.g., name@example.com)"
-                        name="Gemail"
-                        value={formData.Gemail}
+                        name="Femail"
+                        value={formData.Femail}
                         onChange={handleChange}
                       />
 
@@ -238,8 +215,8 @@ const SignupPage = () => {
                         required
                         pattern="^[0-9]{10,15}$"
                         title="Phone number should be 10 to 15 digits"
-                        name="Gphone"
-                        value={formData.Gphone}
+                        name="Fphone"
+                        value={formData.Fphone}
                         onChange={handleChange}
                       />
 
@@ -247,23 +224,117 @@ const SignupPage = () => {
                         <MdPhone />
                       </div>
                     </div>
+                  </div>
+                </motion.div>
 
+                {/* Child Information Section */}
+                <motion.div className="space-y-3">
+                  <h2 className="font-poppins text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-orange-400 mb-3 flex items-center">
+                    <span className="mr-2 text-2xl">👦</span> Child Information
+                  </h2>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-7 gap-y-2">
+                    {/* Basic Info */}
                     <div className="relative">
-                      <select
+                      <input
                         className="input-field"
+                        placeholder="Child's Full Name"
                         required
-                        name="Grelation"
-                        value={formData.Grelation}
+                        name="Cname"
+                        value={formData.Cname}
                         onChange={handleChange}
-                      >
-                        <option value="">Relationship to child</option>
-                        <option>Parent</option>
-                        <option>Guardian</option>
-                        <option>Teacher</option>
-                        <option>Therapist</option>
-                      </select>
+                      />
                       <div className="input-icon text-pink-500">
                         <FaChild />
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      <input
+                        className="input-field"
+                        type="date"
+                        required
+                        name="Cdob"
+                        value={formData.Cdob}
+                        onChange={handleChange}
+                      />
+                      <div className="input-icon text-yellow-500">
+                        <span>🎂</span>
+                      </div>
+                    </div>
+
+                    {/* Gender and Disability Row */}
+                    <div className="col-span-full grid grid-cols-1 md:grid-cols-2 gap-x-7 gap-y-2">
+                      {/* Gender Selection */}
+                      <div className="relative w-full">
+                        <div className="input-field flex items-center space-x-6 p-3 h-full">
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="radio"
+                              id="male"
+                              name="Cgender"
+                              value="male"
+                              checked={formData.Cgender === 'male'}
+                              onChange={handleChange}
+                              className="form-radio h-4 w-4 text-purple-600"
+                              required
+                            />
+                            <label htmlFor="male" className="text-purple-600">
+                              Male
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="radio"
+                              id="female"
+                              name="Cgender"
+                              value="female"
+                              checked={formData.Cgender === 'female'}
+                              onChange={handleChange}
+                              className="form-radio h-4 w-4 text-purple-600"
+                            />
+                            <label htmlFor="female" className="text-purple-600">
+                              Female
+                            </label>
+                          </div>
+                        </div>
+                        <div className="input-icon text-blue-400">
+                          <MdOutlineAccessibility />
+                        </div>
+                      </div>
+
+                      {/* Disability Dropdown */}
+                      <div className="relative w-full">
+                        <select
+                          className="input-field w-full"
+                          required
+                          name="Cdisability"
+                          value={formData.Cdisability}
+                          onChange={handleChange}
+                        >
+                          <option value="">Select disability type</option>
+                          <option value="hearing_impairment">
+                            Hearing disability
+                          </option>
+                          <option value="speech_disorder">
+                            Speech disability
+                          </option>
+                          <option value="autism_verbal">Autism (verbal)</option>
+                          <option value="autism_nonverbal">
+                            Autism (nonverbal)
+                          </option>
+                          <option value="intellectual">
+                            Intellectual disability
+                          </option>
+                          <option value="down_syndrome">Down syndrome</option>
+                          <option value="cerebral_palsy">Cerebral palsy</option>
+                          <option value="multiple_disabilities">
+                            Multiple disabilities
+                          </option>
+                        </select>
+                        <div className="input-icon text-green-500">
+                          <FaHandsHelping />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -359,15 +430,15 @@ const SignupPage = () => {
             max-width: 320px;
             width: 100%;
             padding: 0.75rem 2.8rem;
-            border: 2px solid #d9cfc5; /* violet-200 */
-            background-color: #fff9fb; /* Tailwind: neutral-50 */
-            color: #4c1d95; /* violet-900 */
+            border: 2px solid #d9cfc5;
+            background-color: #fff9fb;
+            color: #4c1d95;
             transition: all 0.3s ease;
             font-size: 0.875rem;
           }
           .input-field::placeholder {
-            color: #9b4df0; /* Violet-600 for placeholders */
-            opacity: 1; /* Ensure full visibility */
+            color: #9b4df0;
+            opacity: 1;
           }
           .input-field:focus {
             outline: none;
@@ -381,57 +452,25 @@ const SignupPage = () => {
             background-position: right 0.75rem center;
             background-size: 16px 12px;
             appearance: none;
-            color: #9b4df0; /* Violet-600 for select placeholders */
+            color: #9b4df0;
           }
-          input[type='date']::-webkit-datetime-edit {
-            color: #9b4df0; /* Violet-600 for date placeholder */
+          input[type='date'] {
+            color: #9b4df0;
           }
-
-          input[type='date']:not(:focus)::-webkit-datetime-edit {
-            color: #9b4df0; /* Maintain color when not focused */
-          }
-
-          input[type='date']:valid::-webkit-datetime-edit {
-            color: #4c1d95; /* Violet-900 when date is selected */
-          }
-
-          /* Hide calendar icon */
-          input[type='date']::-webkit-calendar-picker-indicator {
-            display: none;
+          input[type='date']:valid {
+            color: #4c1d95;
           }
           .input-icon {
             position: absolute;
             left: 0.8rem;
             top: 50%;
             transform: translateY(-50%);
-            /* Remove color: #172554; */
             pointer-events: none;
             font-size: 0.9rem;
           }
-          .animate-float-slow {
-            animation: float 8s ease-in-out infinite;
-          }
-          .animate-float-slower {
-            animation: float 10s ease-in-out infinite;
-          }
-          .animate-float-medium {
-            animation: float 12s ease-in-out infinite;
-          }
-          .animate-float-slowest {
-            animation: float 14s ease-in-out infinite;
-          }
-          @keyframes float {
-            0%,
-            100% {
-              transform: translateY(0) rotate(0deg);
-            }
-            50% {
-              transform: translateY(-20px) rotate(5deg);
-            }
-          }
           @media (min-width: 1024px) {
             .input-field {
-              max-width: 360px; // Reduced from 400px
+              max-width: 360px;
             }
           }
         `}</style>

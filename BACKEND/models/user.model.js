@@ -1,37 +1,84 @@
 //models/user.model.js
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-//creating a schema for the table
 const userSchema = new mongoose.Schema(
-    {
-        // Child info
-        Cname:{         //child name
-            type: String, required: true},
-        Cdob:{ 
-            type: String, required: true},
-        Cstyle:{        //communication style
-            type: String}, 
-        Cneeds:{ 
-            type: String},
+  {
+    // Facilitator/Grown-up Information
+    Fname: {
+      type: String,
+      required: true,
+    },
+    Forganization: {
+      type: String,
+      required: true,
+    },
+    Frole: {
+      type: String,
+      required: true,
+      enum: [
+        'teacher',
+        'ngo_worker',
+        'caregiver',
+        'speech_therapist',
+        'parent',
+      ],
+    },
+    Femail: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    Fphone: {
+      type: String,
+      required: true,
+    },
+    Faddress: {
+      type: String,
+    },
 
-        // Grown-up info
-        Gname:{     //guardian name
-            type: String, required: true},
-        Gemail:{ 
-            type: String, required: true, unique: true},
-        Gphone:{ 
-            type: String, required: true},
-        Grelation:{
-            type: String },
+    // Child Information
+    Cname: {
+      type: String,
+      required: true,
+    },
+    Cdob: {
+      type: String,
+      required: true,
+    },
+    Cgender: {
+      type: String,
+      required: true,
+      enum: ['male', 'female'],
+    },
+    Cdisability: {
+      type: String,
+      required: true,
+      enum: [
+        'hearing_impairment',
+        'speech_disorder',
+        'autism_verbal',
+        'autism_nonverbal',
+        'intellectual',
+        'down_syndrome',
+        'cerebral_palsy',
+        'multiple_disabilities',
+      ],
+    },
 
-        // Account setup
-        username:{
-            type: String, required: true, unique: true},
-        password:{
-            type: String, required: true }, // will be hashed using bcrypt
-
-        }, {timestamps: true, // Adds createdAt and updatedAt
-    }
+    // Account Setup
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
 );
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model('User', userSchema);
