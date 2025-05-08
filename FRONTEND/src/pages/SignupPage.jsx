@@ -78,7 +78,7 @@ const SignupPage = () => {
           className="absolute inset-0 z-0"
           style={{
             background:
-              'linear-gradient(135deg, rgba(255,0,150,0.08) 0%, rgba(0,100,255,0.05) 100%)',
+              'linear-gradient(135deg, rgba(255,0,150,0.07) 0%, rgba(0,100,255,0.05) 100%)',
             // backdropFilter: 'blur(2px)', // Optional blur effect
             // WebkitBackdropFilter: 'blur(2px)', // For Safari
           }}
@@ -91,14 +91,14 @@ const SignupPage = () => {
               className="bg-white backdrop-blur-sm shadow-2xl rounded-2xl p-6 md:p-8 border border-purple-100"
               whileHover={{ scale: 1.005 }}
             >
-              <div className="text-center mb-6">
+              <div className="text-center mb-5">
                 <motion.h1
-                  className="font-quicksand text-[37px] font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-rose-500 mb-2"
+                  className="font-quicksand text-[37px] font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-rose-500 "
                   whileHover={{ scale: 1.02 }}
                 >
                   Create Your Account
                 </motion.h1>
-                <p className="font-nunito text-base text-slate-600">
+                <p className="font-nunito text-lg text-slate-600 ">
                   Join our learning community today!
                 </p>
               </div>
