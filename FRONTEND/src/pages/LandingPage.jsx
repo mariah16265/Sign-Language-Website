@@ -1,9 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
 import Navbar from '../components/Navbar';
-import { FaBookOpen, FaCalculator, FaLanguage } from 'react-icons/fa';
+import { FaBookOpen, FaCalculator, FaLanguage, FaPlay } from 'react-icons/fa';
 
+// Optimized Lazy Video Component
+const LazyVideo = ({ src, className }) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef(null);
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    rootMargin: '200px 0px',
+  });
+
+  useEffect(() => {
+    if (inView && !isLoaded) {
+      const video = document.createElement('video');
+      video.src = src;
+      video.preload = 'metadata';
+      video.addEventListener('loadedmetadata', () => setIsLoaded(true));
+      return () =>
+        video.removeEventListener('loadedmetadata', () => setIsLoaded(true));
+    }
+  }, [inView, src, isLoaded]);
+
+  const handlePlay = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play().catch(() => {});
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  return (
+    <div ref={ref} className={`relative ${className}`} onClick={handlePlay}>
+      {isLoaded ? (
+        <>
+          <video
+            ref={videoRef}
+            src={src}
+            className="w-full h-full object-cover"
+            muted
+            loop
+            playsInline
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+          <button className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-4xl opacity-80 hover:opacity-100 transition-opacity">
+            <FaPlay className={isPlaying ? 'hidden' : 'block'} />
+          </button>
+        </>
+      ) : (
+        <div className="w-full h-full bg-gray-200 animate-pulse rounded-xl" />
+      )}
+    </div>
+  );
+};
 const LandingPage = () => {
   const [stars, setStars] = useState([]);
 
@@ -160,7 +216,7 @@ const LandingPage = () => {
           </motion.div>
         </main>
 
-        {/* Learning Cards Section - Slider Version */}
+        {/* Learning Cards Section - Optimized Video Loading */}
         <section className="py-12 md:py-16 px-6 overflow-hidden relative">
           <div className="max-w-7xl mx-auto">
             <div className="w-full flex justify-center">
@@ -244,10 +300,9 @@ const LandingPage = () => {
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {[
-                    '/Sign Language Videos/English/Module 8- Sports/Bowling.mp4',
-                    '/Sign Language Videos/English/Module 3- Colors/blue.mp4',
-                    '/Sign Language Videos/English/Module 6- Natural World/Clouds.mp4',
-                    // add more video paths here
+                    '/Sign Language Videos/English/Module 8- Sports/Bowling.webm',
+                    '/Sign Language Videos/English/Module 3- Colors/blue.webm',
+                    '/Sign Language Videos/English/Module 6- Natural World/Clouds.webm',
                   ].map((video, i) => (
                     <motion.div
                       key={i}
@@ -256,14 +311,7 @@ const LandingPage = () => {
                       transition={{ duration: 0.5, delay: i * 0.1 }}
                       className="relative h-48 md:h-56 rounded-xl overflow-hidden shadow-lg"
                     >
-                      <video
-                        src={video}
-                        className="w-full h-full object-cover"
-                        muted
-                        autoPlay
-                        loop
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                      <LazyVideo src={video} />
                     </motion.div>
                   ))}
                 </div>
@@ -304,21 +352,13 @@ const LandingPage = () => {
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 relative">
-                  {/* Portrait Video - Left */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.1 }}
                     className="relative h-full rounded-xl overflow-hidden shadow-lg bg-black flex items-center justify-center"
                   >
-                    <video
-                      src="/Sign Language Videos/Math/Module 2- Numbers in Arabic(1 to 20)/14.mp4"
-                      className="h-full w-auto max-w-full object-contain"
-                      muted
-                      autoPlay
-                      loop
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                    <LazyVideo src="/Sign Language Videos/Math/Module 2- Numbers in Arabic(1 to 20)/14.webm" />
                   </motion.div>
 
                   {/* First Landscape Video - Top Right */}
@@ -328,31 +368,17 @@ const LandingPage = () => {
                     transition={{ duration: 0.5, delay: 0.2 }}
                     className="relative aspect-video rounded-xl overflow-hidden shadow-lg bg-black"
                   >
-                    <video
-                      src="/Sign Language Videos/Math/Module 1-Numbers in English(1 to 20)/9.mp4"
-                      className="w-full h-full object-cover"
-                      muted
-                      autoPlay
-                      loop
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                    <LazyVideo src="/Sign Language Videos/Math/Module 1-Numbers in English(1 to 20)/9.webm" />
                   </motion.div>
 
-                  {/* Second Landscape Video - Bottom Right (Shifted Down) */}
+                  {/* Second Landscape Video - Bottom Right */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.3 }}
-                    className="relative aspect-video rounded-xl overflow-hidden shadow-lg bg-black md:mt-32" // Added md:mt-8 here
+                    className="relative aspect-video rounded-xl overflow-hidden shadow-lg bg-black md:mt-32"
                   >
-                    <video
-                      src="/Sign Language Videos/Math/Module 1-Numbers in English(1 to 20)/11.mp4"
-                      className="w-full h-full object-cover"
-                      muted
-                      autoPlay
-                      loop
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                    <LazyVideo src="/Sign Language Videos/Math/Module 1-Numbers in English(1 to 20)/11.webm" />
                   </motion.div>
                 </div>
               </motion.div>
@@ -393,10 +419,9 @@ const LandingPage = () => {
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {[
-                    '/Sign Language Videos/Arabic/Module 1- Alphabets/ك.mp4',
-                    '/Sign Language Videos/Arabic/Module 3- Greetings/How are you.mp4',
-                    '/Sign Language Videos/Arabic/Module 6- Emirates/Ras al Khaimah.mp4',
-                    // add more video paths here
+                    '/Sign Language Videos/Arabic/Module 1- الحروف الأبجدية/ك.webm',
+                    '/Sign Language Videos/Arabic/Module 3- تحيات/كيف حالك.webm',
+                    '/Sign Language Videos/Arabic/Module 6- الإمارات/رأس الخيمة.webm',
                   ].map((video, i) => (
                     <motion.div
                       key={i}
@@ -405,14 +430,7 @@ const LandingPage = () => {
                       transition={{ duration: 0.5, delay: i * 0.1 }}
                       className="relative h-48 md:h-56 rounded-xl overflow-hidden shadow-lg"
                     >
-                      <video
-                        src={video}
-                        className="w-full h-full object-cover"
-                        muted
-                        autoPlay
-                        loop
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                      <LazyVideo src={video} />
                     </motion.div>
                   ))}
                 </div>
