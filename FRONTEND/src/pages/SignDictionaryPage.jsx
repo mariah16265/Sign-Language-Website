@@ -14,6 +14,7 @@ const SignDictionary = () => {
   const [signData, setSignData] = useState([]);
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef(null);
+  const sectionRefs = useRef({});
   const navigate = useNavigate();
 
   const { handleApiError } = useApiErrorHandler();
@@ -155,7 +156,7 @@ const SignDictionary = () => {
             {loading ? (
               <p className="text-center text-lg text-gray-500">Loading...</p>
             ) : (
-              <div className="bg-white rounded-2xl shadow-xl overflow-x-auto border border-gray-200 max-h-[650px] overflow-y-auto">
+              <div className="bg-white rounded-2xl shadow-xl overflow-x-auto border border-gray-200 max-h-[650px] overflow-y-auto scroll-smooth">
                 <table className="min-w-full divide-y divide-gray-200 text-base">
                   <thead className="bg-gradient-to-r from-purple-50 to-purple-100">
                     <tr>
@@ -169,39 +170,40 @@ const SignDictionary = () => {
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     <AnimatePresence>
-                      {Object.keys(groupedSigns).sort().map((letter) => (
-                        <React.Fragment key={letter}>
-                          <motion.tr
-                            initial={{ opacity: 0, y: 5 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -5 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            <td
-                              colSpan="1"
-                              className="bg-purple-100 px-6 py-3 text-lg font-bold text-purple-700 sticky top-0 z-10"
-                            >
-                              {letter}
-                            </td>
-                          </motion.tr>
-                          {groupedSigns[letter].map((sign, idx) => (
-                            <motion.tr
-                              key={sign.title + idx}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -10 }}
-                              transition={{ duration: 0.3, ease: 'easeOut' }}
-                              onClick={() =>
-                                navigate(`/sign/${sign.subject}/${encodeURIComponent(sign.title)}`)
-                              }
-                              className="hover:bg-purple-50 cursor-pointer transition"
-                            >
-                              <td className="px-6 py-4 font-medium text-purple-800">{sign.title}</td>
-                            </motion.tr>
-                          ))}
-                        </React.Fragment>
-                      ))}
+                    {Object.keys(groupedSigns).sort().map((letter) => (
+                    <React.Fragment key={letter}>
+                      <motion.tr
+                        ref={(el) => (sectionRefs.current[letter] = el)}
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -5 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <td
+                          colSpan="1"
+                          className="bg-purple-100 px-6 py-3 text-lg font-bold text-purple-700 sticky top-0 z-10"
+                        >
+                          {letter}
+                        </td>
+                      </motion.tr>
 
+                      {groupedSigns[letter].map((sign, idx) => (
+                        <motion.tr
+                          key={sign.title + idx}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.3, ease: 'easeOut' }}
+                          onClick={() =>
+                            navigate(`/sign/${sign.subject}/${encodeURIComponent(sign.title)}`)
+                          }
+                          className="hover:bg-purple-50 cursor-pointer transition"
+                        >
+                          <td className="px-6 py-4 font-medium text-purple-800">{sign.title}</td>
+                        </motion.tr>
+                      ))}
+                    </React.Fragment>
+                  ))}
                       {filteredSigns.length === 0 && (
                         <motion.tr
                           key="no-results"
@@ -222,6 +224,21 @@ const SignDictionary = () => {
               </div>
             )}
           </motion.div>
+            {/* A–Z Sidebar */}
+            <div className="fixed right-4 top-1/4 z-30 hidden lg:flex flex-col items-center space-y-1 text-purple-700 font-semibold">
+            {(subjectFilter === 'Arabic' ? 'أ ا ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي' .split(' ') : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')).map((letter) => (
+              <button
+                key={letter}
+                onClick={() => {
+                  const ref = sectionRefs.current[letter];
+                  if (ref) ref.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
+                className="hover:text-purple-900 text-sm transition"
+              >
+                {letter}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
