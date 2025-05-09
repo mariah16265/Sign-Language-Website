@@ -8,6 +8,7 @@ import Navbar from '../components/Navbar';
 const LessonPage = () => {
   const { lessonId } = useParams();
   const [lessonData, setLessonData] = useState(null);
+  const [nextLessonId, setNextLessonId] = useState(null);
   const [currentSignIndex, setCurrentSignIndex] = useState(0);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [playedSigns, setPlayedSigns] = useState(new Set());
@@ -65,6 +66,30 @@ const LessonPage = () => {
     fetchLessonAndProgress();
   }, [lessonId]);
 
+  useEffect(() => {
+    const fetchNextLesson = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/lessons/next/${lessonId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    const data = await res.json();
+    
+    if (!res.ok) throw new Error(data.message || 'Failed to fetch next lesson');
+    setNextLessonId(data._id); // Store next lesson ID
+    
+    } catch (err) {
+      console.error('Error fetching next lesson:', err.message);
+    }
+    };
+    
+    if (lessonData) fetchNextLesson();
+    }, [lessonId, lessonData]);
+  
   useEffect(() => {
     if (lessonData && lessonData.signs.length > 0) {
       const currentSignId = lessonData.signs[currentSignIndex]?._id;
@@ -130,13 +155,20 @@ const LessonPage = () => {
         <div className="bg-white bg-opacity-90 backdrop-blur-sm rounded-3xl shadow-2xl p-4 md:p-6 lg:p-8 w-full max-w-6xl">
           {/* Back Button */}
           <div className="flex items-center justify-start mb-4">
-            <button
-              onClick={() => navigate('/learn/subjects', { state: { subject: lessonData.subject }})}
-              className="flex items-center gap-3 bg-gradient-to-r from-purple-600 to-indigo-500 text-white font-bold hover:from-purple-700 hover:to-indigo-600 shadow-lg text-lg py-3 px-6 rounded-full transition duration-300"
-            >
-              <FaArrowLeft />
-              Back to Lessons
-            </button>
+          <button
+            onClick={() =>
+              navigate('/learn/subjects', {
+                state: {
+                  subject: lessonData.subject,
+                  module: lessonData.module,
+                },
+              })
+            }
+            className="flex items-center gap-3 bg-gradient-to-r from-purple-600 to-indigo-500 text-white font-bold hover:from-purple-700 hover:to-indigo-600 shadow-lg text-lg py-3 px-6 rounded-full transition duration-300"
+          >
+            <FaArrowLeft />
+            Back to Modules
+          </button>
           </div>
   
           {/* Title */}
@@ -145,7 +177,7 @@ const LessonPage = () => {
         </h2>
   
           {/* Video Player */}
-          <div className="w-full flex justify-center mb-6 md:mb-8">
+          <div className="w-full flex justify-center items-center mb-6 md:mb-8 min-h-[300px]">
           <video
             ref={videoRef}
             key={currentSign._id}
@@ -153,8 +185,8 @@ const LessonPage = () => {
             controls
             loop
             onPlay={handlePlay}
-            className="rounded-2xl w-full max-h-[400px] md:max-h-[450px] lg:max-h-[500px] object-cover shadow-xl"
-          />
+            className="rounded-2xl max-w-full max-h-[500px] object-contain shadow-xl"
+            />
           </div>
   
           {/* Navigation Buttons */}
@@ -176,12 +208,30 @@ const LessonPage = () => {
           {currentSign.title}
         </div>
 
-  
+        {/* Next Button */}
+        {currentSignIndex === lessonData.signs.length - 1 && hasPlayed ? (
+          nextLessonId ? (
             <button
-              onClick={handleNext}
-              disabled={!hasPlayed || currentSignIndex === lessonData.signs.length - 1}
-              className={`flex items-center gap-2 ${
-              !hasPlayed || currentSignIndex === lessonData.signs.length - 1
+              onClick={() => navigate(`/lesson/${nextLessonId}`)}
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 font-bold hover:from-blue-600 hover:to-indigo-700 text-white shadow-xl text-lg py-3 px-7 rounded-full transition-all duration-300 w-full md:w-auto"
+            >
+              Next Lesson
+              <FaChevronRight />
+            </button>
+          ) : (
+            <button
+              disabled
+              className="flex items-center gap-2 bg-gray-300 text-gray-100 font-bold cursor-not-allowed text-lg py-3 px-7 rounded-full transition-all duration-300 w-full md:w-auto"
+            >
+              Module Done!
+            </button>
+          )
+        ) : (
+          <button
+            onClick={handleNext}
+            disabled={!hasPlayed}
+            className={`flex items-center gap-2 ${
+              !hasPlayed
                 ? 'bg-gray-300 text-gray-100 font-bold cursor-not-allowed'
                 : 'bg-gradient-to-r from-green-300 to-teal-500 font-bold hover:from-green-500 hover:to-teal-600 text-white shadow-xl'
             } text-lg py-3 px-7 rounded-full transition-all duration-300 w-full md:w-auto`}
@@ -189,6 +239,8 @@ const LessonPage = () => {
             Next
             <FaChevronRight />
           </button>
+
+        )}
         </div>
   
         {/* Progress */}

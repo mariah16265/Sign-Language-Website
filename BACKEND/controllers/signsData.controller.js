@@ -37,5 +37,29 @@ const getLessonsByMod = async (req, res) => {
     }
   };
   
+const getNextLesson = async (req,res) => {
+  try {
+    const { lessonId } = req.params;
+    // Step 1: Get current lesson
+    const currentLesson = await SignsData.findById(lessonId);
+    if (!currentLesson) {
+      return res.status(404).json({ message: 'Current lesson not found' });
+    }
 
-module.exports = { getAllModules, getModulesBySub, getLessonsByMod };
+    // Step 2: Find next lesson in the same module (or subject)
+    const nextLesson = await SignsData.findOne({
+      module: currentLesson.module, // or use subject if you want to continue across modules
+      lessonNumber: { $gt: currentLesson.lessonNumber }
+    }).sort({ lessonNumber: 1 });
+
+    if (!nextLesson) {
+      return res.status(404).json({ message: 'No next lesson found' });
+    }
+    res.status(200).json(nextLesson);
+  } catch (error) {
+    console.error('Error fetching next lesson:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+module.exports = { getAllModules, getModulesBySub, getLessonsByMod, getNextLesson };

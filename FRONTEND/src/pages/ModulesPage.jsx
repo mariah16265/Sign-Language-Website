@@ -17,19 +17,27 @@ const ModulesPage = () => {
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
   const location = useLocation();  
-  const selectedSubject = location.state?.subject || 'English'; 
+  const selectedSubject = location.state?.subject; //comes from learn page, also from back to modules button(lesson page) 
+  const selectedModule = location.state?.module; //comes from lesson page
 
   // Check for valid token on mount
-    useEffect(() => {
-      const isTokenValid = checkTokenValid();
-      if (!isTokenValid) return;
-    }, []);
-    
+  useEffect(() => {
+    const isTokenValid = checkTokenValid();
+    if (!isTokenValid) return;
+  }, []);
+  
   useEffect(() => {
     if (selectedSubject) {
       fetchModulesForSubject(selectedSubject);
     }
   }, [selectedSubject]);
+
+  // Set initial openModule to the module passed in location state from lessons page
+  useEffect(() => {
+    if (selectedModule) {
+      setOpenModule(selectedModule); 
+    }
+  }, [selectedModule]);
 
   const fetchModulesForSubject = async (subject) => {
     try {
@@ -73,13 +81,6 @@ const ModulesPage = () => {
   return modules.filter((lesson) => lesson.module === moduleName);
 };
 
-const toggleModule = (moduleName) => {
-  if (openModule === moduleName) {
-    setOpenModule(null); // close if already open
-  } else {
-    setOpenModule(moduleName); // open the clicked one
-  }
-};
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-yellow-100 via-pink-100 to-purple-100 overflow-hidden">
       <Navbar userName="Michael Bob" userAvatar="/images/avatar.jpg" />
@@ -124,6 +125,8 @@ const toggleModule = (moduleName) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
                 {getLessonsForModule(openModule).map((lesson, index) => {
                   const hasProgress = lessonProgress[lesson._id]?.length > 0;
+                  const isComplete = lessonProgress[lesson._id]?.length === lesson.signs.length; // Checks if all signs are watched
+
                   return(
                     <motion.div
                       key={lesson._id}
@@ -161,8 +164,8 @@ const toggleModule = (moduleName) => {
                           onClick={() => navigate(`/lesson/${lesson._id}`)}
                           className="button-soft"
                         >
-                          {hasProgress ? 'Resume Lesson' : 'Start Lesson'}
-                         </button>
+                        {isComplete ? 'Rewatch Lesson' : hasProgress ? 'Resume Lesson' : 'Start Lesson'}  
+                        </button>
                       </div>
                     </motion.div>
                   );
