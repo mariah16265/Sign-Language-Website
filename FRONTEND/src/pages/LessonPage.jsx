@@ -12,6 +12,7 @@ const LessonPage = () => {
   const [currentSignIndex, setCurrentSignIndex] = useState(0);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [playedSigns, setPlayedSigns] = useState(new Set());
+  const [endOfModule, setEndOfModule] = useState(false);
   const { checkTokenValid } = useCheckTokenValid();
   const { handleApiError } = useApiErrorHandler();
   
@@ -77,11 +78,14 @@ const LessonPage = () => {
       },
     });
     
-    const data = await res.json();
+    const nextdata = await res.json();
     
-    if (!res.ok) throw new Error(data.message || 'Failed to fetch next lesson');
-    setNextLessonId(data._id); // Store next lesson ID
-    
+    if (!res.ok) throw new Error(nextdata.message || 'Failed to fetch next lesson');
+     if (nextdata.message === 'End of Module') {
+        setEndOfModule(true);
+      } else {
+        setNextLessonId(nextdata._id); // Store next lesson ID
+      }    
     } catch (err) {
       console.error('Error fetching next lesson:', err.message);
     }
@@ -210,24 +214,23 @@ const LessonPage = () => {
         </div>
 
         {/* Next Button */}
-        {currentSignIndex === lessonData.signs.length - 1 && hasPlayed ? (
-          nextLessonId ? (
+        {currentSignIndex === lessonData.signs.length - 1 && hasPlayed ? ( endOfModule ? (
             <button
-              onClick={() => navigate(`/lesson/${nextLessonId}`)}
-              className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 font-bold hover:from-blue-600 hover:to-indigo-700 text-white shadow-xl text-lg py-3 px-7 rounded-full transition-all duration-300 w-full md:w-auto"
-            >
-              Next Lesson
-              <FaChevronRight />
-            </button>
-          ) : (
-            <button
-              disabled
-              className="flex items-center gap-2 bg-gray-300 text-gray-100 font-bold cursor-not-allowed text-lg py-3 px-7 rounded-full transition-all duration-300 w-full md:w-auto"
-            >
-              Module Done!
-            </button>
-          )
-        ) : (
+      disabled
+      className="flex items-center gap-2 bg-gray-300 text-gray-100 font-bold cursor-not-allowed text-lg py-3 px-7 rounded-full transition-all duration-300 w-full md:w-auto"
+    >
+      End of Module
+    </button>
+  )  : (
+    <button
+      onClick={() => navigate(`/lesson/${nextLessonId}`)}
+      className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 font-bold hover:from-blue-600 hover:to-indigo-700 text-white shadow-xl text-lg py-3 px-7 rounded-full transition-all duration-300 w-full md:w-auto"
+    >
+      Next Lesson
+      <FaChevronRight />
+    </button>
+  )
+): (
           <button
             onClick={handleNext}
             disabled={!hasPlayed}

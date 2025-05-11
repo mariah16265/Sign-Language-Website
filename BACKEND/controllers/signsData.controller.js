@@ -68,9 +68,9 @@ const getNextLesson = async (req,res) => {
       module: currentLesson.module, // or use subject if you want to continue across modules
       lessonNumber: { $gt: currentLesson.lessonNumber }
     }).sort({ lessonNumber: 1 });
-
+    console.log("next lesson", nextLesson);
     if (!nextLesson) {
-      return res.status(404).json({ message: 'No next lesson found' });
+      return res.status(200).json({ message: 'End of Module' });
     }
     res.status(200).json(nextLesson);
   } catch (error) {

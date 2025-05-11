@@ -54,10 +54,11 @@ const getLessonProgress = async (req, res) => {
 //to get all lessons progress
 const getSubjectProgress = async (req, res) => {
     const { userId, subject } = req.params;
+    const { level } = req.query; 
   
     try {
       // 1. Get all lessons for this subject
-      const allLessons = await SignsData.find({ subject });
+      const allLessons = await SignsData.find({ subject, level });
   
       // 2. Group lessons by module name
       const moduleMap = {};

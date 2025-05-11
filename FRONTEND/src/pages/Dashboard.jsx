@@ -44,8 +44,32 @@ const Dashboard = () => {
   //  Main dashboard data fetch
   useEffect(() => {
     const setupDashboard = async () => {
+      const userId = localStorage.getItem('userId');
+      const subjects = ['English', 'Arabic'];   
       try {
-        // 1.----------Generate Weekly Schedule--------------
+        // 1.----------Check Level for each subject--------------
+        for (const subject of subjects) {
+          const response = await fetch(
+            `http://localhost:5000/api/studyplan/update-level/${userId}/${subject}`,
+            {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          const Plandata = await response.json();
+          if (!response.ok) {
+            console.error(`❌ Failed to update level for ${subject}:`, Plandata.message);
+            return;
+          }
+
+          console.log(`✅ Updated ${subject} level successfully:`, Plandata.updatedLevel);
+        }
+
+        // 2.----------Generate Weekly Schedule--------------
         const weekResponse = await fetch(
           'http://localhost:5000/api/dashboard/generate-weekly',
           {
@@ -117,7 +141,6 @@ const Dashboard = () => {
 
         // 4.----------Fetch per-lesson progress--------------
         const progressMap = {};
-        const userId = localStorage.getItem('userId');
 
         for (const lesson of cleanedData) {
           const lessonId = lesson.lessonId;
@@ -145,14 +168,20 @@ const Dashboard = () => {
         setProgressData(progressMap);
 
         // 5.------------Fetch completed lessons and modules per subject-------
-        const subjects = ['English', 'Arabic', 'Math'];
+        const subjectLevelMap = {};
+        cleanedData.forEach((lesson) => {
+          if (!subjectLevelMap[lesson.subject]) {
+            subjectLevelMap[lesson.subject] = lesson.level;
+          }
+        });
         const lessonsArray = [];
         const modulesArray = [];
 
         for (const subject of subjects) {
+          const level = subjectLevelMap[subject]; 
           try {
             const subjectResponse = await fetch(
-              `http://localhost:5000/api/progress/subject-progress/${userId}/${subject}`,
+              `http://localhost:5000/api/progress/subject-progress/${userId}/${subject}?level=${level}`,
               {
                 method: 'GET',
                 headers: {
