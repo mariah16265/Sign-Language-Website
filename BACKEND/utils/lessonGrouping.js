@@ -14,28 +14,22 @@ module.exports = {
   },
   "English": {
     "beginner": {
-      "Module 1- Alphabets": 3,
-      "Module 2- Colors": 2,
-      "Module 3- Greetings": 2,
-      "Module 4- Numbers": 3
+      "Module 1- Alphabets":4,
+      "Module 2- Animals":2,
+      "Module 3- Colors":2,
+      "Module 4- Fruits":3,
+      "Module 5- Family":3,
+      "Module 6- Natural World":4,
+      "Module 7- Vehicles":3,
+      "Module 8- Sports":3,
+      "Module 9- Medical":4
     },
     "intermediate": {
-      "Module 1- Animals": 2,
-      "Module 2- Fruits": 3,
-      "Module 3- Family": 3,
-      "Module 4- Natural World": 4,
-      "Module 5- Vehicles": 3,
-      "Module 6- Sports": 3,
-      "Module 7- Medical": 4
+      "Module 1- Introductory Phrases":4,
+      "Module 2- Everyday Communication":5
     },
     "advanced": {
-      "Module 1- Animals": 2,
-      "Module 2- Fruits": 3,
-      "Module 3- Family": 3,
-      "Module 4- Natural World": 4,
-      "Module 5- Vehicles": 3,
-      "Module 6- Sports": 3,
-      "Module 7- Medical": 4
+      
     }
   }
 }

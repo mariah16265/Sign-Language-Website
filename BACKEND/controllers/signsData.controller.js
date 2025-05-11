@@ -21,6 +21,12 @@ const getModulesBySub = async (req, res) => {
       subject: subjectId,
       level: startingLevel
     });
+    // Sort modules by numeric module number
+    modules.sort((a, b) => {
+      const aNum = parseInt(a.module.match(/\d+/)?.[0]);
+      const bNum = parseInt(b.module.match(/\d+/)?.[0]);
+      return aNum - bNum;
+    });
 
     res.json(modules);
   } catch (error) {
@@ -68,7 +74,7 @@ const getNextLesson = async (req,res) => {
       module: currentLesson.module, // or use subject if you want to continue across modules
       lessonNumber: { $gt: currentLesson.lessonNumber }
     }).sort({ lessonNumber: 1 });
-    console.log("next lesson", nextLesson);
+
     if (!nextLesson) {
       return res.status(200).json({ message: 'End of Module' });
     }
