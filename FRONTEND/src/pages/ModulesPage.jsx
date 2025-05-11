@@ -5,13 +5,14 @@ import Navbar from '../components/Navbar';
 import { motion } from 'framer-motion';
 import { FaLayerGroup, FaRegClipboard } from 'react-icons/fa';
 import './ModulePage.css'; // <-- You'll create this for styles
-import { useCheckTokenValid } from '../utils/apiErrorHandler';
+import { useApiErrorHandler, useCheckTokenValid } from '../utils/apiErrorHandler';
 
 const ModulesPage = () => {
   const [lessonProgress, setLessonProgress] = useState({});
   const [modules, setModules] = useState([]);
   const [openModule, setOpenModule] = useState(null);
   const { checkTokenValid } = useCheckTokenValid();
+  const { handleApiError } = useApiErrorHandler();
 
   const userId = localStorage.getItem('userId');
   const token = localStorage.getItem('token');
@@ -41,7 +42,7 @@ const ModulesPage = () => {
 
   const fetchModulesForSubject = async (subject) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/modules/subject/${subject}`,{
+      const response = await fetch(`http://localhost:5000/api/modules/user/${userId}/subject/${subject}`,{
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -53,21 +54,27 @@ const ModulesPage = () => {
         throw new Error(data.message || 'Failed to fetch modules');
       }
       setModules(data);
+      
+      setLessonProgress({}); // clear or reset first
       const progressMap = {};
       for (const lesson of data) {
-        const res = await fetch(`http://localhost:5000/api/progress/user/${userId}/lesson/${lesson._id}`,{
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });;
-        const progress = await res.json();
-        progressMap[lesson._id] = progress; //full progress object
+        try {
+          const res = await fetch(`http://localhost:5000/api/progress/user/${userId}/lesson/${lesson._id}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const progress = await res.json();
+          progressMap[lesson._id] = progress;
+          setLessonProgress((prev) => ({ ...prev, [lesson._id]: progress }));
+        } catch (err) {
+          console.error(`Error fetching progress for lesson ${lesson._id}`, err);
+        }
       }
-    setLessonProgress(progressMap);
   } catch (error) {
-    console.error('Error fetching modules:', error);
+        handleApiError(error);
   }
 };
 

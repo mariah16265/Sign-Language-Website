@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaArrowLeft, FaCheckCircle, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import { useCheckTokenValid } from '../utils/apiErrorHandler';
+import { FaArrowLeft, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { useApiErrorHandler, useCheckTokenValid } from '../utils/apiErrorHandler';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 
@@ -13,6 +13,7 @@ const LessonPage = () => {
   const [hasPlayed, setHasPlayed] = useState(false);
   const [playedSigns, setPlayedSigns] = useState(new Set());
   const { checkTokenValid } = useCheckTokenValid();
+  const { handleApiError } = useApiErrorHandler();
   
   const videoRef = useRef(null);
   const navigate = useNavigate();
@@ -27,7 +28,10 @@ const LessonPage = () => {
   useEffect(() => {
     async function fetchLessonAndProgress() {
       try {
-        const lessonRes = await fetch(`http://localhost:5000/api/lessons/${lessonId}`,{
+        const userId = localStorage.getItem('userId');
+        if (!userId) return;
+
+        const lessonRes = await fetch(`http://localhost:5000/api/lessons/${lessonId}/user/${userId}`,{
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -36,9 +40,6 @@ const LessonPage = () => {
         });
         const lesson = await lessonRes.json();
         if (!lessonRes.ok) throw new Error(lesson.message || 'Failed to fetch lesson');
-
-        const userId = localStorage.getItem('userId');
-        if (!userId) return;
 
         const progressRes = await fetch(`http://localhost:5000/api/progress/user/${userId}/lesson/${lessonId}`,{
           method: 'GET',
@@ -59,10 +60,9 @@ const LessonPage = () => {
         setPlayedSigns(watchedSet);
         setCurrentSignIndex(firstUnwatchedIndex !== -1 ? firstUnwatchedIndex : 0);
       } catch (error) {
-        console.error('Error fetching data:', error.message);
+        handleApiError(error);
       }
     }
-
     fetchLessonAndProgress();
   }, [lessonId]);
 
@@ -116,6 +116,7 @@ const LessonPage = () => {
             lessonId: lessonData._id,
             signId: signId,
             signTitle: currentSign.title,
+            level: lessonData.level,
             module: lessonData.module,
             subject: lessonData.subject,
             status: 'watched',
