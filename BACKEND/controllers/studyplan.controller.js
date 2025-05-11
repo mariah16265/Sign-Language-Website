@@ -9,12 +9,12 @@ const createStudyPlan = async (req, res) => {
       return res.status(400).json({ message: 'Study Plan already exists for this user' });
     }
 
-    const { startingModules, weeklyLessons, subjectDays } = req.body;
+    const { startingLevels, weeklyLessons, subjectDays } = req.body;
 
     // Create and save the StudyPlan
     const newPlan = new StudyPlan({
       user: userId,
-      startingModules,
+      startingLevels,
       weeklyLessons,
       subjectDays,
     });

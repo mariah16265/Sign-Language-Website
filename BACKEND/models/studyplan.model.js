@@ -7,10 +7,7 @@ const StudyPlanSchema = new mongoose.Schema({
     ref: 'User', 
     required: true 
   },
-  //since map(key val pair) is being used in the frontend, here also we use the same
-  //Each key is a subject name (English, Arabic, Math).
-  //Each value is a String (the module name you start with).    
-  startingModules: { 
+  startingLevels: { 
     type: Object, 
     required: true 
   },
