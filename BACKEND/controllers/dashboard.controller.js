@@ -13,8 +13,8 @@ const generateWeeklySchedule = async (req, res) => {
     
     const studyPlan = await StudyPlan.findOne({ user: userId });
     if (!studyPlan) {
-      return res.status(404).json({ message: 'Study plan not found' });}
-    
+      return res.status(404).json({ message: 'Study plan not found' });
+    }
     // Calculate custom week start based on study plan creation date
     const studyPlanCreatedDate = new Date(studyPlan.createdAt);
     const daysSinceStart = differenceInCalendarDays(today, studyPlanCreatedDate);
@@ -22,8 +22,6 @@ const generateWeeklySchedule = async (req, res) => {
     const weekStart = addDays(studyPlanCreatedDate, fullWeeksPassed * 7);
     const weekStartDateString = format(weekStart, 'yyyy-MM-dd');
 
-
-    // Check if schedule already exists for this week
     const existingSchedule = await WeeklySchedule.findOne({
       userId,
       weekStartDate: weekStartDateString,
@@ -34,25 +32,22 @@ const generateWeeklySchedule = async (req, res) => {
         schedule: existingSchedule.schedule,
       });
     }
-    const rawSignsData = await SignsData.find();
 
+    const rawSignsData = await SignsData.find();
     const watchedProgress = await Progress.find({ userId, status: 'watched' });
-    const watchedSignIds = new Set(
-      watchedProgress.map((p) => p.signId.toString())
-    );
+    const watchedSignIds = new Set(watchedProgress.map(p => p.signId.toString()));
 
     const groupedData = {};
+
     for (const doc of rawSignsData) {
-      const { subject, module, lessonNumber } = doc;
+      const { subject, module, lessonNumber, level } = doc;
       const moduleNumber = parseInt(module.match(/Module (\d+)/)?.[1] || 0);
 
       if (!groupedData[subject]) groupedData[subject] = [];
 
-      let moduleGroup = groupedData[subject].find(
-        (m) => m.moduleName === module
-      );
+      let moduleGroup = groupedData[subject].find(m => m.moduleName === module);
       if (!moduleGroup) {
-        moduleGroup = { moduleName: module, moduleNumber, lessons: [] };
+        moduleGroup = { moduleName: module, moduleNumber, level, lessons: [] };
         groupedData[subject].push(moduleGroup);
       }
 
@@ -78,36 +73,35 @@ const generateWeeklySchedule = async (req, res) => {
       const dayName = format(date, 'EEEE');
       const dateString = format(date, 'yyyy-MM-dd');
 
-      const subjects = Object.keys(studyPlan.startingModules);
+      const subjects = Object.keys(studyPlan.startingLevels || {});
       for (const subjectName of subjects) {
         const subjectDays = studyPlan.subjectDays[subjectName] || [];
-        if (!subjectDays.includes(dayName.slice(0, 3))) continue; // e.g., "Wed"
+        if (!subjectDays.includes(dayName.slice(0, 3))) continue;
 
         const lessonsPerWeek = studyPlan.weeklyLessons[subjectName];
-        const startingModuleName = studyPlan.startingModules[subjectName].name;
+        const userLevel = studyPlan.startingLevels?.[subjectName]?.current || studyPlan.startingLevels?.[subjectName];
 
-        const subjectModules = groupedData[subjectName];
+        let subjectModules = groupedData[subjectName];
         if (!subjectModules) {
           console.log(`No data for subject: ${subjectName}`);
           continue;
         }
 
-        const startIndex = subjectModules.findIndex(
-          (m) => m.moduleName === startingModuleName
-        );
-        if (startIndex === -1) {
-          console.log(
-            `Starting module ${startingModuleName} not found in subject ${subjectName}`
-          );
+        if (userLevel) {
+          subjectModules = subjectModules.filter(m => m.level === userLevel);
+        }
+
+        if (!subjectModules.length) {
+          console.log(`No modules found for level ${userLevel} in subject ${subjectName}`);
           continue;
         }
 
         const lessons = [];
         let lessonsCount = 0;
 
-        for (const module of subjectModules.slice(startIndex)) {
+        for (const module of subjectModules) {
           for (const lesson of module.lessons) {
-            const allSignsWatched = lesson.signs.every((sign) =>
+            const allSignsWatched = lesson.signs.every(sign =>
               watchedSignIds.has(sign._id.toString())
             );
             if (allSignsWatched) continue;
@@ -117,6 +111,7 @@ const generateWeeklySchedule = async (req, res) => {
               day: dayName,
               subject: subjectName,
               module: module.moduleName,
+              level: module.level,
               lesson: lesson.lessonName,
               lessonId: lesson.lessonId,
             });
@@ -138,9 +133,7 @@ const generateWeeklySchedule = async (req, res) => {
     );
 
     console.log(`Weekly schedule generated`);
-    res
-      .status(200)
-      .json({ message: 'Schedule generated successfully', schedule });
+    res.status(200).json({ message: 'Schedule generated successfully', schedule });
   } catch (err) {
     console.error('Error generating weekly schedule:', err);
     res.status(500).json({ message: 'Server error' });
@@ -152,16 +145,13 @@ const getDashboardData = async (req, res) => {
 
   try {
     const todaySchedule = await getTodaysScheduleWithSigns(userId);
-
-    // ... fetch other dashboard data if needed
-    //console.log(`todays schedule: ${todaySchedule}`);
     res.json({
       todaySchedule,
-      // other data here...
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Dashboard fetch failed' });
   }
 };
+
 module.exports = { generateWeeklySchedule, getDashboardData };

@@ -5,6 +5,7 @@ const lessonSchema = new mongoose.Schema(
     date: String,
     day: String,
     subject: String,
+    level: String, 
     module: String,
     lesson: String,
     lessonId: mongoose.Schema.Types.ObjectId,

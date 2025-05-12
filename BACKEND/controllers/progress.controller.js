@@ -3,13 +3,14 @@ const SignsData=require('../models/signsData.model');
 // Create or skip progress
 const saveProgress = async (req, res) => {
   try {
-    const { userId, lessonId, signId, signTitle, module, subject} = req.body;
+    const { userId, lessonId, signId, signTitle,level, module, subject} = req.body;
 
     // Check if already exists
     const existingProgress = await Progress.findOne({
       userId,
       lessonId,
       signId,
+      level,
     });
     if (existingProgress) {
       // If already exists, do nothing
@@ -21,6 +22,7 @@ const saveProgress = async (req, res) => {
       userId,
       lessonId,
       signId,
+      level,
       module,
       subject,
       signTitle,
@@ -52,10 +54,11 @@ const getLessonProgress = async (req, res) => {
 //to get all lessons progress
 const getSubjectProgress = async (req, res) => {
     const { userId, subject } = req.params;
+    const { level } = req.query; 
   
     try {
       // 1. Get all lessons for this subject
-      const allLessons = await SignsData.find({ subject });
+      const allLessons = await SignsData.find({ subject, level });
   
       // 2. Group lessons by module name
       const moduleMap = {};

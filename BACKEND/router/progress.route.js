@@ -21,7 +21,7 @@ const {
 // Save progress
 router.post('/', saveProgress);
 
-//Get subject-level progress
+//Get lesson-level progress
 router.get('/user/:userId/lesson/:lessonId', authenticateUser, getLessonProgress);
 
 //Get subject-level progress

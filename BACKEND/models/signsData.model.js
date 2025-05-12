@@ -13,6 +13,10 @@ const signsDataSchema = new mongoose.Schema({
     type: Number, 
     required: true
    },
+  level: {  
+    type: String,
+    required: true
+  },
   signs: [
     {
       title: { type: String, required: true },

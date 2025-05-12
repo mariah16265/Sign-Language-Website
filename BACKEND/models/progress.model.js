@@ -20,6 +20,10 @@ const progressSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  level: {
+    type: String,
+    required: true,
+  },
   subject: { 
     type: String, required: true 
   },

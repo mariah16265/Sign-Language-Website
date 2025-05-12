@@ -29,7 +29,7 @@ async function signsDataSync() {
 
     // Create a map of existing lessons
     for (const doc of existingLessons) {
-      const key = `${doc.subject}-${doc.module}-${doc.lessonNumber}`;
+      const key = `${doc.subject}-${doc.level}-${doc.module}-${doc.lessonNumber}`;
       existingLookup.set(key, doc._id);
     }
 
@@ -40,66 +40,76 @@ async function signsDataSync() {
       const subjectPath = path.join(baseFolderPath, subject);
       if (!fs.lstatSync(subjectPath).isDirectory()) continue;
 
-      const modules = fs.readdirSync(subjectPath);
-      for (const module of modules) {
-        const modulePath = path.join(subjectPath, module);
-        if (!fs.lstatSync(modulePath).isDirectory()) continue;
+      // Loop through levels within the subject
+      const levels = fs.readdirSync(subjectPath);
+      for (const level of levels) {
+        const levelPath = path.join(subjectPath, level);
+        if (!fs.lstatSync(levelPath).isDirectory()) continue;
 
-        const videoFiles = fs.readdirSync(modulePath)
-          .filter(file => file.endsWith('.mp4'))
-          .sort((a, b) => {
-            const numA = parseInt(path.parse(a).name);
-            const numB = parseInt(path.parse(b).name);
-            return numA - numB;
-          });
-        
-        const videos = videoFiles.map(file => ({
-          title: path.parse(file).name,
-          videoUrl: `/Sign Language Videos/${subject}/${module}/${file}`
-        }));
+        // Loop through modules within the level
+        const modules = fs.readdirSync(levelPath);
+        for (const module of modules) {
+          const modulePath = path.join(levelPath, module);
+          if (!fs.lstatSync(modulePath).isDirectory()) continue;
 
-        const videosPerLesson = lessonGrouping[subject]?.[module] || 3;
-        const groupedLessons = groupVideosIntoLessons(videos, videosPerLesson);
-
-        for (let lessonIndex = 0; lessonIndex < groupedLessons.length; lessonIndex++) {
-          const lessonNumber = lessonIndex + 1;
-          const key = `${subject}-${module}-${lessonNumber}`;
-          validKeys.add(key); // Mark as valid
-
-          // Look up the existing signs for the lesson
-          const oldLesson = existingLessons.find(doc => doc.subject === subject && doc.module === module && doc.lessonNumber === lessonNumber);
-          let existingSignsMap = new Map();
-
-          if (oldLesson) {
-            // Map existing signs by title to retain their signID
-            for (const sign of oldLesson.signs) {
-              existingSignsMap.set(sign.title, sign._id);
-            }
-          }
-
-          // Enrich the new signs with the existing _id (if any)
-          const enrichedSigns = groupedLessons[lessonIndex].map(sign => ({
-            ...sign,
-            _id: existingSignsMap.get(sign.title) || new mongoose.Types.ObjectId() // Use existing signID or generate a new one
+          const videoFiles = fs.readdirSync(modulePath)
+            .filter(file => file.endsWith('.mp4'))
+            .sort((a, b) => {
+              const numA = parseInt(path.parse(a).name);
+              const numB = parseInt(path.parse(b).name);
+              return numA - numB;
+            });
+          
+          const videos = videoFiles.map(file => ({
+            title: path.parse(file).name,
+            videoUrl: `/Sign Language Videos/${subject}/${level}/${module}/${file}`
           }));
 
-          const updateData = {
-            subject,
-            module,
-            lessonNumber,
-            signs: enrichedSigns
-          };
+          // Fetch the videos per lesson and level from lessonGrouping.js
+          const videosPerLesson = lessonGrouping[subject]?.[level]?.[module] || 3;
+          const groupedLessons = groupVideosIntoLessons(videos, videosPerLesson);
 
-          // Retain existing _id if present
-          if (existingLookup.has(key)) {
-            updateData._id = existingLookup.get(key);
+          for (let lessonIndex = 0; lessonIndex < groupedLessons.length; lessonIndex++) {
+            const lessonNumber = lessonIndex + 1;
+            const key = `${subject}-${level}-${module}-${lessonNumber}`;
+            validKeys.add(key); // Mark as valid
+
+            // Look up the existing signs for the lesson
+            const oldLesson = existingLessons.find(doc => doc.subject === subject && doc.level === level && doc.module === module && doc.lessonNumber === lessonNumber);
+            let existingSignsMap = new Map();
+
+            if (oldLesson) {
+              // Map existing signs by title to retain their signID
+              for (const sign of oldLesson.signs) {
+                existingSignsMap.set(sign.title, sign._id);
+              }
+            }
+
+            // Enrich the new signs with the existing _id (if any)
+            const enrichedSigns = groupedLessons[lessonIndex].map(sign => ({
+              ...sign,
+              _id: existingSignsMap.get(sign.title) || new mongoose.Types.ObjectId() // Use existing signID or generate a new one
+            }));
+
+            const updateData = {
+              subject,
+              level,
+              module,
+              lessonNumber,
+              signs: enrichedSigns
+            };
+
+            // Retain existing _id if present
+            if (existingLookup.has(key)) {
+              updateData._id = existingLookup.get(key);
+            }
+
+            await SignsData.findOneAndUpdate(
+              { subject, level, module, lessonNumber },
+              updateData,
+              { upsert: true, new: true, setDefaultsOnInsert: true }
+            );
           }
-
-          await SignsData.findOneAndUpdate(
-            { subject, module, lessonNumber },
-            updateData,
-            { upsert: true, new: true, setDefaultsOnInsert: true }
-          );
         }
       }
     }
@@ -107,7 +117,7 @@ async function signsDataSync() {
     // Delete orphan lessons (no longer present in folders)
     const allDbLessons = await SignsData.find({});
     for (const doc of allDbLessons) {
-      const key = `${doc.subject}-${doc.module}-${doc.lessonNumber}`;
+      const key = `${doc.subject}-${doc.level}-${doc.module}-${doc.lessonNumber}`;
       if (!validKeys.has(key)) {
         await SignsData.deleteOne({ _id: doc._id });
         console.log(`🗑️ Deleted orphan lesson: ${key}`);

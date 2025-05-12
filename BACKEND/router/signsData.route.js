@@ -2,15 +2,19 @@ const express = require('express');
 const router = express.Router();
 
 // Import the controllers
-const { 
-    getAllModules, 
+const {  
     getModulesBySub,
-    getLessonsByMod } = require('../controllers/signsData.controller');
+    getLessonsByMod, 
+    getNextLesson} = require('../controllers/signsData.controller');
+const { 
+    authenticateUser 
+} = require('../middleware/authMiddleware'); // authentication middleware
 
 
-router.get('/:lessonId', getLessonsByMod); // fetch lessons by modules
+router.get('/:lessonId/user/:userId', authenticateUser, getLessonsByMod); // fetch lessons by modules
 
-//for studyplan and learn page
-router.get('/subject/:subjectId', getModulesBySub); // fetch modules by subject (english, arabic etc.) 
+router.get('/next/:lessonId', authenticateUser,  getNextLesson); // fetch next lesson by current lesson ID
+
+router.get('/user/:userId/subject/:subjectId', authenticateUser, getModulesBySub); //for learn page
 
 module.exports = router;
