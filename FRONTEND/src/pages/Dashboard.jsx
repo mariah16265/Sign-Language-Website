@@ -45,7 +45,7 @@ const Dashboard = () => {
   useEffect(() => {
     const setupDashboard = async () => {
       const userId = localStorage.getItem('userId');
-      const subjects = ['English', 'Arabic'];   
+      const subjects = ['English', 'Arabic'];
       try {
         // 1.----------Check Level for each subject--------------
         for (const subject of subjects) {
@@ -62,11 +62,17 @@ const Dashboard = () => {
 
           const Plandata = await response.json();
           if (!response.ok) {
-            console.error(`❌ Failed to update level for ${subject}:`, Plandata.message);
+            console.error(
+              `❌ Failed to update level for ${subject}:`,
+              Plandata.message
+            );
             return;
           }
 
-          console.log(`✅ Updated ${subject} level successfully:`, Plandata.updatedLevel);
+          console.log(
+            `✅ Updated ${subject} level successfully:`,
+            Plandata.updatedLevel
+          );
         }
 
         // 2.----------Generate Weekly Schedule--------------
@@ -178,7 +184,7 @@ const Dashboard = () => {
         const modulesArray = [];
 
         for (const subject of subjects) {
-          const level = subjectLevelMap[subject]; 
+          const level = subjectLevelMap[subject];
           try {
             const subjectResponse = await fetch(
               `http://localhost:5000/api/progress/subject-progress/${userId}/${subject}?level=${level}`,
@@ -379,7 +385,9 @@ const Dashboard = () => {
           {/* Subjects Grid */}
           {groupedSubjects.length > 0 ? (
             <motion.div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
+              className={`grid grid-cols-1 ${
+                groupedSubjects.length === 2 ? 'md:grid-cols-2' : ''
+              } gap-6 mb-8`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ staggerChildren: 0.1 }}
@@ -428,6 +436,7 @@ const Dashboard = () => {
                           }),
                         },
                       ]}
+                      totalSubjects={groupedSubjects.length}
                     />
                   </motion.div>
                 );
