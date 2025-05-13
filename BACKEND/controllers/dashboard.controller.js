@@ -10,7 +10,7 @@ const generateWeeklySchedule = async (req, res) => {
     const userId = req.user.id;
   //-------------DYNAMIC Schedule Generation--------------
     const today = new Date();
-    
+
     const studyPlan = await StudyPlan.findOne({ user: userId });
     if (!studyPlan) {
       return res.status(404).json({ message: 'Study plan not found' });
