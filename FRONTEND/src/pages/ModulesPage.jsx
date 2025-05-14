@@ -4,7 +4,7 @@ import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import { motion } from 'framer-motion';
 import { FaLayerGroup, FaRegClipboard } from 'react-icons/fa';
-import './ModulePage.css'; // <-- You'll create this for styles
+import './ModulePage.css'; 
 import { useApiErrorHandler, useCheckTokenValid } from '../utils/apiErrorHandler';
 
 const ModulesPage = () => {
@@ -97,8 +97,8 @@ const ModulesPage = () => {
 
         <div className="flex-1 flex flex-col lg:flex-row">
           {/* Module List */}
-          <div className="w-full lg:w-1/4 p-6 bg-white-50 space-y-4 overflow-y-auto border-b lg:border-r border-white-200">
-            <h2 className="text-3xl font-bold text-center text-pink-600 mb-4">
+          <div className="w-full lg:w-[25%] p-4 space-y-4 overflow-y-auto border-b lg:border-r border-white-200">
+            <h2 className="text-3xl font-bold text-center text-pink-600 mb-10 mt-2">
               <FaLayerGroup className="inline mr-2" /> Modules
             </h2>
             {uniqueModules.map((mod, index) => (
@@ -107,37 +107,38 @@ const ModulesPage = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.2, delay: index * 0.05 }}
-                className={`rounded-2xl p-4 text-center cursor-pointer shadow-md ${
+                className={`rounded-xl p-3 text-center cursor-pointer shadow-md mx-auto overflow-hidden ${
                   openModule === mod.module
                     ? "bg-purple-600 text-white font-bold"
                     : "bg-white hover:bg-purple-200 text-black font-bold"
                 }`}
+                style={{ maxWidth: "300px", minWidth: "250px", marginBottom: "25px"}}
                 onClick={() => setOpenModule(mod.module)}
               >
-                <span className="text-xl">{mod.module}</span>
+                <span className="text-base lg:text-lg block truncate whitespace-normal break-words">{mod.module}</span>
               </motion.div>
             ))}
           </div>
 
-          <div className="w-full lg:w-3/4 p-8 overflow-y-auto bg-gradient-to-br from-purple-200 via-pink-100 to-white">
-          {/* <div className="w-full lg:w-3/4 p-8 overflow-y-auto"> */}
-
-
+          {/* Lesson Section */}
+          <div className="w-full lg:w-[75%] pt-8 overflow-y-auto bg-gradient-to-br from-purple-200 via-pink-100 to-white">
             {openModule && (
               <>
-                <h2 className="text-4xl font-extrabold text-center text-pink-600 mb-8">
+                <h2 className="text-3xl font-extrabold text-center text-pink-600 mb-8">
                   <FaRegClipboard className="inline mr-2" />
                   Lessons for {openModule}
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                
+                {/* Centered Lesson Grid */}
+                <div className="flex justify-center">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 w-full max-w-7xl mx-auto px-4">
                 {getLessonsForModule(openModule).map((lesson, index) => {
                   const hasProgress = lessonProgress[lesson._id]?.length > 0;
                   const isComplete = lessonProgress[lesson._id]?.length === lesson.signs.length; // Checks if all signs are watched
-
                   return(
                     <motion.div
                       key={lesson._id}
-                      className="lesson-card flex flex-col h-full"  // <-- added flex-col h-full
+                      className="lesson-card flex flex-col h-full"
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.1 }}
@@ -157,7 +158,7 @@ const ModulesPage = () => {
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.4, delay: idx * 0.1 }}
-                                className="lesson-signs bg-white rounded-xl shadow-md border-l-4 border-purple-500 p-3 ml-2 sm:ml-4 hover:shadow-lg transition-transform hover:translate-x-1"
+                                className="lesson-signs bg-white rounded-xl shadow-md border-l-4 border-purple-500 p-3 ml-2 sm:ml-1 hover:shadow-lg transition-transform hover:translate-x-1"
                               >
                                 <h5>{sign.title}</h5>
                               </motion.div>
@@ -175,8 +176,9 @@ const ModulesPage = () => {
                         </button>
                       </div>
                     </motion.div>
-                  );
-                })}
+                    );
+                  })}
+                  </div>
                 </div>
               </>
             )}

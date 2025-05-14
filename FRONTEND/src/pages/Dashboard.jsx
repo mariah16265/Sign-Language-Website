@@ -44,10 +44,25 @@ const Dashboard = () => {
   //  Main dashboard data fetch
   useEffect(() => {
     const setupDashboard = async () => {
-      const userId = localStorage.getItem('userId');
-      const subjects = ['English', 'Arabic'];
+    const userId = localStorage.getItem('userId');
       try {
-        // 1.----------Check Level for each subject--------------
+        // 1. Fetch study plan to get actual subjects
+        const studyPlanResponse = await fetch(`http://localhost:5000/api/studyplan/${userId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const studyPlanData = await studyPlanResponse.json();
+
+        if (!studyPlanResponse.ok) {
+          console.error('❌ Failed to fetch study plan');
+          return;
+        }
+
+        const subjects = Object.keys(studyPlanData.startingLevels); // Only valid subjects
+        // 2.----------Check Level for each subject--------------
         for (const subject of subjects) {
           const response = await fetch(
             `http://localhost:5000/api/studyplan/update-level/${userId}/${subject}`,

@@ -300,9 +300,9 @@ const LandingPage = () => {
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {[
-                    '/Sign Language Videos/English/Module 8- Sports/Bowling.webm',
-                    '/Sign Language Videos/English/Module 3- Colors/blue.webm',
-                    '/Sign Language Videos/English/Module 6- Natural World/Clouds.webm',
+                    '/Sign Language Videos/English/beginner/Module 8- Sports/Bowling.webm',
+                    '/Sign Language Videos/English/beginner/Module 3- Colors/blue.webm',
+                    '/Sign Language Videos/English/beginner/Module 6- Natural World/Clouds.webm',
                   ].map((video, i) => (
                     <motion.div
                       key={i}
@@ -358,7 +358,7 @@ const LandingPage = () => {
                     transition={{ duration: 0.5, delay: 0.1 }}
                     className="relative h-full rounded-xl overflow-hidden shadow-lg bg-black flex items-center justify-center"
                   >
-                    <LazyVideo src="/Sign Language Videos/Math/Module 2- Numbers in Arabic(1 to 20)/14.webm" />
+                    <LazyVideo src="/Sign Language Videos/English/beginner/Module 10- Numbers/14.mp4" />
                   </motion.div>
 
                   {/* First Landscape Video - Top Right */}
@@ -368,7 +368,7 @@ const LandingPage = () => {
                     transition={{ duration: 0.5, delay: 0.2 }}
                     className="relative aspect-video rounded-xl overflow-hidden shadow-lg bg-black"
                   >
-                    <LazyVideo src="/Sign Language Videos/Math/Module 1-Numbers in English(1 to 20)/9.webm" />
+                    <LazyVideo src="/Sign Language Videos/English/beginner/Module 10- Numbers/9.webm" />
                   </motion.div>
 
                   {/* Second Landscape Video - Bottom Right */}
@@ -378,7 +378,7 @@ const LandingPage = () => {
                     transition={{ duration: 0.5, delay: 0.3 }}
                     className="relative aspect-video rounded-xl overflow-hidden shadow-lg bg-black md:mt-32"
                   >
-                    <LazyVideo src="/Sign Language Videos/Math/Module 1-Numbers in English(1 to 20)/11.webm" />
+                    <LazyVideo src="/Sign Language Videos/English/beginner/Module 10- Numbers/11.webm" />
                   </motion.div>
                 </div>
               </motion.div>
@@ -419,9 +419,9 @@ const LandingPage = () => {
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {[
-                    '/Sign Language Videos/Arabic/Module 1- الحروف الأبجدية/ك.webm',
-                    '/Sign Language Videos/Arabic/Module 3- تحيات/كيف حالك.webm',
-                    '/Sign Language Videos/Arabic/Module 6- الإمارات/رأس الخيمة.webm',
+                    '/Sign Language Videos/Arabic/beginner/Module 1- الحروف الأبجدية/ك.webm',
+                    '/Sign Language Videos/Arabic/beginner/Module 3- تحيات/كيف حالك.webm',
+                    '/Sign Language Videos/Arabic/intermediate/Module 3- الإمارات/رأس الخيمة.webm',
                   ].map((video, i) => (
                     <motion.div
                       key={i}

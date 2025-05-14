@@ -4,7 +4,7 @@ import { GiHand } from 'react-icons/gi';
 import { FaSignLanguage } from 'react-icons/fa';
 import { FiMenu, FiX } from 'react-icons/fi';
 import { motion } from 'framer-motion';
-import { FiLogOut } from 'react-icons/fi';
+import { FiEdit, FiLogOut } from 'react-icons/fi';
 import { FaUser } from "react-icons/fa";
 import { useLocation } from 'react-router-dom';
 
@@ -42,6 +42,10 @@ const Navbar = ({ hideLoginButton = false }) => {
     localStorage.removeItem('isNewUser');
     setUserName(''); 
     navigate('/login');
+  };
+
+  const handleEditStudyPlan = () => {
+    navigate('/studyplan?edit=true');
   };
 
   return (
@@ -94,6 +98,13 @@ const Navbar = ({ hideLoginButton = false }) => {
               {/* Dropdown */}
               {isDropdownOpen && (
                 <div className="absolute top-14 right-0 bg-gradient-to-br from-white to-gray-100 border-2 border-purple-600 shadow-lg rounded-2xl w-full p-2 flex flex-col space-y-2 z-50">
+                  <button
+                    onClick={handleEditStudyPlan}
+                    className="flex items-center gap-2 text-purple-700 hover:text-purple-500 transition-colors font-semibold w-full py-2 px-3 rounded-md"
+                  >
+                      <FiEdit className="text-lg" /> 
+                      Edit StudyPlan
+                  </button>
                   <button
                     onClick={handleLogout}
                     className="flex items-center gap-2 text-purple-700 hover:text-purple-500 transition-colors font-semibold w-full py-2 px-3 rounded-md"
@@ -167,6 +178,13 @@ const Navbar = ({ hideLoginButton = false }) => {
           {/* Dropdown */}
           {isDropdownOpen && (
             <div className="absolute top-14 right-0 bg-gradient-to-br from-white to-gray-100 border-2 border-purple-600 shadow-lg rounded-2xl flex p-3 flex-col space-y-2 z-50">
+              <button
+                onClick={handleEditStudyPlan}
+                className="flex items-center gap-2 text-purple-700 hover:text-purple-500 transition-colors font-semibold w-full py-2 px-3 rounded-md"
+              >
+                  <FiEdit className="text-lg" /> 
+                  Edit Study Plan
+              </button>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 text-purple-700 hover:text-purple-500 transition-colors font-semibold py-2 px-4 rounded-md w-full"

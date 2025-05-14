@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import {
   useApiErrorHandler,
   useCheckTokenValid,
 } from '../utils/apiErrorHandler';
-import { useNavigate } from 'react-router-dom';
 import {
   FaBook,
   FaLanguage,
@@ -15,6 +15,8 @@ import {
 } from 'react-icons/fa';
 
 const StudyPlanPage = () => {
+  const { search } = useLocation();
+  const isEditMode = new URLSearchParams(search).get('edit') === 'true';
   const [studyPlan, setStudyPlan] = useState({
     startingLevels: { English: '', Arabic: '' },
     weeklyLessons: { English: 0, Arabic: 0 },
@@ -25,10 +27,11 @@ const StudyPlanPage = () => {
   const { handleApiError } = useApiErrorHandler();
   const { checkTokenValid } = useCheckTokenValid();
   const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('userId');
   const isNewUser = localStorage.getItem('isNewUser');
 
   useEffect(() => {
-    if (isNewUser === 'false') {
+    if (isNewUser === 'false' && !isEditMode) {
       navigate('/dashboard');
     }
   }, [isNewUser, navigate]);
@@ -39,6 +42,45 @@ const StudyPlanPage = () => {
       navigate('/login');
     }
   }, [checkTokenValid, navigate]);
+
+  useEffect(() => {
+    const fetchStudyPlan = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/studyplan/${userId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch study plan');}
+        const data = await response.json();
+
+        // Prefill the form with existing studyplan data, 1 sub or 2 subjects
+        setStudyPlan({
+          startingLevels: {
+            English: data.startingLevels?.English || '',
+            Arabic: data.startingLevels?.Arabic || '',
+          },
+          weeklyLessons: {
+            English: data.weeklyLessons?.English || 0,
+            Arabic: data.weeklyLessons?.Arabic || 0,
+          },
+          subjectDays: {
+            English: data.subjectDays?.English || [],
+            Arabic: data.subjectDays?.Arabic || [],
+          },
+        });
+      } catch (error) {
+        handleApiError(error);
+      }
+    };
+    if (isEditMode) {
+      fetchStudyPlan();
+    }
+  }, [isEditMode]);
 
   const handleStudyPlan = async () => {
     try {
@@ -56,10 +98,15 @@ const StudyPlanPage = () => {
           )
         ),
       };
+      const endpoint = isEditMode
+      ? `http://localhost:5000/api/studyplan/edit/${userId}` // Edit plan endpoint
+      : 'http://localhost:5000/api/studyplan/'; // Create plan endpoint
+      const method = isEditMode ? 'PUT' : 'POST';
 
-      const response = await fetch('http://localhost:5000/api/studyplan/', {
-        method: 'POST',
-        headers: {
+
+      const response = await fetch(endpoint, {
+        method: method,
+        headers: { 
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
@@ -134,7 +181,7 @@ const StudyPlanPage = () => {
 
   const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-  // Updated validation logic
+  /* Updated validation logic
   const selectedSubjects = Object.entries(studyPlan.startingLevels)
     .filter(([_, level]) => level !== '')
     .map(([subject]) => subject);
@@ -146,6 +193,25 @@ const StudyPlanPage = () => {
         studyPlan.weeklyLessons[subject] > 0 &&
         studyPlan.subjectDays[subject].length > 0
     );
+*/
+  // New validation logic: A subject is valid only if all three are selected
+  const isValid = Object.entries(studyPlan.startingLevels).every(([subjectId, level]) => {
+  const lessons = studyPlan.weeklyLessons[subjectId];
+  const days = studyPlan.subjectDays[subjectId];
+
+  const levelSelected = level && level !== '';
+  const lessonsSelected = lessons > 0;
+  const daysSelected = Array.isArray(days) && days.length > 0;
+
+  // Case 1: If nothing is selected for this subject → OK
+  if (!levelSelected && !lessonsSelected && !daysSelected) return true;
+
+  // Case 2: If level is selected → lessons and days must also be selected
+  if (levelSelected && lessonsSelected && daysSelected) return true;
+
+  // All other cases → Invalid
+  return false;
+});
 
   // Darker color configuration
   const colorSchemes = {

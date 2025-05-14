@@ -1,6 +1,8 @@
+const { differenceInCalendarDays, addDays, format } = require('date-fns');
 const StudyPlan = require('../models/studyplan.model');
 const Progress = require('../models/progress.model');
 const SignsData = require('../models/signsData.model');
+const WeeklySchedule = require('../models/dashboard.model.js');
 
 const createStudyPlan = async (req, res) => {
   try {
@@ -20,7 +22,6 @@ const createStudyPlan = async (req, res) => {
       weeklyLessons,
       subjectDays,
     });
-
     await newPlan.save();
 
     res.status(201).json({
@@ -29,6 +30,62 @@ const createStudyPlan = async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating study plan and dashboard:', error);
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
+
+const editStudyPlan = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { startingLevels, weeklyLessons, subjectDays } = req.body;
+
+    const existingPlan = await StudyPlan.findOne({ user: userId });
+    if (!existingPlan) {
+      return res.status(404).json({ message: 'Study Plan not found' });
+    }
+    
+    // ✅ Calculate current dynamic weekStartDate
+    const today = new Date();
+    const createdDate = new Date(existingPlan.createdAt);
+    const daysSinceStart = differenceInCalendarDays(today, createdDate);
+    const fullWeeksPassed = Math.floor(daysSinceStart / 7);
+    const weekStart = addDays(createdDate, fullWeeksPassed * 7);
+    const weekStartDateString = format(weekStart, 'yyyy-MM-dd');
+
+    // ✅ Delete this week's WeeklySchedule only
+    await WeeklySchedule.deleteOne({
+      userId,
+      weekStartDate: weekStartDateString,
+    });
+
+    // Update all fields
+    existingPlan.startingLevels = startingLevels;
+    existingPlan.weeklyLessons = weeklyLessons;
+    existingPlan.subjectDays = subjectDays;
+
+    existingPlan.markModified('startingLevels');
+    existingPlan.markModified('weeklyLessons');
+    existingPlan.markModified('subjectDays');
+
+    await existingPlan.save();
+
+    res.status(200).json({message: 'Study Plan updated successfully'});
+  } catch (error) {
+    console.error('Error editing study plan:', error);
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
+
+const getStudyPlan = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const studyPlan = await StudyPlan.findOne({ user: userId });
+    if (!studyPlan) {
+      return res.status(404).json({ message: 'Study Plan not found' });
+    }
+    res.status(200).json(studyPlan );
+  } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
@@ -94,5 +151,7 @@ const updateStudyPlanLevel = async (req, res) => {
 
 module.exports = {
   createStudyPlan,
+  editStudyPlan,
+  getStudyPlan,
   updateStudyPlanLevel,
 };
