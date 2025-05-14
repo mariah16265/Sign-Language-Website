@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
@@ -8,10 +8,11 @@ import { useCheckTokenValid } from '../utils/apiErrorHandler';
 
 const LearningPage = () => {
   const navigate = useNavigate();
-  const today = new Date();
-  const dayName = format(today, 'EEEE');
-  const dateString = format(today, 'MMMM do, yyyy');
   const { checkTokenValid } = useCheckTokenValid();
+  const [allowedSubjects, setAllowedSubjects] = useState([]);
+  const userId = localStorage.getItem('userId'); 
+  const token = localStorage.getItem('token');
+
 
   // Check for valid token on mount
   useEffect(() => {
@@ -19,9 +20,36 @@ const LearningPage = () => {
     if (!isTokenValid) return;
   }, []);
 
+  useEffect(() => {
+    const fetchStudyPlan = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/studyplan/${userId}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          console.error('❌ Failed to fetch study plan');
+          return;
+        }
+
+        const data = await response.json();
+        const subjectKeys = Object.keys(data.startingLevels); // e.g., ['English', 'Arabic']
+        setAllowedSubjects(subjectKeys);
+      } catch (error) {
+        console.error('Error fetching study plan:', error);
+      }
+    };
+
+    fetchStudyPlan();
+  }, []);
+
   const subjectsData = [
     {
       name: 'English Signs',
+      key: 'English',
       path: '/english',
       image: '/assets/english.jpeg',
       gradient: 'from-purple-500 to-indigo-600',
@@ -29,6 +57,7 @@ const LearningPage = () => {
     },
     {
       name: 'Arabic Signs',
+      key: 'Arabic',
       path: '/arabic',
       image: '/assets/arabic.jpeg',
       gradient: 'from-emerald-500 to-teal-600',
@@ -36,6 +65,7 @@ const LearningPage = () => {
     },
     {
       name: 'Emergency Signs',
+      key: 'Emergency',
       path: '/emergency',
       image: '/assets/life.jpeg',
       gradient: 'from-amber-500 to-orange-600',
@@ -43,13 +73,18 @@ const LearningPage = () => {
     },
     {
       name: 'Awareness Signs',
+      key: 'Awareness',
       path: '/awareness',
       image: '/assets/mental.jpeg',
       gradient: 'from-pink-500 to-red-600',
       borderColor: 'border-pink-500',
     },
   ];
-  
+
+  const filteredSubjects = subjectsData.filter(subject => 
+    ['Emergency', 'Awareness'].includes(subject.key) || allowedSubjects.includes(subject.key)
+  );
+
   const onSelectSubject = (subject) => {
     navigate('/learn/subjects', { state: { subject: subject.name.split(" ")[0] } });
   };
@@ -74,11 +109,12 @@ const LearningPage = () => {
 
           <motion.div
             className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-16 mb-8 mx-auto max-w-5xl"  // Changed gap-x-4 to gap-x-12 and max-w-4xl to max-w-5xl
+            //className="flex flex-wrap justify-center gap-12 mb-8 mx-auto max-w-6xl"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ staggerChildren: 0.1 }}
           >
-            {subjectsData.map((subject, index) => (
+            {filteredSubjects.map((subject, index) => (
                   <motion.div
                     key={index}
                     initial={{ y: 20, opacity: 0 }}
