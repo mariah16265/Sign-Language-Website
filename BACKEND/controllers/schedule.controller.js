@@ -13,11 +13,23 @@ const getTodaysScheduleWithSigns = async (userId) => {
     'schedule.date': today,
   }).lean();
 
-  if (!weeklySchedule) {
-    console.log('No weekly schedule found for user', userId);
-    return [];
-  }
+  if (!weeklySchedule) {   // Find the user's full schedule
+    const fullSchedule = await WeeklySchedule.findOne({ userId })
+      .sort({ weekStartDate: -1 })  // Get latest by weekStartDate
+      .lean();
+    let nextStudyDate = null;
 
+    if (fullSchedule && fullSchedule.schedule) {
+      const futureLessons = fullSchedule.schedule
+        .filter(entry => moment(entry.date).isAfter(today))
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+      nextStudyDate = futureLessons.length > 0 ? futureLessons[0].date : null;
+    }
+
+    console.log(`Rest day for user ${userId}.\nNext lesson is on ${nextStudyDate || 'N/A'}.`);
+
+    return []
+  }
   //console.log('Weekly schedule found:', weeklySchedule);
 
   // Filter today's lessons

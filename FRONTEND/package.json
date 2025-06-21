@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@mediapipe/camera_utils": "^0.3.1675466862",
+    "@mediapipe/drawing_utils": "^0.3.1675466124",
+    "@mediapipe/hands": "^0.4.1675469240",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -11,6 +14,7 @@
     "framer-motion": "^12.9.2",
     "jwt-decode": "^4.0.0",
     "lottie-react": "^2.4.1",
+    "onnxruntime-web": "^1.22.0",
     "react": "^19.1.0",
     "react-confetti": "^6.4.0",
     "react-dom": "^19.1.0",
@@ -21,6 +25,7 @@
     "react-scripts": "5.0.1",
     "react-toastify": "^11.0.5",
     "react-use": "^17.6.0",
+    "react-webcam": "^7.2.0",
     "recharts": "^2.15.3",
     "web-vitals": "^2.1.4"
   },

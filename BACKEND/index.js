@@ -8,7 +8,10 @@ const signsDataRoutes = require('./router/signsData.route');  //sends data to fr
 const studyPlanRoutes = require('./router/studyplan.route');
 const dashboardRoutes = require('./router/dashboard.route');
 const progressRoutes = require('./router/progress.route');
+const gestureQuizRoutes = require('./router/gestureQuiz.route');
+const quizRoutes = require('./router/quiz.route');
 const signDictionaryRoutes = require('./router/signdictionary.route');
+const questionsDataSync = require('./utils/questionsDataSync');
 
 dotenv.config();
 
@@ -32,6 +35,7 @@ mongoose
   .then(() => {
     console.log('MongoDB connected');
     signsDataSync(); 
+    questionsDataSync();
   })
   .catch((err) => {
     console.error('MongoDB connection error:', err);
@@ -52,6 +56,16 @@ app.use('/api/dashboard', dashboardRoutes);
 
 // Progress API
 app.use('/api/progress', progressRoutes);   //to get lesson's & subjects progress
+
+// Gesture Prediction for Quiz API 
+app.use('/api/predict', gestureQuizRoutes);
+
+// Quiz API for getting questions
+app.use('/api/quiz-questions', quizRoutes);
+// for getting quiz progrress
+app.use('/api/quiz-progress', quizRoutes);
+// for saving quiz progrress
+app.use('/api/quiz-static/', quizRoutes);
 
 //Route to get dictionary content
 app.use('/api/signs', signDictionaryRoutes);
