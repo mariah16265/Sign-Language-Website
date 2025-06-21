@@ -1,23 +1,23 @@
 const QuizQuestion = require('../models/quizQuestions.model');
 const SignsData = require('../models/signsData.model');
-const QuizProgress = require('../models/quizProgress.model'); 
+const QuizProgress = require('../models/quizProgress.model');
 
 const shuffle = (arr) => arr.sort(() => 0.5 - Math.random());
 
 const generateQuizForModule = async (req, res) => {
   const { module } = req.params;
-  console.log("Fetching Quiz Questions..")
+  console.log('Fetching Quiz Questions..');
   try {
     // Get all signs for the specified module
     const lessons = await SignsData.find({ module });
-    const allSigns = lessons.flatMap(lesson => lesson.signs);
-    const signTitles = allSigns.map(sign => sign.title);
+    const allSigns = lessons.flatMap((lesson) => lesson.signs);
+    const signTitles = allSigns.map((sign) => sign.title);
 
     // Fetch quiz questions
     const allQuestions = await QuizQuestion.find({ module });
 
-    const staticQs = shuffle(allQuestions.filter(q => q.type === 'static'));
-    const dynamicQs = shuffle(allQuestions.filter(q => q.type === 'dynamic'));
+    const staticQs = shuffle(allQuestions.filter((q) => q.type === 'static'));
+    const dynamicQs = shuffle(allQuestions.filter((q) => q.type === 'dynamic'));
 
     const orderedQuestions = [];
 
@@ -28,19 +28,19 @@ const generateQuizForModule = async (req, res) => {
     };
 
     pushN(staticQs, 2);
-    pushN(dynamicQs, 2);
-    pushN(staticQs, 3);
     pushN(dynamicQs, 3);
+    pushN(staticQs, 3);
+    pushN(dynamicQs, 4);
 
     const finalQuestions = orderedQuestions.map((q) => {
       if (q.type === 'static') {
         const incorrectLabels = shuffle(
-          signTitles.filter(title => title !== q.signTitle)
+          signTitles.filter((title) => title !== q.signTitle)
         ).slice(0, 3);
 
         const options = shuffle([
           { label: q.signTitle, isCorrect: true },
-          ...incorrectLabels.map(label => ({ label, isCorrect: false }))
+          ...incorrectLabels.map((label) => ({ label, isCorrect: false })),
         ]);
 
         return {
@@ -48,13 +48,13 @@ const generateQuizForModule = async (req, res) => {
           prompt: 'What does this sign represent?',
           signTitle: q.signTitle,
           signUrl: q.signUrl, // image or video for the question
-          options
+          options,
         };
       } else {
         return {
           type: 'dynamic',
           prompt: `Show the sign for "${q.signTitle}"`,
-          correctLabel: q.signTitle
+          correctLabel: q.signTitle,
         };
       }
     });
@@ -66,14 +66,13 @@ const generateQuizForModule = async (req, res) => {
   }
 };
 
-
 const getQuizProgressForModule = async (req, res) => {
   const { userId, module } = req.params;
 
   try {
     const progress = await QuizProgress.find({
       userId,
-      module
+      module,
     });
 
     res.json(progress);
@@ -88,7 +87,9 @@ const saveQuizProgress = async (req, res) => {
   const { module, signTitle, isCorrect } = req.body;
 
   if (!module || !signTitle || typeof isCorrect !== 'boolean') {
-    return res.status(400).json({ message: 'Missing required fields or invalid data' });
+    return res
+      .status(400)
+      .json({ message: 'Missing required fields or invalid data' });
   }
 
   const answer = isCorrect ? 'correct' : 'incorrect';
@@ -96,7 +97,11 @@ const saveQuizProgress = async (req, res) => {
 
   try {
     // Check if a progress record already exists for this user, module, and signTitle
-    const existingProgress = await QuizProgress.findOne({ userId, module, signTitle });
+    const existingProgress = await QuizProgress.findOne({
+      userId,
+      module,
+      signTitle,
+    });
 
     if (existingProgress) {
       // Update existing record
@@ -104,7 +109,9 @@ const saveQuizProgress = async (req, res) => {
       existingProgress.score = score;
       existingProgress.timestamp = new Date(); // update timestamp to now
       await existingProgress.save();
-      return res.status(200).json({ message: 'Quiz progress updated', updated: true });
+      return res
+        .status(200)
+        .json({ message: 'Quiz progress updated', updated: true });
     }
 
     // Create new progress record
@@ -114,7 +121,7 @@ const saveQuizProgress = async (req, res) => {
       signTitle,
       answer,
       score,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     await newProgress.save();
@@ -125,4 +132,8 @@ const saveQuizProgress = async (req, res) => {
   }
 };
 
-module.exports = { generateQuizForModule, getQuizProgressForModule, saveQuizProgress };
+module.exports = {
+  generateQuizForModule,
+  getQuizProgressForModule,
+  saveQuizProgress,
+};

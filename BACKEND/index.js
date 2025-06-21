@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const userRoutes = require('./router/user.route');
-const signsDataSync = require('./utils/signsDataSync');   //syncs data
-const signsDataRoutes = require('./router/signsData.route');  //sends data to frontend
+const signsDataSync = require('./utils/signsDataSync'); //syncs data
+const signsDataRoutes = require('./router/signsData.route'); //sends data to frontend
 const studyPlanRoutes = require('./router/studyplan.route');
 const dashboardRoutes = require('./router/dashboard.route');
 const progressRoutes = require('./router/progress.route');
@@ -13,17 +13,22 @@ const quizRoutes = require('./router/quiz.route');
 const signDictionaryRoutes = require('./router/signdictionary.route');
 const questionsDataSync = require('./utils/questionsDataSync');
 
+// Import the confidence controller directly
+const { getConfidence } = require('./controllers/gestureQuiz.controller');
+const { authenticateUser } = require('./middleware/authMiddleware');
+
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true,
-}));
-app.use(cors());
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Connect to MongoDB
@@ -34,7 +39,7 @@ mongoose
   })
   .then(() => {
     console.log('MongoDB connected');
-    signsDataSync(); 
+    signsDataSync();
     questionsDataSync();
   })
   .catch((err) => {
@@ -55,16 +60,19 @@ app.use('/api/studyplan', studyPlanRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
 // Progress API
-app.use('/api/progress', progressRoutes);   //to get lesson's & subjects progress
+app.use('/api/progress', progressRoutes); //to get lesson's & subjects progress
 
-// Gesture Prediction for Quiz API 
+// Gesture Prediction for Quiz API
 app.use('/api/predict', gestureQuizRoutes);
+
+// Add confidence endpoint directly
+app.post('/api/confidence', authenticateUser, getConfidence);
 
 // Quiz API for getting questions
 app.use('/api/quiz-questions', quizRoutes);
-// for getting quiz progrress
+// for getting quiz progress
 app.use('/api/quiz-progress', quizRoutes);
-// for saving quiz progrress
+// for saving quiz progress
 app.use('/api/quiz-static/', quizRoutes);
 
 //Route to get dictionary content

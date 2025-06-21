@@ -20,6 +20,8 @@ const QuizPage = () => {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [attemptedQuestions, setAttemptedQuestions] = useState(new Set());
   const [steps, setSteps] = useState([]);
+  const [autoChecking, setAutoChecking] = useState(true); // New state for auto-detection
+  const [countdown, setCountdown] = useState(0); // New state for countdown
 
   const token = localStorage.getItem('token');
   const userId = localStorage.getItem('userId');
@@ -30,11 +32,15 @@ const QuizPage = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/quiz-questions/module/${module}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(
+          `http://localhost:5000/api/quiz-questions/module/${module}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'Failed to load questions');
+        if (!res.ok)
+          throw new Error(data.message || 'Failed to load questions');
         setQuestions(data);
       } catch (err) {
         console.error('Quiz fetch error:', err.message);
@@ -47,7 +53,8 @@ const QuizPage = () => {
   useEffect(() => {
     if (questions.length > 0) {
       const newSteps = questions.map((q, idx) => {
-        const signLabel = q.correctLabel || q.options?.find((opt) => opt.isCorrect)?.label;
+        const signLabel =
+          q.correctLabel || q.options?.find((opt) => opt.isCorrect)?.label;
         return {
           label: `Q${idx + 1}`,
           completed: attemptedQuestions.has(signLabel),
@@ -79,7 +86,7 @@ const QuizPage = () => {
         results.multiHandedness?.length
       ) {
         const landmarks = results.multiHandLandmarks[0];
-        const handLabel = results.multiHandedness[0].label === "Left" ? "Right" : "Left";
+        const handLabel = results.multiHandedness[0].label; // Removed flip logic
         setLandmarksData({ points: landmarks, hand: handLabel });
       } else {
         setLandmarksData(null);
@@ -90,7 +97,8 @@ const QuizPage = () => {
       if (!isDynamic) return;
 
       const hands = new window.Hands({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
+        locateFile: (file) =>
+          `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
       });
 
       hands.setOptions({
@@ -137,50 +145,134 @@ const QuizPage = () => {
     };
   }, [isDynamic]);
 
-    const handleSubmit = useCallback(async () => {
+  // Auto-detection effect for dynamic signs
+  useEffect(() => {
+    if (!isDynamic || !autoChecking || hasSubmitted || !landmarksData) return;
+
+    let isActive = true; // Flag to handle component unmount
+
+    const checkSign = async () => {
+      // Normalize landmarks (relative to wrist)
+      const points = landmarksData.points;
+      const normalized = [];
+      const baseX = points[0].x;
+      const baseY = points[0].y;
+
+      for (let i = 1; i < points.length; i++) {
+        normalized.push(points[i].x - baseX);
+        normalized.push(points[i].y - baseY);
+      }
+
+      try {
+        const res = await fetch(`http://localhost:5000/api/confidence`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            features: normalized,
+            label: question.correctLabel,
+            hand: landmarksData.hand || 'Left',
+          }),
+        });
+
+        // Only update state if component is still mounted
+        if (!isActive) return;
+
+        const data = await res.json();
+
+        // Check both confidence and match status
+        if (data.confidence > 70 && data.match) {
+          setCountdown((prev) => {
+            if (prev >= 2) {
+              // 3 consecutive detections
+              handleSubmit();
+              return 0;
+            }
+            return prev + 1;
+          });
+        } else {
+          setCountdown(0);
+        }
+      } catch (err) {
+        console.error('Confidence check error:', err);
+      }
+    };
+
+    const interval = setInterval(checkSign, 1000);
+    return () => {
+      isActive = false; // Mark as inactive on unmount
+      clearInterval(interval);
+    };
+  }, [isDynamic, landmarksData, autoChecking, hasSubmitted, question, token]);
+  const handleSubmit = useCallback(async () => {
     if (!question || hasSubmitted) return;
 
     if (isDynamic) {
-      if (!landmarksData) return alert("No hand detected!");
+      if (!landmarksData) return alert('No hand detected!');
 
+      // Updated normalization: relative positions to wrist
+      // Replace the problematic normalization code in handleSubmit
       const points = landmarksData.points;
-      const baseX = points[0].x, baseY = points[0].y;
-      const maxDist = Math.max(...points.map(lm => Math.sqrt((lm.x - baseX) ** 2 + (lm.y - baseY) ** 2)), 1e-6);
+      const baseX = points[0].x;
+      const baseY = points[0].y;
+
+      // Calculate squared distances
+      const squaredDistances = points.map(
+        (lm) => (lm.x - baseX) ** 2 + (lm.y - baseY) ** 2
+      );
+
+      // Find max distance (with epsilon to prevent division by zero)
+      const maxDist = Math.max(...squaredDistances, 1e-6);
+      const sqrtMaxDist = Math.sqrt(maxDist);
+
+      // Normalize landmarks
       const normalized = points.flatMap((lm) => [
-        (lm.x - baseX) / maxDist,
-        (lm.y - baseY) / maxDist,
+        (lm.x - baseX) / sqrtMaxDist,
+        (lm.y - baseY) / sqrtMaxDist,
       ]);
 
       setHasSubmitted(true);
-      setAttemptedQuestions(prev => new Set(prev).add(question.correctLabel || question.signTitle));
+      setAttemptedQuestions((prev) =>
+        new Set(prev).add(question.correctLabel || question.signTitle)
+      );
 
       try {
         const res = await fetch(`http://localhost:5000/api/predict/infer`, {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             features: normalized,
             question: question.correctLabel,
-            hand: landmarksData.hand || "Left",
-            module
+            hand: landmarksData.hand || 'Left',
+            module,
           }),
         });
 
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Prediction failed");
-        setFeedback(data.answer === 'correct' ? '✅ Correct!' : '❌ Wrong!');
+        if (!res.ok) throw new Error(data.message || 'Prediction failed');
+
+        // Improved feedback message
+        if (data.answer === 'correct') {
+          setFeedback('✅ Correct! Great job!');
+        } else {
+          setFeedback(`❌ Try again! Expected: ${question.correctLabel}`);
+        }
       } catch (err) {
-        console.error("Prediction error:", err.message);
+        console.error('Prediction error:', err.message);
         setFeedback('❌ Error during prediction.');
       }
     } else {
       if (selectedOption === null) return;
 
       setHasSubmitted(true);
-      setAttemptedQuestions(prev => new Set(prev).add(question.correctLabel || question.signTitle));
+      setAttemptedQuestions((prev) =>
+        new Set(prev).add(question.correctLabel || question.signTitle)
+      );
 
       const selected = question.options[selectedOption];
       setFeedback(selected.isCorrect ? '✅ Correct!' : '❌ Wrong!');
@@ -200,17 +292,27 @@ const QuizPage = () => {
           }),
         });
       } catch (err) {
-        console.error("❌ Error saving static quiz progress:", err.message);
+        console.error('❌ Error saving static quiz progress:', err.message);
       }
     }
-  }, [hasSubmitted, isDynamic, landmarksData, module, question, selectedOption, token, userId]);
-  
+  }, [
+    hasSubmitted,
+    isDynamic,
+    landmarksData,
+    module,
+    question,
+    selectedOption,
+    token,
+    userId,
+  ]);
+
   const handleNext = () => {
-    if (!hasSubmitted) return alert("Please submit an answer first!");
+    if (!hasSubmitted) return alert('Please submit an answer first!');
     setHasSubmitted(false);
     setQuestionIndex((prev) => (prev + 1) % questions.length);
     setSelectedOption(null);
     setFeedback('');
+    setCountdown(0); // Reset countdown
   };
 
   if (questions.length === 0) return <div>Loading quiz...</div>;
@@ -243,7 +345,8 @@ const QuizPage = () => {
                   <div className="relative bg-pink-50 rounded-2xl px-8 py-6 text-center shadow-inner border-4 border-pink-400 -mt-10 ml-9">
                     <h3 className="text-2xl font-bold text-pink-700">
                       {(() => {
-                        const category = module.split('-')[1]?.trim().toLowerCase() || 'item';
+                        const category =
+                          module.split('-')[1]?.trim().toLowerCase() || 'item';
                         return `This sign represents which ${category}?`;
                       })()}
                     </h3>
@@ -264,12 +367,14 @@ const QuizPage = () => {
                       <div
                         key={index}
                         onClick={() => {
-                          if (!hasSubmitted) setSelectedOption(index); // Disable option changes after submit
+                          if (!hasSubmitted) setSelectedOption(index);
                         }}
                         className={`cursor-pointer border-4 rounded-2xl overflow-hidden shadow-md transition-all ${
                           selectedOption === index
                             ? hasSubmitted
-                              ? (question.options[index]?.isCorrect ? 'border-green-500 bg-green-100' : 'border-red-500 bg-red-100')
+                              ? question.options[index]?.isCorrect
+                                ? 'border-green-500 bg-green-100'
+                                : 'border-red-500 bg-red-100'
                               : 'border-purple-500 scale-105'
                             : 'border-gray-300'
                         }`}
@@ -277,8 +382,6 @@ const QuizPage = () => {
                         <div className="bg-white py-4 text-center font-bold text-purple-600 text-xl">
                           {opt.label}
                         </div>
-
-
                       </div>
                     ))}
                   </div>
@@ -287,9 +390,13 @@ const QuizPage = () => {
                     <div className="flex gap-6">
                       <button
                         onClick={handleSubmit}
-                        disabled={hasSubmitted || (!isDynamic && selectedOption === null)}
+                        disabled={
+                          hasSubmitted ||
+                          (!isDynamic && selectedOption === null)
+                        }
                         className={`${
-                          hasSubmitted || (!isDynamic && selectedOption === null) 
+                          hasSubmitted ||
+                          (!isDynamic && selectedOption === null)
                             ? 'bg-gray-400 cursor-not-allowed opacity-50'
                             : 'bg-pink-500 hover:bg-pink-600 transition transform hover:scale-105'
                         } text-white font-extrabold py-4 px-10 rounded-full shadow-lg text-xl`}
@@ -322,7 +429,6 @@ const QuizPage = () => {
                         {feedback}
                       </motion.div>
                     )}
-
                   </div>
                 </div>
               </div>
@@ -330,7 +436,9 @@ const QuizPage = () => {
               <div className="flex flex-col md:flex-row w-full gap-12 items-center">
                 <div className="flex flex-col items-center w-full md:w-1/3 min-h-[280px]">
                   <div className="relative bg-pink-50 rounded-2xl px-8 py-6 text-center shadow-inner border-4 border-pink-400 -mt-10 ml-6">
-                    <h3 className="text-2xl font-bold text-pink-700">{question.prompt}</h3>
+                    <h3 className="text-2xl font-bold text-pink-700">
+                      {question.prompt}
+                    </h3>
                   </div>
                   <div className="flex justify-center items-center bg-pink-500 rounded-full w-36 h-36 shadow-lg mt-6">
                     <p className="text-5xl font-extrabold text-white animate-bounce">
@@ -360,8 +468,14 @@ const QuizPage = () => {
                         objectFit: 'cover',
                       }}
                     />
-                    
                   </div>
+
+                  {/* Auto-detection countdown */}
+                  {countdown > 0 && (
+                    <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full mb-4 animate-pulse">
+                      ✅ Detected! Auto-submitting in {3 - countdown}...
+                    </div>
+                  )}
 
                   <div className="flex flex-col items-center gap-3">
                     <div className="flex gap-2 mt-2">
@@ -378,8 +492,8 @@ const QuizPage = () => {
                       </button>
                       <button
                         onClick={handleNext}
-                        disabled={!feedback} 
-                         className={`${
+                        disabled={!feedback}
+                        className={`${
                           !feedback
                             ? 'bg-gray-300 cursor-not-allowed opacity-50'
                             : 'bg-blue-500 hover:bg-blue-600 transition transform hover:scale-105'
@@ -389,12 +503,50 @@ const QuizPage = () => {
                       </button>
                     </div>
 
+                    {/* Auto-check toggle */}
+                    <div className="flex items-center gap-2 mt-2">
+                      <label className="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={autoChecking}
+                          onChange={() => setAutoChecking(!autoChecking)}
+                          className="mr-2 h-5 w-5 text-pink-600"
+                        />
+                        Auto-detect
+                      </label>
+                    </div>
+
+                    {/* Improved feedback display */}
                     {feedback && (
-                      <div className={`text-lg font-bold px-6 py-3 rounded-full ${
-                        feedback.includes('Correct') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-700'
-                      }`}>
-                        {feedback}
-                      </div>
+                      <motion.div
+                        initial={{ scale: 0.8 }}
+                        animate={{ scale: 1 }}
+                        className={`text-2xl font-bold px-8 py-4 rounded-2xl shadow-lg ${
+                          feedback.includes('Correct')
+                            ? 'bg-green-100 text-green-800 border-4 border-green-500'
+                            : 'bg-red-100 text-red-800 border-4 border-red-500'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          {feedback.includes('Correct') ? (
+                            <>
+                              <span className="text-3xl">🎉</span>
+                              <span>Perfect! Great job!</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-3xl">🤔</span>
+                              <div>
+                                <div>Almost! Try again</div>
+                                <div className="text-lg font-normal">
+                                  Expected:{' '}
+                                  <strong>{question.correctLabel}</strong>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </motion.div>
                     )}
                   </div>
                 </div>
@@ -405,7 +557,6 @@ const QuizPage = () => {
       </div>
     </div>
   );
-
 };
 
 export default QuizPage;
