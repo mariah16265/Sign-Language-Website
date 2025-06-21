@@ -63,14 +63,14 @@ const SignVideoPage = () => {
             </h2>
 
             {/* Video Player */}
-            <div className="w-full flex justify-center mb-6 md:mb-8">
+            <div className="w-full flex justify-center mb-2 md:mb-2">
               {videoUrl ? (
                 <video
                   ref={videoRef}
                   src={videoUrl}
                   controls
                   loop
-                  className="rounded-2xl w-full max-h-[400px] md:max-h-[450px] lg:max-h-[500px] object-cover shadow-xl"
+                  className="rounded-2xl max-w-full max-h-[500px] object-contain shadow-xl"
                   />
               ) : (
                 <p className="text-center text-red-600 font-semibold">Video not found.</p>

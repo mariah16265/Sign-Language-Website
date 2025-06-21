@@ -44,7 +44,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/modules', signsDataRoutes);
 app.use('/api/lessons', signsDataRoutes);
 
-//Route to save studyplan
+//Route to save or get studyplan
 app.use('/api/studyplan', studyPlanRoutes);
 
 //Route to display dashboard content
