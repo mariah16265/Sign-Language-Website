@@ -6,8 +6,8 @@ import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 
 const quizModules = [
-  { module: 'Alphabets', subject: 'English', status: 'completed' },
-  { module: 'Animals', subject: 'English', status: 'available' },
+  { path: 'Equiz' ,module: 'Alphabets', subject: 'English', status: 'available' },
+  { path: 'Wquiz' , module: 'Animals', subject: 'English', status: 'available' },
   { module: 'Colors', subject: 'English', status: 'locked' },
   { module: 'Vocabulary', subject: 'English', status: 'locked' },
 ];
@@ -15,8 +15,8 @@ const quizModules = [
 const QuizSelectionPage = () => {
   const navigate = useNavigate();
 
-  const handleStartQuiz = (moduleName) => {
-    navigate(`/quiz/${moduleName.toLowerCase()}`);
+  const handleStartQuiz = (path) => {
+    navigate(`/${path}`);
   };
 
   return (
@@ -40,7 +40,7 @@ const QuizSelectionPage = () => {
             className="bg-white rounded-2xl shadow-lg p-6 border-8 border-pink-300 w-full max-w-[80rem] flex flex-col gap-6"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {quizModules.map(({ module, subject, status }) => (
+              {quizModules.map(({ path, module, subject, status }) => (
                 <motion.div
                   key={module}
                   className={`rounded-2xl p-6 border-4 shadow-md transition-all duration-200 ${
@@ -69,7 +69,7 @@ const QuizSelectionPage = () => {
                         Completed
                       </span>
                       <button
-                        onClick={() => handleStartQuiz(module)}
+                        onClick={() => handleStartQuiz(path)}
                         className="text-sm font-semibold text-blue-600 underline hover:text-blue-800"
                       >
                         Retry
@@ -79,7 +79,7 @@ const QuizSelectionPage = () => {
 
                   {status === 'available' && (
                     <button
-                      onClick={() => handleStartQuiz(module)}
+                      onClick={() => handleStartQuiz(path)}  // ✅ correct
                       className="mt-2 flex items-center bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow"
                     >
                       <FaPlayCircle className="mr-2" size={18} />

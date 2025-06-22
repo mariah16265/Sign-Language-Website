@@ -29,8 +29,8 @@ const generateQuizForModule = async (req, res) => {
 
     pushN(staticQs, 2);
     pushN(dynamicQs, 3);
-    pushN(staticQs, 3);
-    pushN(dynamicQs, 4);
+    pushN(staticQs, 2);
+    pushN(dynamicQs, 3);
 
     const finalQuestions = orderedQuestions.map((q) => {
       if (q.type === 'static') {
@@ -40,7 +40,7 @@ const generateQuizForModule = async (req, res) => {
 
         const options = shuffle([
           { label: q.signTitle, isCorrect: true },
-          ...incorrectLabels.map((label) => ({ label, isCorrect: false })),
+          ...incorrectLabels.map((label) => ({ label: label.toUpperCase(), isCorrect: false })),
         ]);
 
         return {
