@@ -9,25 +9,21 @@ const StepProgressBar = ({ steps }) => (
           <motion.div
             initial={{ scale: 0.9 }}
             animate={{
-              scale: step.current ? 1.3 : 1,
+              scale: step.current ? 1.2 : 1,
               background: step.completed
-                ? "linear-gradient(135deg, #D8B4FE, #8B5CF6)"
+                ? 'linear-gradient(135deg, #A5B4FC, #6366F1)' // indigo gradient
                 : step.current
-                ? "linear-gradient(135deg, #34D399, #059669)"
-                : "#E5E7EB",
-              boxShadow: step.current
-                ? "0 0 10px 4px rgba(16,185,129,0.7)"
-                : step.completed
-                ? "0 0 10px 3px rgba(139,92,246,0.6)"
-                : "none",
+                ? 'linear-gradient(135deg, #FCD34D, #F59E0B)' // amber gradient
+                : '#E5E7EB', // gray
             }}
-            transition={{ duration: 0.4, type: "spring", stiffness: 300 }}
-            className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold cursor-default"
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.3, type: 'spring', stiffness: 400 }}
+            className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold cursor-default"
           >
             {step.completed ? (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-6 h-6"
+                className="w-5 h-5"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -43,8 +39,8 @@ const StepProgressBar = ({ steps }) => (
             ) : (
               <span
                 className={`${
-                  step.current ? "text-green-400" : "text-gray-400"
-                }`}
+                  step.current ? 'text-amber-100' : 'text-gray-500'
+                } text-md`}
               >
                 {i + 1}
               </span>
@@ -53,13 +49,13 @@ const StepProgressBar = ({ steps }) => (
           <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-            className={`mt-1 text-xs font-semibold ${
+            transition={{ delay: 0.2, duration: 0.3 }}
+            className={`text-xs font-medium mt-3 ${
               step.current
-                ? "text-green-500"
+                ? 'text-amber-600'
                 : step.completed
-                ? "text-purple-500"
-                : "text-gray-400"
+                ? 'text-indigo-600'
+                : 'text-gray-400'
             }`}
           >
             {step.label}
@@ -70,9 +66,9 @@ const StepProgressBar = ({ steps }) => (
           <motion.div
             initial={{ scaleX: 1 }}
             animate={{ scaleX: 1 }}
-            transition={{ duration: 0.5 }}
-            style={{ originX: 0 }}
-            className="h-1 w-12 rounded bg-gradient-to-r from-pink-400 via-purple-500 to-indigo-600"
+            className={`h-0.5 w-8 rounded-full ${
+              step.completed ? 'bg-indigo-300' : 'bg-gray-200'
+            }`}
           />
         )}
       </React.Fragment>
