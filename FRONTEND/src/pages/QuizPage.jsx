@@ -385,14 +385,24 @@ const QuizPage = () => {
     );
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-pink-50 to-white overflow-hidden">
+    <div
+      className="relative min-h-screen overflow-hidden"
+      style={{
+        backgroundImage: "url('/assets/quizbg.jpg')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
+      {/* <div className="absolute inset-0 bg-opacity-60"></div> */}
       <Navbar userName="Michael Bob" userAvatar="/images/avatar.jpg" />
       <div className="flex flex-col lg:flex-row min-h-screen z-10 relative">
         <Sidebar />
         <div className="flex-1 pt-6 px-4 md:pt-8 md:px-6 lg:pt-10 lg:px-12 flex flex-col items-center pb-16">
           {' '}
           <div className="w-full max-w-7xl mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-center text-pink-700 mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-center text-purple-600 mb-2 baloo-font">
               {module} Quiz
             </h2>
           </div>
@@ -400,7 +410,7 @@ const QuizPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="bg-white rounded-3xl shadow-lg p-6 md:p-8 border-4 border-pink-200 w-full max-w-[80rem] min-h-[550px] flex flex-col gap-8 justify-between"
+            className="bg-white/80 rounded-3xl shadow-lg p-6 md:p-8 border-4 border-pink-200 w-full max-w-[80rem] min-h-[550px] flex flex-col gap-8 justify-between"
           >
             <div className="w-full">
               <StepProgressBar steps={steps} />
@@ -545,10 +555,10 @@ const QuizPage = () => {
               </div>
             ) : (
               <div className="flex flex-col md:flex-row w-full gap-6 md:gap-8 items-center">
-                <div className="flex flex-col items-center w-full md:w-2/5">
+                <div className="flex flex-col items-center w-full md:w-2/5 -mt-7">
                   <div className="relative bg-pink-100 rounded-2xl px-8 py-4 text-center border-2 border-pink-300 ">
                     <h3 className="text-2xl font-bold text-pink-800">
-                      {question.prompt}
+                      Show the sign for
                     </h3>
                   </div>
                   <motion.div
