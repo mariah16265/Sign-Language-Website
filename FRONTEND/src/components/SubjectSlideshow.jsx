@@ -9,6 +9,20 @@ const SubjectSlideshow = ({ subjects, totalSubjects }) => {
   const lessonCount = currentSubject.lessons.length;
   const isFullWidth = totalSubjects === 1;
 
+  // Determine text color styles
+  const getTextColorStyle = () => {
+    switch (currentSubject.name) {
+      case 'English':
+        return { color: 'white' }; // blue-500
+      case 'Arabic':
+        return { color: '	#f1f5f9	' };
+      default:
+        return { color: '#ffffff' }; // White for darker backgrounds
+    }
+  };
+
+  const textStyle = getTextColorStyle();
+
   if (currentSubject.lessons.length === 0) {
     return (
       <div className="relative h-80 rounded-2xl overflow-hidden shadow-xl border-2 border-white">
@@ -17,7 +31,10 @@ const SubjectSlideshow = ({ subjects, totalSubjects }) => {
         >
           <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/asfalt-light.png')]" />
         </div>
-        <div className="relative h-full flex items-center justify-center p-6 text-white">
+        <div
+          className="relative h-full flex items-center justify-center p-6"
+          style={textStyle}
+        >
           <p>No lessons scheduled for today</p>
         </div>
       </div>
@@ -86,7 +103,7 @@ const SubjectSlideshow = ({ subjects, totalSubjects }) => {
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/asfalt-light.png')]" />
       </div>
 
-      <div className="relative h-full flex flex-col p-6 text-white">
+      <div className="relative h-full flex flex-col p-6" style={textStyle}>
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -104,6 +121,7 @@ const SubjectSlideshow = ({ subjects, totalSubjects }) => {
               whileTap={{ scale: 0.98 }}
               className={`flex flex-col items-center justify-center ${size} bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-all`}
               onClick={() => navigate(lesson.path)}
+              style={textStyle}
             >
               <span className={`${isFullWidth ? 'text-4xl' : 'text-2xl'} mb-1`}>
                 {lesson.emoji}
@@ -120,7 +138,7 @@ const SubjectSlideshow = ({ subjects, totalSubjects }) => {
               </h4>
               <p
                 className={`${
-                  isFullWidth ? 'text-sm' : 'text-[0.7rem]'
+                  isFullWidth ? 'text-base' : 'text-[0.9rem]'
                 } opacity-90 text-center`}
               >
                 {lesson.subtitle}

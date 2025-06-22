@@ -107,6 +107,8 @@ const LandingPage = () => {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
+            filter: 'blur(4px)',
+            opacity: '0.9',
           }}
         />
       </div>
@@ -351,35 +353,22 @@ const LandingPage = () => {
                   through visual sign language lessons.
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 relative">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.1 }}
-                    className="relative h-full rounded-xl overflow-hidden shadow-lg bg-black flex items-center justify-center"
-                  >
-                    <LazyVideo src="/Sign Language Videos/English/beginner/Module 10- Numbers/14.mp4" />
-                  </motion.div>
-
-                  {/* First Landscape Video - Top Right */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                    className="relative aspect-video rounded-xl overflow-hidden shadow-lg bg-black"
-                  >
-                    <LazyVideo src="/Sign Language Videos/English/beginner/Module 10- Numbers/9.webm" />
-                  </motion.div>
-
-                  {/* Second Landscape Video - Bottom Right */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.3 }}
-                    className="relative aspect-video rounded-xl overflow-hidden shadow-lg bg-black md:mt-32"
-                  >
-                    <LazyVideo src="/Sign Language Videos/English/beginner/Module 10- Numbers/11.webm" />
-                  </motion.div>
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    '/Sign Language Videos/English/beginner/Module 10- Numbers/14.mp4',
+                    '/Sign Language Videos/English/beginner/Module 10- Numbers/9.webm',
+                    '/Sign Language Videos/English/beginner/Module 10- Numbers/11.webm',
+                  ].map((video, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: i * 0.1 }}
+                      className="relative h-48 md:h-56 rounded-xl overflow-hidden shadow-lg"
+                    >
+                      <LazyVideo src={video} />
+                    </motion.div>
+                  ))}
                 </div>
               </motion.div>
 
