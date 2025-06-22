@@ -36,3 +36,17 @@
     transform: rotate(360deg);
   }
 }
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spinner {
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #4f46e5; /* Indigo-600 color or any you want */
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
