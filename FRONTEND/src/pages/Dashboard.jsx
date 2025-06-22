@@ -518,7 +518,7 @@ const Dashboard = () => {
             {/* Learning Progress - Right Side */}
             <div className="bg-gradient-to-r from-lime-100 to-green-200 p-6 rounded-2xl shadow-md border border-gray-100">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-green-800">
+                <h3 className="text-2xl font-bold text-green-800">
                   Learning Progress
                 </h3>
                 <div className="flex items-center gap-2">

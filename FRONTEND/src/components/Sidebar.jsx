@@ -27,15 +27,10 @@ const Sidebar = () => {
     {
       icon: <FaPuzzlePiece className="text-2xl" />,
       label: 'Quiz',
-      color: 'bg-amber-500 hover:bg-amber-600',
+      color: 'bg-emerald-500 hover:bg-emerald-600',
       path: '/quiz',
     },
-    {
-      icon: <FaChartBar className="text-2xl" />,
-      label: 'Progress',
-      color: 'bg-emerald-500 hover:bg-emerald-600',
-      path: '/progress',
-    },
+
     {
       icon: <FaSearch className="text-xl" />,
       label: 'Signs',
@@ -47,13 +42,13 @@ const Sidebar = () => {
   return (
     <div className="lg:w-64 w-full bg-gradient-to-b from-yellow-300 via-amber-300 to-red-400 shadow-lg px-6 py-8 flex flex-col rounded-none lg:rounded-r-3xl">
       <div className="h-16"></div>
-      <nav className="flex flex-col gap-8 mt-6">
+      <nav className="flex flex-col gap-11 mt-6">
         {tabs.map(({ icon, label, color, path }, index) => {
           const isActive = location.pathname.startsWith(path);
           return (
             <button
               key={index}
-              className={`relative flex items-center gap-3 pl-5 pr-6 py-5 text-white rounded-xl transition-all shadow-md ${color} hover:scale-[1.02] overflow-hidden ${
+              className={`relative flex items-center gap-4 pl-6 pr-8 py-6 text-white rounded-2xl transition-all shadow-md ${color} hover:scale-[1.02] overflow-hidden ${
                 isActive
                   ? 'ring-4 ring-white ring-offset-2 ring-offset-indigo-600 scale-[1.03]'
                   : ''
@@ -63,14 +58,17 @@ const Sidebar = () => {
               {isActive && (
                 <span className="absolute left-0 top-0 bottom-0 w-1.5 bg-white rounded-r-full animate-pulse"></span>
               )}
-              {icon}
-              <span className="font-bold text-base drop-shadow-sm tracking-wide">
+              {/* Increase icon size here */}
+              <div className="text-3xl">{icon}</div>
+
+              <span className="font-bold text-lg drop-shadow-sm tracking-wide">
                 {label}
               </span>
             </button>
           );
         })}
       </nav>
+
       <div className="flex-grow"></div>
     </div>
   );

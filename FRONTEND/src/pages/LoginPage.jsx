@@ -173,7 +173,7 @@ const LoginPage = () => {
   return (
     <div className="relative min-h-screen flex flex-col">
       {/* Navbar */}
-      <div className="w-full z-20">
+      <div className="w-full z-50">
         <Navbar hideLoginButton={true} />
       </div>
 

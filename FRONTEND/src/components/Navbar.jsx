@@ -16,22 +16,23 @@ const Navbar = ({ hideLoginButton = false }) => {
     switch (location.pathname) {
       case '/':
         return {
-          bg: 'bg-gradient-to-r from-amber-100 to-amber-50',
-          text: 'from-amber-600 to-orange-500',
-          icon: 'text-orange-500',
-          button: 'from-orange-400 to-orange-500',
-          buttonHover: 'from-orange-500 to-orange-600',
-          navText: 'text-orange-700 hover:text-orange-500',
-          border: 'border-orange-500',
+          bg: 'bg-white',
+          text: 'from-sky-600 to-blue-600',
+          icon: 'text-sky-600',
+          button: 'from-sky-300 to-sky-400',
+          buttonHover: 'from-sky-400 to-sky-500',
+          navText: 'text-sky-700 hover:text-sky-600',
+          border: 'border-sky-400',
         };
+
       case '/signup':
         return {
           bg: 'bg-pink-50',
-          text: 'from-pink-600 to-fuchsia-500',
+          text: 'from-pink-600 to-fuchsia-500', // Updated text gradient
           icon: 'text-pink-600',
           button: 'from-fuchsia-500 to-pink-500',
           buttonHover: 'from-pink-600 to-fuchsia-600',
-          navBg: 'bg-pink-50', // lighter navbar bg here
+          navBg: 'bg-pink-50',
           navText: 'text-pink-700 hover:text-fuchsia-500',
           border: 'border-pink-400',
         };
@@ -39,7 +40,7 @@ const Navbar = ({ hideLoginButton = false }) => {
       case '/login':
         return {
           bg: 'bg-gradient-to-r from-amber-100 to-amber-50',
-          text: 'from-orange-600 to-yellow-500',
+          text: 'from-orange-600 to-yellow-500', // Updated text gradient
           icon: 'text-orange-500',
           button: 'from-yellow-500 to-orange-400',
           buttonHover: 'from-orange-500 to-orange-600',
@@ -49,7 +50,7 @@ const Navbar = ({ hideLoginButton = false }) => {
       case '/dashboard':
         return {
           bg: 'bg-white',
-          text: 'text-orange-700',
+          text: 'from-orange-600 to-orange-400', // Updated text gradient
           icon: 'text-orange-600',
           button: 'bg-orange-400',
           buttonHover: 'bg-orange-500',
@@ -60,7 +61,7 @@ const Navbar = ({ hideLoginButton = false }) => {
       case '/studyplan':
         return {
           bg: 'bg-gradient-to-r from-green-50 to-green-100',
-          text: 'from-green-600 to-lime-500',
+          text: 'from-green-600 to-lime-500', // Updated text gradient
           icon: 'text-green-600',
           button: 'from-lime-500 to-green-500',
           buttonHover: 'from-green-600 to-green-700',
@@ -70,7 +71,7 @@ const Navbar = ({ hideLoginButton = false }) => {
       default:
         return {
           bg: 'bg-white',
-          text: 'text-orange-700',
+          text: 'from-orange-600 to-orange-400', // Updated text gradient
           icon: 'text-orange-600',
           button: 'bg-orange-400',
           buttonHover: 'bg-orange-500',
@@ -122,15 +123,17 @@ const Navbar = ({ hideLoginButton = false }) => {
     <nav
       className={`${colors.bg} shadow-sm px-6 py-4 flex justify-between items-center sticky top-0 z-40 transition-colors duration-300`}
     >
-      {/* Logo */}
+      {/* Logo - fixed alignment */}
       <motion.div
-        className="flex items-center space-x-3" // Changed to items-baseline and added pt-1
+        className="flex items-center space-x-3"
         whileHover={{ scale: 1.05 }}
         transition={{ type: 'spring', stiffness: 400, damping: 10 }}
       >
-        <GiHand className={`text-4xl ${colors.icon} relative top-0.5`} />{' '}
-        {/* Added top positioning */}
-        <h1 className="text-2xl sm:text-3xl font-extrabold leading-snug text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-400 pb-0.5">
+        <GiHand className={`text-4xl ${colors.icon}`} />
+        <h1
+          className={`text-2xl sm:text-3xl font-medium text-transparent bg-clip-text bg-gradient-to-r ${colors.text} tracking-tight`}
+          style={{ fontFamily: "'Fredoka One', cursive" }}
+        >
           LittleSigns
         </h1>
       </motion.div>
