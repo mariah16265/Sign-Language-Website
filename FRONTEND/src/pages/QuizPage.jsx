@@ -10,8 +10,17 @@ const QuizPage = () => {
   const location = useLocation();
   const module = location.state?.moduleName || 'Module 1- Alphabets';
 
-  const webcamRef = useRef(null);
+  // ----- REFS -----
+  const webcamRef = useRef(null);  
+  const cameraRef = useRef(null);
+  const countdownRef = useRef(0);
+  const intervalRef = useRef(null);
+  const hasStartedCountdownRef = useRef(false);
+  const isSubmittingRef = useRef(false);
+  const landmarksDataRef = useRef(null);
+  const handleSubmitRef = useRef(null);
 
+  // ----- STATE -----
   const [landmarksData, setLandmarksData] = useState(null);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -20,27 +29,26 @@ const QuizPage = () => {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [attemptedQuestions, setAttemptedQuestions] = useState(new Set());
   const [steps, setSteps] = useState([]);
-  const [autoChecking, setAutoChecking] = useState(true); // New state for auto-detection
-  const [countdown, setCountdown] = useState(0); // New state for countdown
+  const [autoChecking, setAutoChecking] = useState(true);
+  const [countdown, setCountdown] = useState(0);
+  const [isCountingDown, setIsCountingDown] = useState(false);
 
+  // ----- INFO -----
   const token = localStorage.getItem('token');
   const userId = localStorage.getItem('userId');
-
   const question = questions[questionIndex];
   const isDynamic = question?.type === 'dynamic';
 
+  // ----- FETCH QUESTIONS -----
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
         const res = await fetch(
           `http://localhost:5000/api/quiz-questions/module/${module}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await res.json();
-        if (!res.ok)
-          throw new Error(data.message || 'Failed to load questions');
+        if (!res.ok) throw new Error(data.message || 'Failed to load questions');
         setQuestions(data);
       } catch (err) {
         console.error('Quiz fetch error:', err.message);
@@ -50,6 +58,7 @@ const QuizPage = () => {
     fetchQuestions();
   }, [token, userId, module]);
 
+  // ----- UPDATE STEPS PROGRESS -----
   useEffect(() => {
     if (questions.length > 0) {
       const newSteps = questions.map((q, idx) => {
@@ -65,8 +74,7 @@ const QuizPage = () => {
     }
   }, [questions, attemptedQuestions, questionIndex]);
 
-  const cameraRef = useRef(null);
-
+  // ----- SETUP MEDIA PIPE AND CAMERA -----
   useEffect(() => {
     if (!isDynamic) {
       if (cameraRef.current) {
@@ -77,16 +85,12 @@ const QuizPage = () => {
     }
 
     let isMounted = true;
-
     const onResults = (results) => {
       if (!isMounted) return;
 
-      if (
-        results.multiHandLandmarks?.length &&
-        results.multiHandedness?.length
-      ) {
+      if (results.multiHandLandmarks?.length && results.multiHandedness?.length) {
         const landmarks = results.multiHandLandmarks[0];
-        const handLabel = results.multiHandedness[0].label; // Removed flip logic
+        const handLabel = results.multiHandedness[0].label;
         setLandmarksData({ points: landmarks, hand: handLabel });
       } else {
         setLandmarksData(null);
@@ -95,21 +99,17 @@ const QuizPage = () => {
 
     const setupMediaPipe = async () => {
       if (!isDynamic) return;
-
       const hands = new window.Hands({
         locateFile: (file) =>
           `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
       });
-
       hands.setOptions({
         maxNumHands: 1,
         modelComplexity: 1,
         minDetectionConfidence: 0.6,
         minTrackingConfidence: 0.6,
       });
-
       hands.onResults(onResults);
-
       const waitForVideo = () =>
         new Promise((resolve) => {
           const check = () => {
@@ -120,7 +120,6 @@ const QuizPage = () => {
         });
 
       await waitForVideo();
-
       cameraRef.current = new window.Camera(webcamRef.current.video, {
         onFrame: async () => {
           if (webcamRef.current?.video) {
@@ -133,9 +132,7 @@ const QuizPage = () => {
 
       cameraRef.current.start();
     };
-
     setupMediaPipe();
-
     return () => {
       isMounted = false;
       if (cameraRef.current) {
@@ -145,100 +142,41 @@ const QuizPage = () => {
     };
   }, [isDynamic]);
 
-  // Auto-detection effect for dynamic signs
-  useEffect(() => {
-    if (!isDynamic || !autoChecking || hasSubmitted || !landmarksData) return;
-
-    let isActive = true; // Flag to handle component unmount
-
-    const checkSign = async () => {
-      // Normalize landmarks (relative to wrist)
-      const points = landmarksData.points;
-      const normalized = [];
-      const baseX = points[0].x;
-      const baseY = points[0].y;
-
-      for (let i = 1; i < points.length; i++) {
-        normalized.push(points[i].x - baseX);
-        normalized.push(points[i].y - baseY);
-      }
-
-      try {
-        const res = await fetch(`http://localhost:5000/api/confidence`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            features: normalized,
-            label: question.correctLabel,
-            hand: landmarksData.hand || 'Left',
-          }),
-        });
-
-        // Only update state if component is still mounted
-        if (!isActive) return;
-
-        const data = await res.json();
-
-        // Check both confidence and match status
-        if (data.confidence > 70 && data.match) {
-          setCountdown((prev) => {
-            if (prev >= 2) {
-              // 3 consecutive detections
-              handleSubmit();
-              return 0;
-            }
-            return prev + 1;
-          });
-        } else {
-          setCountdown(0);
-        }
-      } catch (err) {
-        console.error('Confidence check error:', err);
-      }
-    };
-
-    const interval = setInterval(checkSign, 1000);
-    return () => {
-      isActive = false; // Mark as inactive on unmount
-      clearInterval(interval);
-    };
-  }, [isDynamic, landmarksData, autoChecking, hasSubmitted, question, token]);
+  // ----- HANDLE SUBMIT -----
   const handleSubmit = useCallback(async () => {
-    if (!question || hasSubmitted) return;
+    if (!question || hasSubmitted || isSubmittingRef.current) return;
 
-    if (isDynamic) {
-      if (!landmarksData) return alert('No hand detected!');
+    isSubmittingRef.current = true;
 
-      // Updated normalization: relative positions to wrist
-      // Replace the problematic normalization code in handleSubmit
-      const points = landmarksData.points;
-      const baseX = points[0].x;
-      const baseY = points[0].y;
+    try {
+      if (isDynamic) {
+        if (!landmarksData) {
+          alert('No hand detected!');
+          isSubmittingRef.current = false;
+          return;
+        }
 
-      // Calculate squared distances
-      const squaredDistances = points.map(
-        (lm) => (lm.x - baseX) ** 2 + (lm.y - baseY) ** 2
-      );
+        const points = landmarksData.points;
+        const baseX = points[0].x;
+        const baseY = points[0].y;
 
-      // Find max distance (with epsilon to prevent division by zero)
-      const maxDist = Math.max(...squaredDistances, 1e-6);
-      const sqrtMaxDist = Math.sqrt(maxDist);
+        const squaredDistances = points.map(
+          (lm) => (lm.x - baseX) ** 2 + (lm.y - baseY) ** 2
+        );
 
-      // Normalize landmarks
-      const normalized = points.flatMap((lm) => [
-        (lm.x - baseX) / sqrtMaxDist,
-        (lm.y - baseY) / sqrtMaxDist,
-      ]);
+        const maxDist = Math.max(...squaredDistances, 1e-6);
+        const sqrtMaxDist = Math.sqrt(maxDist);
 
-      setHasSubmitted(true);
-      setAttemptedQuestions((prev) =>
-        new Set(prev).add(question.correctLabel || question.signTitle)
-      );
+        const normalized = points.flatMap((lm) => [
+          (lm.x - baseX) / sqrtMaxDist,
+          (lm.y - baseY) / sqrtMaxDist,
+        ]);
 
-      try {
+        setHasSubmitted(true);
+        setAttemptedQuestions((prev) =>
+          new Set(prev).add(question.correctLabel || question.signTitle)
+        );
+
         const res = await fetch(`http://localhost:5000/api/predict/infer`, {
           method: 'POST',
           headers: {
@@ -256,44 +194,48 @@ const QuizPage = () => {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || 'Prediction failed');
 
-        // Improved feedback message
         if (data.answer === 'correct') {
           setFeedback('✅ Correct! Great job!');
         } else {
           setFeedback(`❌ Try again! Expected: ${question.correctLabel}`);
         }
-      } catch (err) {
-        console.error('Prediction error:', err.message);
-        setFeedback('❌ Error during prediction.');
+      } else {
+        if (selectedOption === null) {
+          isSubmittingRef.current = false;
+          return;
+        }
+
+        setHasSubmitted(true);
+        setAttemptedQuestions((prev) =>
+          new Set(prev).add(question.correctLabel || question.signTitle)
+        );
+
+        const selected = question.options[selectedOption];
+        setFeedback(selected.isCorrect ? '✅ Correct!' : '❌ Wrong!');
+
+        try {
+          await fetch(`http://localhost:5000/api/quiz-static/save/${userId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              userId,
+              module,
+              signTitle: question.options.find((opt) => opt.isCorrect)?.label,
+              isCorrect: selected.isCorrect,
+            }),
+          });
+        } catch (err) {
+          console.error('❌ Error saving static quiz progress:', err.message);
+        }
       }
-    } else {
-      if (selectedOption === null) return;
-
-      setHasSubmitted(true);
-      setAttemptedQuestions((prev) =>
-        new Set(prev).add(question.correctLabel || question.signTitle)
-      );
-
-      const selected = question.options[selectedOption];
-      setFeedback(selected.isCorrect ? '✅ Correct!' : '❌ Wrong!');
-
-      try {
-        await fetch(`http://localhost:5000/api/quiz-static/save/${userId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            userId,
-            module,
-            signTitle: question.options.find((opt) => opt.isCorrect)?.label,
-            isCorrect: selected.isCorrect,
-          }),
-        });
-      } catch (err) {
-        console.error('❌ Error saving static quiz progress:', err.message);
-      }
+    } catch (err) {
+      console.error('Prediction error:', err.message);
+      setFeedback('❌ Error during prediction.');
+    } finally {
+      isSubmittingRef.current = false;
     }
   }, [
     hasSubmitted,
@@ -306,13 +248,84 @@ const QuizPage = () => {
     userId,
   ]);
 
+  // ----- UPDATE REFS -----
+  useEffect(() => {
+    handleSubmitRef.current = handleSubmit;
+  }, [handleSubmit]);
+
+  useEffect(() => {
+    landmarksDataRef.current = landmarksData;
+  }, [landmarksData]);
+
+  // ----- COUNTDOWN EFFECT -----
+  useEffect(() => {
+    if (!isDynamic || !autoChecking || hasSubmitted) return;
+
+    if (!landmarksData) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      hasStartedCountdownRef.current = false;
+      setIsCountingDown(false);
+      setCountdown(0);
+      countdownRef.current = 0;
+      return;
+    }
+
+    if (landmarksData && !hasStartedCountdownRef.current) {
+      hasStartedCountdownRef.current = true;
+      setIsCountingDown(true);
+
+      countdownRef.current = 3;
+      setCountdown(3);
+
+      intervalRef.current = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+            hasStartedCountdownRef.current = false;
+            setIsCountingDown(false);
+            handleSubmitRef.current();
+            return 0;
+          }
+          countdownRef.current = prev - 1;
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    // No cleanup here to avoid clearing interval on every landmarksData change
+  }, [landmarksData, isDynamic, autoChecking, hasSubmitted]);
+
+  // ----- CLEANUP ON UNMOUNT OR KEY STATE CHANGE -----
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      hasStartedCountdownRef.current = false;
+      setIsCountingDown(false);
+      setCountdown(0);
+      countdownRef.current = 0;
+    };
+  }, [isDynamic, autoChecking, hasSubmitted]);
+
+  // ----- NEXT QUESTION -----
   const handleNext = () => {
-    if (!hasSubmitted) return alert('Please submit an answer first!');
+    if (!hasSubmitted) return;
+    clearInterval(intervalRef.current);
+    intervalRef.current = null;
+    setIsCountingDown(false);
+    setCountdown(0);
+
     setHasSubmitted(false);
     setQuestionIndex((prev) => (prev + 1) % questions.length);
     setSelectedOption(null);
     setFeedback('');
-    setCountdown(0); // Reset countdown
+    setCountdown(0);
   };
 
   if (questions.length === 0) return <div>Loading quiz...</div>;
@@ -471,24 +484,30 @@ const QuizPage = () => {
                   </div>
 
                   {/* Auto-detection countdown */}
-                  {countdown > 0 && (
+                  {isCountingDown && (
                     <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full mb-4 animate-pulse">
-                      ✅ Detected! Auto-submitting in {3 - countdown}...
+                      ✅ Detected! Auto-submitting in {countdown}...
                     </div>
                   )}
+
 
                   <div className="flex flex-col items-center gap-3">
                     <div className="flex gap-2 mt-2">
                       <button
-                        onClick={handleSubmit}
-                        disabled={hasSubmitted || !landmarksData}
-                        className={`${
-                          hasSubmitted || !landmarksData
-                            ? 'bg-gray-400 cursor-not-allowed opacity-50'
-                            : 'bg-pink-500 hover:bg-pink-600 transition transform hover:scale-105'
-                        } text-white font-extrabold py-4 px-10 rounded-full shadow-lg text-xl`}
+                        disabled={true}
+                        className={`flex items-center justify-center gap-2
+                          ${
+                            hasSubmitted && !feedback
+                              ? 'bg-pink-500' // submitted but feedback not shown yet → show pink
+                              : 'bg-gray-400 cursor-not-allowed opacity-50' // otherwise gray
+                          }
+                          text-white font-extrabold py-4 px-10 rounded-full shadow-lg text-xl`}
                       >
-                        🔍 Check My Sign
+                        {/* Spinner only during "submission in progress" */}
+                        {hasSubmitted && !feedback && (
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        )}
+                        <span>Checking Sign</span>
                       </button>
                       <button
                         onClick={handleNext}
