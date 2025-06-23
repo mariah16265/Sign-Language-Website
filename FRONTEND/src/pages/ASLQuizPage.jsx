@@ -4,13 +4,16 @@ import Webcam from 'react-webcam';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import StepProgressBar from '../components/StepProgress';
-import { useNavigate,useLocation  } from 'react-router-dom';
-import {useApiErrorHandler,  useCheckTokenValid} from '../utils/apiErrorHandler';
+import { useNavigate, useLocation } from 'react-router-dom';
+import {
+  useApiErrorHandler,
+  useCheckTokenValid,
+} from '../utils/apiErrorHandler';
 
 const ASLQuizPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const subject = location.state?.subjectName ;
+  const subject = location.state?.subjectName;
   const module = location.state?.moduleName;
 
   // ----- REFS -----
@@ -29,15 +32,15 @@ const ASLQuizPage = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [feedback, setFeedback] = useState('');
-  const [feedbackType, setFeedbackType] = useState(''); 
+  const [feedbackType, setFeedbackType] = useState('');
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [attemptedQuestions, setAttemptedQuestions] = useState(new Set());
   const [steps, setSteps] = useState([]);
-  const [quizProgress, setQuizProgress] =useState(0)
+  const [quizProgress, setQuizProgress] = useState(0);
   const [countdown, setCountdown] = useState(0);
   const [isCountingDown, setIsCountingDown] = useState(false);
   const [isQuizFinished, setIsQuizFinished] = useState(false);
-  
+
   const { handleApiError } = useApiErrorHandler();
   const { checkTokenValid } = useCheckTokenValid();
   const token = localStorage.getItem('token');
@@ -77,31 +80,6 @@ const ASLQuizPage = () => {
         const res = await fetch(
           `http://localhost:5000/api/quiz-questions/module/${module}`,
           {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-              },
-          }
-        );
-        const data = await res.json();
-        if (!res.ok)
-          throw new Error(data.message || 'Failed to load questions');
-        setQuestions(data);
-      } catch (err) {
-          handleApiError(err);
-      }
-    };
-
-    fetchQuestions();
-  }, [token, userId, module]);
-
-   const fetchProgress = async () => {
-      console.log("GEting progress");
-      try {
-        const res = await fetch(
-          `http://localhost:5000/api/quiz-progress/user/${userId}/${module}`,
-          {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -110,14 +88,38 @@ const ASLQuizPage = () => {
           }
         );
         const data = await res.json();
-        console.log("Progress response:", data);
-
-        setQuizProgress(data.totalScore || 0);
+        if (!res.ok)
+          throw new Error(data.message || 'Failed to load questions');
+        setQuestions(data);
       } catch (err) {
-          handleApiError(err);
-
+        handleApiError(err);
       }
     };
+
+    fetchQuestions();
+  }, [token, userId, module]);
+
+  const fetchProgress = async () => {
+    console.log('GEting progress');
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/quiz-progress/user/${userId}/${module}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await res.json();
+      console.log('Progress response:', data);
+
+      setQuizProgress(data.totalScore || 0);
+    } catch (err) {
+      handleApiError(err);
+    }
+  };
 
   // ----- UPDATE STEPS PROGRESS -----
   useEffect(() => {
@@ -328,7 +330,7 @@ const ASLQuizPage = () => {
         await fetchProgress();
       }
     } catch (err) {
-       handleApiError(err);
+      handleApiError(err);
       setFeedback('Error during prediction.');
       setFeedbackType('error');
     } finally {
@@ -419,11 +421,11 @@ const ASLQuizPage = () => {
     if (questionIndex === questions.length - 1) {
       const stream = webcamRef.current?.video?.srcObject;
       if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       }
       setIsQuizFinished(true); //last ques of quiz
       return;
-      }
+    }
     setHasSubmitted(false);
     setQuestionIndex((prev) => (prev + 1) % questions.length);
     setSelectedOption(null);
@@ -471,346 +473,388 @@ const ASLQuizPage = () => {
               <StepProgressBar steps={steps} />
             </div>
             {isQuizFinished ? (
-            <div className="flex-1 flex flex-col items-center justify-center gap-8 py-10 px-4 text-center bg-gradient-to-b from-purple-50 via-pink-50 to-yellow-100 rounded-2xl shadow-inner min-h-[500px]">
-              <motion.h2
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5 }}
-                className="text-5xl sm:text-6xl font-extrabold text-purple-700 drop-shadow-md"
-              >
-                🎓 Quiz Complete!
-              </motion.h2>
+              <div className="flex-1 flex flex-col items-center justify-center gap-5 py-6 px-4 text-center">
+                {/* Score Bubble (simple centered version) */}
+                <div className="relative mt-2">
+                  {/* Blue glow effect */}
+                  <div className="absolute -inset-3 bg-gradient-to-r from-blue-200 to-cyan-200 rounded-full blur-xl opacity-80 animate-pulse"></div>
 
-              <div className="flex flex-col items-center justify-center mt-4">
-                <div className="text-[4rem] sm:text-[5rem] font-black text-pink-500 drop-shadow-lg leading-none">
-                  {quizProgress ?? 0}%
-                </div>
-                <div className="mt-2 text-lg sm:text-xl font-semibold text-purple-500">
-                  Your Score
-                </div>
-              </div>
-
-              <motion.p
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-                className={`text-xl sm:text-2xl font-semibold max-w-2xl px-4 ${
-                  (quizProgress ?? 0) >= 70 ? 'text-green-700' : 'text-red-700'
-                }`}
-              >
-                {(quizProgress ?? 0) >= 90 && (
-                  <>🌟 <strong>Amazing work!</strong> You’re a Sign Language Superstar! ⭐ Keep shining!</>
-                )}
-                {(quizProgress ?? 0) >= 70 && quizProgress < 90 && (
-                  <>🎉 <strong>Fantastic!</strong> You’re ready for the next module! Keep it up!</>
-                )}
-                {(quizProgress ?? 0) >= 50 && quizProgress < 70 && (
-                  <>✨ <strong>Almost there!</strong> Just a little more practice!</>
-                )}
-                {(quizProgress ?? 0) < 50 && (
-                  <>🔁 <strong>Don't give up!</strong> Watch <span className="font-bold">{module}</span> again and try once more. You’re learning!</>
-                )}
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="mt-6"
-              >
-                <button
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg px-8 py-4 rounded-full shadow-xl transform hover:scale-105 transition"
-                  onClick={() => navigate('/dashboard', {
-                    state: {
-                      subject: subject,
-                      module: module
-                    },
-                  })}
-                >
-                  🚀 Back to Dashboard Page
-                </button>
-              </motion.div>
-            </div>
-          ) : (
-            <>
-            {!isDynamic ? (
-              <div className="flex flex-col md:flex-row w-full gap-8 md:gap-10 items-center">
-                <div className="flex flex-col items-center w-full md:w-1/2">
-                  <div className="text-center px-4">
-                    <h3 className="text-3xl font-medium text-pink-800 font-sans leading-tight mb-2">
-                      What does this sign represent?
-                    </h3>
-                  </div>
-
-                  <div className="flex justify-center items-center bg-white rounded-2xl shadow-sm mt-8 w-[320px] h-[240px] md:w-[380px] md:h-[280px] border-2 border-pink-200 overflow-hidden">
-                    <img
-                      src={question.signUrl}
-                      alt="Sign language demonstration"
-                      className="object-contain w-full h-full p-4"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col items-center w-full md:w-1/2 gap-8">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-lg mt-28">
-                    {question.options.map((opt, index) => (
-                      <motion.div
-                        key={index}
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          if (!hasSubmitted) setSelectedOption(index);
-                        }}
-                        className={`cursor-pointer rounded-xl overflow-hidden transition-all ${
-                          selectedOption === index
-                            ? hasSubmitted
-                              ? question.options[index]?.isCorrect
-                                ? 'bg-green-100 border-4 border-green-500'
-                                : 'bg-red-100 border-4 border-red-500'
-                              : 'bg-pink-200 border-4 border-pink-500'
-                            : 'bg-pink-50 border-4 border-pink-300 hover:border-pink-500'
-                        }`}
-                      >
-                        {/* CHANGED: Reduced padding and font size */}
-                        <div className="py-4 px-5 text-center font-bold text-pink-800 text-xl">
-                          {opt.label}
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  <div className="flex flex-col items-center gap-5 w-full">
-                    <div className="flex flex-col sm:flex-row gap-5 w-full max-w-lg justify-center">
-                      <motion.button
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleSubmit}
-                        disabled={hasSubmitted || selectedOption === null}
-                        className={`${
-                          hasSubmitted || selectedOption === null
-                            ? 'bg-gray-200 cursor-not-allowed'
-                            : 'bg-pink-500 hover:bg-pink-600 text-white'
-                        } font-bold py-4 px-6 rounded-full text-md w-full flex items-center justify-center gap-2 transition-colors`}
-                      >
-                        {selectedOption === null ? 'Submit' : 'Submit'}
-                      </motion.button>
-
-                      <motion.button
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleNext}
-                        disabled={!hasSubmitted}
-                        className={`${
-                          !hasSubmitted
-                            ? 'bg-gray-200 cursor-not-allowed'
-                            : 'bg-purple-500 hover:bg-purple-600 text-white'
-                        } font-bold py-4 px-6 rounded-full text-md w-full flex items-center justify-center gap-2 transition-colors`}
-                      >
-                        {questionIndex === questions.length - 1 ? ' Submit Quiz' : ' Next Question'}
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </motion.button>
+                  {/* Main score circle */}
+                  <div className="relative flex flex-col items-center justify-center w-52 h-52 bg-white rounded-full shadow-lg border-6 border-white">
+                    <div className="text-6xl font-black bg-gradient-to-br from-cyan-600 to-blue-500 bg-clip-text text-transparent leading-none">
+                      {quizProgress ?? 0}%
                     </div>
+                    <div className="mt-1 text-md font-semibold text-blue-600/90">
+                      Your Score
+                    </div>
+                  </div>
+                </div>
 
-                    {/* Static Quiz Feedback */}
-                    <div className="min-h-[3rem] flex items-center justify-center w-full">
-                      {feedback && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className={`flex justify-center text-lg font-bold ${
-                            feedbackType === 'correct'
-                              ? 'text-green-600'
-                              : 'text-red-600'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            {feedbackType === 'correct' ? (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-6 w-6 text-green-600"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            ) : (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-6 w-6 text-red-600"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            )}
-                            <span>{feedback}</span>
+                {/* Centered Feedback Messages (no animations) */}
+                <div className="mt-3 w-full max-w-md">
+                  <div
+                    className={`rounded-xl p-4 mx-auto ${
+                      (quizProgress ?? 0) >= 70
+                        ? 'bg-cyan-100/60 border border-cyan-200'
+                        : (quizProgress ?? 0) >= 50
+                        ? 'bg-blue-100/60 border border-blue-200'
+                        : 'bg-indigo-100/60 border border-indigo-200'
+                    }`}
+                  >
+                    <div
+                      className={`text-2xl font-bold font-['Nunito'] tracking-wide ${
+                        (quizProgress ?? 0) >= 70
+                          ? 'text-cyan-700'
+                          : (quizProgress ?? 0) >= 50
+                          ? 'text-blue-700'
+                          : 'text-indigo-700'
+                      }`}
+                    >
+                      {(quizProgress ?? 0) >= 90 && (
+                        <div className="space-y-2">
+                          <div className="font-bold">
+                            Excellent Performance!
                           </div>
-                        </motion.div>
+                          <div>Sign Language Master! 🏆</div>
+                        </div>
+                      )}
+                      {(quizProgress ?? 0) >= 70 && quizProgress < 90 && (
+                        <div className="space-y-2">
+                          <div className="font-bold">Great Job!</div>
+                          <div>Ready for the next level!</div>
+                        </div>
+                      )}
+                      {(quizProgress ?? 0) >= 50 && quizProgress < 70 && (
+                        <div className="space-y-2">
+                          <div className="font-bold">Good Effort!</div>
+                          <div>Practice makes perfect!</div>
+                        </div>
+                      )}
+                      {(quizProgress ?? 0) < 50 && (
+                        <div className="space-y-2">
+                          <div className="font-bold">Keep Learning!</div>
+                          <div>Review the {module} module</div>
+                        </div>
                       )}
                     </div>
                   </div>
+                </div>
+
+                {/* Action Button (simple version) */}
+                <div className="mt-5">
+                  <button
+                    className="bg-gradient-to-br from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold px-7 py-2.5 rounded-full shadow-lg"
+                    onClick={() =>
+                      navigate('/dashboard', {
+                        state: {
+                          subject: subject,
+                          module: module,
+                        },
+                      })
+                    }
+                  >
+                    <span className="flex items-center gap-2">
+                      Return to Dashboard
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                  </button>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col md:flex-row w-full gap-6 md:gap-8 items-center">
-                <div className="flex flex-col items-center w-full md:w-2/5 -mt-7">
-                  <div className="relative bg-pink-100 rounded-2xl px-8 py-4 text-center border-2 border-pink-300 ">
-                    <h3 className="text-2xl font-bold text-pink-800">
-                      Show the sign for
-                    </h3>
-                  </div>
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.05, 1],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      repeatType: 'reverse',
-                    }}
-                    className="flex justify-center items-center bg-gradient-to-r from-pink-400 to-pink-600 rounded-full w-40 h-40 shadow-xl mt-8"
-                  >
-                    <p className="text-6xl font-extrabold text-white">
-                      {question.correctLabel}
-                    </p>
-                  </motion.div>
-                </div>
+              <>
+                {!isDynamic ? (
+                  <div className="flex flex-col md:flex-row w-full gap-8 md:gap-10 items-center">
+                    <div className="flex flex-col items-center w-full md:w-1/2">
+                      <div className="text-center px-4">
+                        <h3 className="text-3xl font-medium text-pink-800 font-sans leading-tight mb-2">
+                          What does this sign represent?
+                        </h3>
+                      </div>
 
-                <div className="flex flex-col items-center w-full md:w-3/5">
-                  <p className="text-pink-700 text-center font-bold mb-4 text-xl mt-5">
-                    Show the sign in front of the camera
-                  </p>
-                  <div className="relative rounded-2xl border-4 border-pink-300 shadow-lg overflow-hidden mb-6 w-full max-w-[540px] h-[280px]">
-                    <Webcam
-                      ref={webcamRef}
-                      audio={false}
-                      mirrored={true}
-                      screenshotFormat="image/jpeg"
-                      videoConstraints={{
-                        width: 1280,
-                        height: 720,
-                        facingMode: 'user',
-                      }}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-
-                  <div className="flex flex-col items-center gap-3 w-full max-w-lg">
-                    <div className="flex flex-col sm:flex-row gap-5 w-full justify-center">
-                      <motion.button
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.98 }}
-                        disabled={hasSubmitted || isCountingDown}
-                        onClick={handleSubmit}
-                        className={`${
-                          hasSubmitted || isCountingDown
-                            ? 'bg-pink-300 cursor-not-allowed'
-                            : 'bg-pink-500 hover:bg-pink-600 text-white'
-                        } font-bold py-4 px-6 rounded-full text-md w-full sm:w-auto flex items-center justify-center gap-2 transition-colors`}
-                      >
-                        {isCountingDown
-                          ? `Submitting in ${countdown}...`
-                          : hasSubmitted
-                          ? 'Checking...'
-                          : 'No Sign Detected'}
-                      </motion.button>
-
-                      <motion.button
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleNext}
-                        disabled={!feedback}
-                        className={`${
-                          !feedback
-                            ? 'bg-gray-200 cursor-not-allowed'
-                            : 'bg-purple-500 hover:bg-purple-600 text-white'
-                        } font-bold py-4 px-6 rounded-full text-md w-full sm:w-auto flex items-center justify-center gap-2 transition-colors`}
-                      >
-                        {questionIndex === questions.length - 1 ? ' Submit Quiz' : ' Next Question'}
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </motion.button>
+                      <div className="flex justify-center items-center bg-white rounded-2xl shadow-sm mt-8 w-[320px] h-[240px] md:w-[380px] md:h-[280px] border-2 border-pink-200 overflow-hidden">
+                        <img
+                          src={question.signUrl}
+                          alt="Sign language demonstration"
+                          className="object-contain w-full h-full p-4"
+                        />
+                      </div>
                     </div>
 
-                    {/* Dynamic Quiz Feedback */}
-                    <div className="min-h-[2rem] flex items-center justify-center w-full mt-1">
-                      {feedback && (
-                        <motion.div
-                          initial={{ scale: 0.8 }}
-                          animate={{ scale: 1 }}
-                          className={`flex justify-center text-lg font-bold ${
-                            feedbackType === 'correct'
-                              ? 'text-green-600'
-                              : 'text-red-600'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            {feedbackType === 'correct' ? (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-6 w-6 text-green-600"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            ) : (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-6 w-6 text-red-600"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            )}
-                            <span>{feedback}</span>
-                          </div>
-                        </motion.div>
-                      )}
+                    <div className="flex flex-col items-center w-full md:w-1/2 gap-8">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-lg mt-28">
+                        {question.options.map((opt, index) => (
+                          <motion.div
+                            key={index}
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => {
+                              if (!hasSubmitted) setSelectedOption(index);
+                            }}
+                            className={`cursor-pointer rounded-xl overflow-hidden transition-all ${
+                              selectedOption === index
+                                ? hasSubmitted
+                                  ? question.options[index]?.isCorrect
+                                    ? 'bg-green-100 border-4 border-green-500'
+                                    : 'bg-red-100 border-4 border-red-500'
+                                  : 'bg-pink-200 border-4 border-pink-500'
+                                : 'bg-pink-50 border-4 border-pink-300 hover:border-pink-500'
+                            }`}
+                          >
+                            {/* CHANGED: Reduced padding and font size */}
+                            <div className="py-4 px-5 text-center font-bold text-pink-800 text-xl">
+                              {opt.label}
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      <div className="flex flex-col items-center gap-5 w-full">
+                        <div className="flex flex-col sm:flex-row gap-5 w-full max-w-lg justify-center">
+                          <motion.button
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={handleSubmit}
+                            disabled={hasSubmitted || selectedOption === null}
+                            className={`${
+                              hasSubmitted || selectedOption === null
+                                ? 'bg-gray-200 cursor-not-allowed'
+                                : 'bg-pink-500 hover:bg-pink-600 text-white'
+                            } font-bold py-4 px-6 rounded-full text-md w-full flex items-center justify-center gap-2 transition-colors`}
+                          >
+                            {selectedOption === null ? 'Submit' : 'Submit'}
+                          </motion.button>
+
+                          <motion.button
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={handleNext}
+                            disabled={!hasSubmitted}
+                            className={`${
+                              !hasSubmitted
+                                ? 'bg-gray-200 cursor-not-allowed'
+                                : 'bg-purple-500 hover:bg-purple-600 text-white'
+                            } font-bold py-4 px-6 rounded-full text-md w-full flex items-center justify-center gap-2 transition-colors`}
+                          >
+                            {questionIndex === questions.length - 1
+                              ? ' Submit Quiz'
+                              : ' Next Question'}
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </motion.button>
+                        </div>
+
+                        {/* Static Quiz Feedback */}
+                        <div className="min-h-[3rem] flex items-center justify-center w-full">
+                          {feedback && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className={`flex justify-center text-lg font-bold ${
+                                feedbackType === 'correct'
+                                  ? 'text-green-600'
+                                  : 'text-red-600'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                {feedbackType === 'correct' ? (
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-6 w-6 text-green-600"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                ) : (
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-6 w-6 text-red-600"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                )}
+                                <span>{feedback}</span>
+                              </div>
+                            </motion.div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            )}
-            </>
+                ) : (
+                  <div className="flex flex-col md:flex-row w-full gap-6 md:gap-8 items-center">
+                    <div className="flex flex-col items-center w-full md:w-2/5 -mt-7">
+                      <div className="relative bg-pink-100 rounded-2xl px-8 py-4 text-center border-2 border-pink-300 ">
+                        <h3 className="text-2xl font-bold text-pink-800">
+                          Show the sign for
+                        </h3>
+                      </div>
+                      <motion.div
+                        animate={{
+                          scale: [1, 1.05, 1],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          repeatType: 'reverse',
+                        }}
+                        className="flex justify-center items-center bg-gradient-to-r from-pink-400 to-pink-600 rounded-full w-40 h-40 shadow-xl mt-8"
+                      >
+                        <p className="text-6xl font-extrabold text-white">
+                          {question.correctLabel}
+                        </p>
+                      </motion.div>
+                    </div>
+
+                    <div className="flex flex-col items-center w-full md:w-3/5">
+                      <p className="text-pink-700 text-center font-bold mb-4 text-xl mt-5">
+                        Show the sign in front of the camera
+                      </p>
+                      <div className="relative rounded-2xl border-4 border-pink-300 shadow-lg overflow-hidden mb-6 w-full max-w-[540px] h-[280px]">
+                        <Webcam
+                          ref={webcamRef}
+                          audio={false}
+                          mirrored={true}
+                          screenshotFormat="image/jpeg"
+                          videoConstraints={{
+                            width: 1280,
+                            height: 720,
+                            facingMode: 'user',
+                          }}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+
+                      <div className="flex flex-col items-center gap-3 w-full max-w-lg">
+                        <div className="flex flex-col sm:flex-row gap-5 w-full justify-center">
+                          <motion.button
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.98 }}
+                            disabled={hasSubmitted || isCountingDown}
+                            onClick={handleSubmit}
+                            className={`${
+                              hasSubmitted || isCountingDown
+                                ? 'bg-pink-300 cursor-not-allowed'
+                                : 'bg-pink-500 hover:bg-pink-600 text-white'
+                            } font-bold py-4 px-6 rounded-full text-md w-full sm:w-auto flex items-center justify-center gap-2 transition-colors`}
+                          >
+                            {isCountingDown
+                              ? `Submitting in ${countdown}...`
+                              : hasSubmitted
+                              ? 'Checking...'
+                              : 'No Sign Detected'}
+                          </motion.button>
+
+                          <motion.button
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={handleNext}
+                            disabled={!feedback}
+                            className={`${
+                              !feedback
+                                ? 'bg-gray-200 cursor-not-allowed'
+                                : 'bg-purple-500 hover:bg-purple-600 text-white'
+                            } font-bold py-4 px-6 rounded-full text-md w-full sm:w-auto flex items-center justify-center gap-2 transition-colors`}
+                          >
+                            {questionIndex === questions.length - 1
+                              ? ' Submit Quiz'
+                              : ' Next Question'}
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </motion.button>
+                        </div>
+
+                        {/* Dynamic Quiz Feedback */}
+                        <div className="min-h-[2rem] flex items-center justify-center w-full mt-1">
+                          {feedback && (
+                            <motion.div
+                              initial={{ scale: 0.8 }}
+                              animate={{ scale: 1 }}
+                              className={`flex justify-center text-lg font-bold ${
+                                feedbackType === 'correct'
+                                  ? 'text-green-600'
+                                  : 'text-red-600'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                {feedbackType === 'correct' ? (
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-6 w-6 text-green-600"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                ) : (
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-6 w-6 text-red-600"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                )}
+                                <span>{feedback}</span>
+                              </div>
+                            </motion.div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </motion.div>
         </div>

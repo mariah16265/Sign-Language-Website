@@ -5,7 +5,10 @@ import { motion } from 'framer-motion';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import SubjectSlideshow from '../components/SubjectSlideshow';
-import {useApiErrorHandler,  useCheckTokenValid} from '../utils/apiErrorHandler';
+import {
+  useApiErrorHandler,
+  useCheckTokenValid,
+} from '../utils/apiErrorHandler';
 
 import {
   BarChart,
@@ -17,7 +20,16 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
-import { FaHands, FaFire, FaMedal, FaChartLine } from 'react-icons/fa';
+import {
+  FaHands,
+  FaFire,
+  FaMedal,
+  FaChartLine,
+  FaQuestionCircle,
+  FaArrowRight,
+  FaRegCalendarCheck,
+  FaInfoCircle,
+} from 'react-icons/fa';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -281,37 +293,38 @@ const Dashboard = () => {
           currentStreak: streakData.currentStreak,
           bestStreak: streakData.bestStreak,
         });
-      
-      // ✅ 7. Fetch quiz modules
-      const quizResponse = await fetch(
-        `http://localhost:5000/api/quiz-modules/info/user/${userId}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
 
-      const quizData = await quizResponse.json();
-      if (!quizResponse.ok)
-        throw new Error(quizData.message || 'Failed to fetch modules');
+        // ✅ 7. Fetch quiz modules
+        const quizResponse = await fetch(
+          `http://localhost:5000/api/quiz-modules/info/user/${userId}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-      setEnglishModules(quizData.english);
-      setArabicModules(quizData.arabic);
+        const quizData = await quizResponse.json();
+        if (!quizResponse.ok)
+          throw new Error(quizData.message || 'Failed to fetch modules');
 
-      const availableModules = [...quizData.english, ...quizData.arabic].filter(
-        (mod) => mod.status === 'available'
-      );
-      setQuizModules(availableModules);
-    } catch (err) {
-      handleApiError(err);
-    }
-  };
+        setEnglishModules(quizData.english);
+        setArabicModules(quizData.arabic);
 
-  setupDashboard();
-}, [navigate, token, userId]);
+        const availableModules = [
+          ...quizData.english,
+          ...quizData.arabic,
+        ].filter((mod) => mod.status === 'available');
+        setQuizModules(availableModules);
+      } catch (err) {
+        handleApiError(err);
+      }
+    };
+
+    setupDashboard();
+  }, [navigate, token, userId]);
 
   const handleStartQuiz = (module, subject) => {
     let path = '';
@@ -543,55 +556,87 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-           {/* Quiz Reminder Cards */}
-          
-          <div className="w-full px-4">
-  {quizModules?.length > 0 ? (
-    <div
-      className={`grid gap-6 ${
-        quizModules.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'
-      }`}
-    >
-      {quizModules.map((quiz, index) => (
-        <motion.div
-          key={quiz.module}
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: index * 0.15 }}
-          className={`p-6 rounded-2xl shadow-lg transform hover:scale-[1.02] transition-all duration-300 border-l-[10px] ${
-            quiz.subject === 'Arabic'
-              ? 'border-emerald-500 bg-gradient-to-br from-emerald-100 to-emerald-200'
-              : 'border-blue-500 bg-gradient-to-br from-blue-100 to-blue-200'
-          }`}
-        >
-          <h3 className="text-2xl font-extrabold text-gray-800 mb-2">
-            {quiz.subject} Quiz Available!
-          </h3>
-          <p className="text-gray-700 text-lg mb-4 leading-relaxed">
-            You’ve unlocked <strong>{quiz.module}</strong>. Let’s test your skills!
-          </p>
-          <button
-            onClick={() => handleStartQuiz(quiz.module, quiz.subject)}
-            className={`px-6 py-2 rounded-full font-semibold text-lg shadow-md transition-all duration-300 ease-in-out text-white ${
-              quiz.subject === 'Arabic'
-                ? 'bg-emerald-500 hover:bg-emerald-600'
-                : 'bg-blue-500 hover:bg-blue-600'
-            }`}
-          >
-            Start Quiz
-          </button>
-        </motion.div>
-      ))}
-    </div>
-  ) : (
-    <div className="flex justify-center items-center h-48 bg-gray-100 rounded-2xl shadow-md text-gray-500 text-xl font-semibold">
-      NO QUIZ DUE TODAY
-    </div>
-  )}
-</div>
+            {/* Quiz Reminder Cards */}
+            <div className="w-full px-4 h-full">
+              {quizModules?.length > 0 ? (
+                <div
+                  className={`grid gap-6 ${
+                    quizModules.length === 1
+                      ? 'grid-cols-1'
+                      : 'grid-cols-1 md:grid-cols-2'
+                  } h-full`}
+                >
+                  {quizModules.map((quiz, index) => (
+                    <motion.div
+                      key={quiz.module}
+                      initial={{ y: 30, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: index * 0.15 }}
+                      className="relative p-8 rounded-2xl shadow-xl transform hover:scale-[1.015] transition-all duration-300 min-h-[280px] bg-cover bg-center overflow-hidden before:absolute before:inset-0 before:z-0"
+                      style={{ backgroundImage: 'url(assets/quiznotif.png)' }}
+                    >
+                      <div className="relative z-10 h-full flex flex-col justify-center items-center text-center">
+                        <h3 className="text-4xl mt-6 font-medium font-['Fredoka'] text-indigo-800 mb-6 tracking-tight">
+                          {quiz.subject} Quiz Available!
+                        </h3>
 
+                        <div className="rounded-xl p-6 shadow-lg max-w-md mb-6">
+                          <p className="text-gray-800 text-xl mb-3">
+                            You've unlocked
+                          </p>
+                          <p className="text-indigo-700 text-xl font-bold mb-4">
+                            {quiz.module}
+                          </p>
+                          <p className="text-gray-700 text-base font-medium">
+                            Test your knowledge now!
+                          </p>
+                        </div>
 
+                        <button
+                          onClick={() =>
+                            handleStartQuiz(quiz.module, quiz.subject)
+                          }
+                          className={`mt-3 py-3 px-7 font-['Poppins'] rounded-xl font-semibold text-lg shadow-lg transition-all duration-300 ease-in-out flex items-center justify-center gap-3 ${
+                            quiz.subject === 'Arabic'
+                              ? 'bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white'
+                              : 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white'
+                          }`}
+                        >
+                          Start Quiz
+                          <FaArrowRight className="text-base" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <motion.div
+                  className="relative p-8 rounded-2xl shadow-xl min-h-[380px] bg-cover bg-center overflow-hidden before:absolute before:inset-0 before:z-0"
+                  style={{ backgroundImage: 'url(assets/quiznotif.png)' }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="relative z-10 h-full flex flex-col justify-center items-center text-center">
+                    <h3 className="text-4xl mt-9 font-medium font-['Fredoka'] text-indigo-800 mb-6 tracking-tight">
+                      No Quizzes Available
+                    </h3>
 
+                    <div className="rounded-xl p-6 shadow-lg max-w-md mb-6">
+                      <p className="text-gray-800 text-xl mt-2 mb-3">
+                        You're all caught up!
+                      </p>
+                      <p className="text-indigo-700 text-xl font-bold mb-4">
+                        Great work!
+                      </p>
+                      <p className="text-gray-700 text-base font-medium">
+                        New quizzes will unlock as you complete lessons
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </div>
             {/* Learning Progress - Right Side */}
             <div className="bg-gradient-to-r from-lime-100 to-green-200 p-6 rounded-2xl shadow-md border border-gray-100">
               <div className="flex justify-between items-center mb-4">

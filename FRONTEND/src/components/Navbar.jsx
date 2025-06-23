@@ -60,23 +60,23 @@ const Navbar = ({ hideLoginButton = false }) => {
 
       case '/studyplan':
         return {
-          bg: 'bg-gradient-to-r from-green-50 to-green-100',
-          text: 'from-green-600 to-lime-500', // Updated text gradient
-          icon: 'text-green-600',
-          button: 'from-lime-500 to-green-500',
-          buttonHover: 'from-green-600 to-green-700',
-          navText: 'text-green-700 hover:text-green-500',
-          border: 'border-green-500',
+          bg: 'bg-white',
+          text: 'from-sky-600 to-blue-600',
+          icon: 'text-sky-600',
+          button: 'from-sky-300 to-sky-400',
+          buttonHover: 'from-sky-400 to-sky-500',
+          navText: 'text-sky-700 hover:text-sky-600',
+          border: 'border-sky-400',
         };
       default:
         return {
           bg: 'bg-white',
-          text: 'from-orange-600 to-orange-400', // Updated text gradient
-          icon: 'text-orange-600',
-          button: 'bg-orange-400',
-          buttonHover: 'bg-orange-500',
-          navText: 'text-orange-700 hover:text-orange-900',
-          border: 'border-orange-300',
+          text: 'from-sky-600 to-blue-600',
+          icon: 'text-sky-600',
+          button: 'from-sky-300 to-sky-400',
+          buttonHover: 'from-sky-400 to-sky-500',
+          navText: 'text-sky-700 hover:text-sky-600',
+          border: 'border-sky-400',
         };
     }
   };
