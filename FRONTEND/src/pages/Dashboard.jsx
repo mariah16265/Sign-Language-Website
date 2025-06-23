@@ -5,10 +5,8 @@ import { motion } from 'framer-motion';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import SubjectSlideshow from '../components/SubjectSlideshow';
-import {
-  useApiErrorHandler,
-  useCheckTokenValid,
-} from '../utils/apiErrorHandler';
+import {useApiErrorHandler,  useCheckTokenValid} from '../utils/apiErrorHandler';
+
 import {
   BarChart,
   Bar,
@@ -30,9 +28,13 @@ const Dashboard = () => {
   const [signsCompleted, setSignsCompleted] = useState([]);
   const [nextStudyDate, setNextStudyDate] = useState([]);
   const [streak, setStreak] = useState({ currentStreak: 0, bestStreak: 0 });
+  const [englishModules, setEnglishModules] = useState([]);
+  const [arabicModules, setArabicModules] = useState([]);
+  const [quizModules, setQuizModules] = useState([]);
 
   const { handleApiError } = useApiErrorHandler();
   const { checkTokenValid } = useCheckTokenValid();
+  const userId = localStorage.getItem('userId');
   const token = localStorage.getItem('token');
 
   // Check for valid token on mount
@@ -229,13 +231,9 @@ const Dashboard = () => {
               completed: subjectData.completedModules,
             });
           } catch (err) {
-            console.error(
-              `❌ Failed to fetch subject progress for ${subject}`,
-              err
-            );
+            handleApiError(err);
           }
         }
-
         setLessonsCompleted(lessonsArray);
 
         const totalCompletedModules = modulesArray.reduce(
@@ -283,13 +281,56 @@ const Dashboard = () => {
           currentStreak: streakData.currentStreak,
           bestStreak: streakData.bestStreak,
         });
-      } catch (err) {
-        handleApiError(err);
-      }
-    };
+      
+      // ✅ 7. Fetch quiz modules
+      const quizResponse = await fetch(
+        `http://localhost:5000/api/quiz-modules/info/user/${userId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    setupDashboard();
-  }, [navigate]);
+      const quizData = await quizResponse.json();
+      if (!quizResponse.ok)
+        throw new Error(quizData.message || 'Failed to fetch modules');
+
+      setEnglishModules(quizData.english);
+      setArabicModules(quizData.arabic);
+
+      const availableModules = [...quizData.english, ...quizData.arabic].filter(
+        (mod) => mod.status === 'available'
+      );
+      setQuizModules(availableModules);
+    } catch (err) {
+      handleApiError(err);
+    }
+  };
+
+  setupDashboard();
+}, [navigate, token, userId]);
+
+  const handleStartQuiz = (module, subject) => {
+    let path = '';
+
+    if (subject.toLowerCase() === 'arabic') {
+      path = 'Aquiz';
+    } else if (module === 'Module 1- Alphabets') {
+      path = 'Equiz';
+    } else {
+      path = 'Wquiz';
+    }
+
+    navigate(`/${path}`, {
+      state: {
+        subjectName: subject,
+        moduleName: module,
+      },
+    });
+  };
 
   //----------------Group today's schedule by subject--------------
   const groupedBySubject = {};
@@ -502,18 +543,54 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            {/* Future Scope Placeholder - Left Side */}
-            <div className="bg-amber-200 p-6 rounded-2xl shadow-md border border-gray-100 flex flex-col items-center justify-center">
-              <div className="text-center">
-                <div className="text-5xl mb-4">🚀</div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
-                  Future Scope
-                </h3>
-                <p className="text-gray-600">
-                  Coming soon with exciting new features!
-                </p>
-              </div>
-            </div>
+           {/* Quiz Reminder Cards */}
+          
+          <div className="w-full px-4">
+  {quizModules?.length > 0 ? (
+    <div
+      className={`grid gap-6 ${
+        quizModules.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'
+      }`}
+    >
+      {quizModules.map((quiz, index) => (
+        <motion.div
+          key={quiz.module}
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: index * 0.15 }}
+          className={`p-6 rounded-2xl shadow-lg transform hover:scale-[1.02] transition-all duration-300 border-l-[10px] ${
+            quiz.subject === 'Arabic'
+              ? 'border-emerald-500 bg-gradient-to-br from-emerald-100 to-emerald-200'
+              : 'border-blue-500 bg-gradient-to-br from-blue-100 to-blue-200'
+          }`}
+        >
+          <h3 className="text-2xl font-extrabold text-gray-800 mb-2">
+            {quiz.subject} Quiz Available!
+          </h3>
+          <p className="text-gray-700 text-lg mb-4 leading-relaxed">
+            You’ve unlocked <strong>{quiz.module}</strong>. Let’s test your skills!
+          </p>
+          <button
+            onClick={() => handleStartQuiz(quiz.module, quiz.subject)}
+            className={`px-6 py-2 rounded-full font-semibold text-lg shadow-md transition-all duration-300 ease-in-out text-white ${
+              quiz.subject === 'Arabic'
+                ? 'bg-emerald-500 hover:bg-emerald-600'
+                : 'bg-blue-500 hover:bg-blue-600'
+            }`}
+          >
+            Start Quiz
+          </button>
+        </motion.div>
+      ))}
+    </div>
+  ) : (
+    <div className="flex justify-center items-center h-48 bg-gray-100 rounded-2xl shadow-md text-gray-500 text-xl font-semibold">
+      NO QUIZ DUE TODAY
+    </div>
+  )}
+</div>
+
+
 
             {/* Learning Progress - Right Side */}
             <div className="bg-gradient-to-r from-lime-100 to-green-200 p-6 rounded-2xl shadow-md border border-gray-100">
