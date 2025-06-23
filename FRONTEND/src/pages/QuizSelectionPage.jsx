@@ -4,7 +4,10 @@ import { motion } from 'framer-motion';
 import { FaLock, FaPlayCircle, FaBook, FaStar } from 'react-icons/fa';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
-import {useApiErrorHandler,  useCheckTokenValid} from '../utils/apiErrorHandler';
+import {
+  useApiErrorHandler,
+  useCheckTokenValid,
+} from '../utils/apiErrorHandler';
 
 const QuizSelectionPage = () => {
   const navigate = useNavigate();
@@ -12,7 +15,7 @@ const QuizSelectionPage = () => {
   const userId = localStorage.getItem('userId');
   const [englishModules, setEnglishModules] = useState([]);
   const [arabicModules, setArabicModules] = useState([]);
-  
+
   const { handleApiError } = useApiErrorHandler();
   const { checkTokenValid } = useCheckTokenValid();
 
@@ -91,7 +94,7 @@ const QuizSelectionPage = () => {
                 ? 'bg-gradient-to-br from-yellow-50 via-amber-100 to-orange-100 border border-orange-300'
                 : status === 'completed'
                 ? 'bg-gradient-to-br from-orange-100 via-amber-300 to-yellow-200 border border-amber-300'
-                : 'bg-gradient-to-br from-cyan-100 via-blue-200 to-indigo-200 border border-blue-300'
+                : 'bg-gradient-to-br from-indigo-100 to-blue-100 border border-indigo-200 text-indigo-800'
             } shadow-lg hover:shadow-xl relative overflow-hidden`}
           whileHover={{ y: status !== 'locked' ? -5 : 0 }}
         >
