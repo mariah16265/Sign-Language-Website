@@ -8,31 +8,26 @@ const shuffle = (arr) => arr.sort(() => 0.5 - Math.random());
 // ─────────────── Generate Quiz ───────────────
 const generateQuizForModule = async (req, res) => {
   const { module } = req.params;
-  console.log('Fetching Quiz Questions..');
+  console.log('🔍 Fetching Quiz Questions...');
+
   try {
+    // Fetch all questions for the module
+    const allQuestions = await QuizQuestion.find({ module });
+
+    if (allQuestions.length < 10) {
+      return res.status(400).json({ message: 'Not enough quiz questions for this module' });
+    }
+
+    // Shuffle the full set of 10
+    const shuffledQuestions = shuffle(allQuestions);
+
+    // Fetch sign titles for incorrect options (if static)
     const lessons = await SignsData.find({ module });
     const allSigns = lessons.flatMap((lesson) => lesson.signs);
     const signTitles = allSigns.map((sign) => sign.title);
 
-    const allQuestions = await QuizQuestion.find({ module });
-
-    const staticQs = shuffle(allQuestions.filter((q) => q.type === 'static'));
-    const dynamicQs = shuffle(allQuestions.filter((q) => q.type === 'dynamic'));
-
-    const orderedQuestions = [];
-
-    const pushN = (list, n) => {
-      for (let i = 0; i < n && list.length > 0; i++) {
-        orderedQuestions.push(list.shift());
-      }
-    };
-
-    pushN(staticQs, 2);
-    pushN(dynamicQs, 2);
-    pushN(staticQs, 3);
-    pushN(dynamicQs, 3);
-
-    const finalQuestions = orderedQuestions.map((q) => {
+    // Format final question objects
+    const finalQuestions = shuffledQuestions.map((q) => {
       if (q.type === 'static') {
         const incorrectLabels = shuffle(
           signTitles.filter((title) => title !== q.signTitle)
@@ -40,7 +35,10 @@ const generateQuizForModule = async (req, res) => {
 
         const options = shuffle([
           { label: q.signTitle, isCorrect: true },
-          ...incorrectLabels.map((label) => ({ label: label.toUpperCase(), isCorrect: false })),
+          ...incorrectLabels.map((label) => ({
+            label: label.toUpperCase(),
+            isCorrect: false,
+          })),
         ]);
 
         return {
@@ -58,7 +56,8 @@ const generateQuizForModule = async (req, res) => {
         };
       }
     });
-
+    const titles = finalQuestions.map(q => q.signTitle || q.correctLabel);
+    console.log("Sign Questions:", titles);
     res.json(finalQuestions);
   } catch (err) {
     console.error('❌ Error generating quiz:', err);
