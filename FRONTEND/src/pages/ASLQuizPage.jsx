@@ -502,7 +502,7 @@ const ASLQuizPage = () => {
                     }`}
                   >
                     <div
-                      className={`text-2xl font-bold font-['Nunito'] tracking-wide ${
+                      className={`text-xl font-bold  tracking-wide ${
                         (quizProgress ?? 0) >= 70
                           ? 'text-cyan-700'
                           : (quizProgress ?? 0) >= 50
@@ -515,7 +515,7 @@ const ASLQuizPage = () => {
                           <div className="font-bold">
                             Excellent Performance!
                           </div>
-                          <div>Sign Language Master! 🏆</div>
+                          <div>Sign Language Master!🏆</div>
                         </div>
                       )}
                       {(quizProgress ?? 0) >= 70 && quizProgress < 90 && (
