@@ -52,6 +52,7 @@ app.use('/api/users', userRoutes);
 // Route to get modules data for learn & lesson
 app.use('/api/modules', signsDataRoutes);
 app.use('/api/lessons', signsDataRoutes);
+app.use('/api/module-availability', signsDataRoutes);
 
 //Route to save or get studyplan
 app.use('/api/studyplan', studyPlanRoutes);

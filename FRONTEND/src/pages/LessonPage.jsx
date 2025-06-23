@@ -13,6 +13,7 @@ const LessonPage = () => {
   const [hasPlayed, setHasPlayed] = useState(false);
   const [playedSigns, setPlayedSigns] = useState(new Set());
   const [endOfModule, setEndOfModule] = useState(false);
+  const [showQuizPopup, setShowQuizPopup] = useState(false);
   const { checkTokenValid } = useCheckTokenValid();
   const { handleApiError } = useApiErrorHandler();
   
@@ -94,6 +95,7 @@ const LessonPage = () => {
     if (lessonData) fetchNextLesson();
     }, [lessonId, lessonData]);
   
+
   useEffect(() => {
     if (lessonData && lessonData.signs.length > 0) {
       const currentSignId = lessonData.signs[currentSignIndex]?._id;
@@ -129,6 +131,11 @@ const LessonPage = () => {
 
         const data = await response.json();
         if (!response.ok) throw new Error(data.message || 'Failed to save progress');
+        // ✅ Only show quiz popup when watching last sign for the first time
+        const isLastSign = currentSignIndex === lessonData.signs.length - 1;
+        if (isLastSign && endOfModule) {
+          setShowQuizPopup(true);
+        }
       } catch (err) {
         console.error('Error saving progress:', err.message);
       }
@@ -151,6 +158,24 @@ const LessonPage = () => {
 
   const currentSign = lessonData.signs[currentSignIndex];
 
+  const handleStartQuiz = (module, subject) => {
+    let path = '';
+
+    if (subject.toLowerCase() === 'arabic') {
+      path = 'Aquiz';
+    } else if (module === 'Module 1- Alphabets') {
+      path = 'Equiz';
+    } else {
+      path = 'Wquiz';
+    }
+
+    navigate(`/${path}`, {
+      state: {
+        subjectName: subject,
+        moduleName: module,
+      },
+    });
+  };
   return ( 
     <div className="relative w-full min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/assets/lessonbg.jpg')" }}>
     <Navbar userName="Michael Bob" userAvatar="/images/avatar.jpg" />
@@ -215,22 +240,22 @@ const LessonPage = () => {
 
         {/* Next Button */}
         {currentSignIndex === lessonData.signs.length - 1 && hasPlayed ? ( endOfModule ? (
-            <button
-      disabled
-      className="flex items-center gap-2 bg-gray-300 text-gray-100 font-bold cursor-not-allowed text-lg py-3 px-7 rounded-full transition-all duration-300 w-full md:w-auto"
-    >
-      End of Module
-    </button>
-  )  : (
-    <button
-      onClick={() => navigate(`/lesson/${nextLessonId}`)}
-      className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 font-bold hover:from-blue-600 hover:to-indigo-700 text-white shadow-xl text-lg py-3 px-7 rounded-full transition-all duration-300 w-full md:w-auto"
-    >
-      Next Lesson
-      <FaChevronRight />
-    </button>
-  )
-): (
+          <button
+            disabled
+            className="flex items-center gap-2 bg-gray-300 text-gray-100 font-bold cursor-not-allowed text-lg py-3 px-7 rounded-full transition-all duration-300 w-full md:w-auto"
+          >
+            End of Module
+          </button>
+        )  : (
+          <button
+            onClick={() => navigate(`/lesson/${nextLessonId}`)}
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 font-bold hover:from-blue-600 hover:to-indigo-700 text-white shadow-xl text-lg py-3 px-7 rounded-full transition-all duration-300 w-full md:w-auto"
+          >
+            Next Lesson
+            <FaChevronRight />
+          </button>
+        )
+      ): (
           <button
             onClick={handleNext}
             disabled={!hasPlayed}
@@ -261,8 +286,29 @@ const LessonPage = () => {
       </div>
     </div>
   </div>
-</div>
+ {showQuizPopup && (
+  <div
+    className="fixed top-24 right-6 z-50 bg-white border border-green-400 text-green-900 px-6 py-4 rounded-2xl shadow-lg max-w-sm
+      ring-2 ring-green-300
+      animate-fadeIn
+      flex flex-col items-center justify-center space-y-4"
+  >
+    <div className="font-semibold text-xl text-center">
+      🎉 You’ve unlocked your quiz!
+    </div>
+    <button
+      onClick={() => handleStartQuiz(lessonData.module, lessonData.subject)}
+      className="text-base font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-8 rounded-full shadow-lg hover:from-purple-700 hover:to-indigo-700 transition"
+      aria-label="Start Quiz"
+    >
+      Start Quiz
+    </button>
+  </div>
+)}
 
+
+
+</div>
   );
 };
 

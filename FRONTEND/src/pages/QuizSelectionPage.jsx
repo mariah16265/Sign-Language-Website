@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { FaLock, FaPlayCircle, FaBook, FaStar } from 'react-icons/fa';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
+import {useApiErrorHandler,  useCheckTokenValid} from '../utils/apiErrorHandler';
 
 const QuizSelectionPage = () => {
   const navigate = useNavigate();
@@ -11,6 +12,15 @@ const QuizSelectionPage = () => {
   const userId = localStorage.getItem('userId');
   const [englishModules, setEnglishModules] = useState([]);
   const [arabicModules, setArabicModules] = useState([]);
+  
+  const { handleApiError } = useApiErrorHandler();
+  const { checkTokenValid } = useCheckTokenValid();
+
+  // Check for valid token on mount
+  useEffect(() => {
+    const isTokenValid = checkTokenValid();
+    if (!isTokenValid) return;
+  }, []);
 
   useEffect(() => {
     const fetchQuizModules = async () => {
@@ -44,7 +54,7 @@ const QuizSelectionPage = () => {
         setEnglishModules(sortedEnglish);
         setArabicModules(sortedArabic);
       } catch (err) {
-        console.error('Quiz modules fetch error:', err.message);
+        handleApiError(err);
       }
     };
 
@@ -62,7 +72,12 @@ const QuizSelectionPage = () => {
       path = 'Wquiz';
     }
 
-    navigate(`/${path}`);
+    navigate(`/${path}`, {
+      state: {
+        subjectName: subject,
+        moduleName: module,
+      },
+    });
   };
 
   const renderQuizCards = (modules, subject) => (

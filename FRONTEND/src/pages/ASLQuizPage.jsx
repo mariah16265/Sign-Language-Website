@@ -5,12 +5,13 @@ import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import StepProgressBar from '../components/StepProgress';
 import { useNavigate,useLocation  } from 'react-router-dom';
+import {useApiErrorHandler,  useCheckTokenValid} from '../utils/apiErrorHandler';
 
 const ASLQuizPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const subject = location.state?.subjectName || 'English';
-  const module = location.state?.moduleName || 'Module 1- Alphabets';
+  const subject = location.state?.subjectName ;
+  const module = location.state?.moduleName;
 
   // ----- REFS -----
   const webcamRef = useRef(null);
@@ -37,6 +38,15 @@ const ASLQuizPage = () => {
   const [isCountingDown, setIsCountingDown] = useState(false);
   const [isQuizFinished, setIsQuizFinished] = useState(false);
   
+  const { handleApiError } = useApiErrorHandler();
+  const { checkTokenValid } = useCheckTokenValid();
+  const token = localStorage.getItem('token');
+
+  // Check for valid token on mount
+  useEffect(() => {
+    const isTokenValid = checkTokenValid();
+    if (!isTokenValid) return;
+  }, []);
 
   // ----- FEEDBACK MESSAGES -----
   const correctFeedbacks = [
@@ -56,7 +66,6 @@ const ASLQuizPage = () => {
   ];
 
   // ----- INFO -----
-  const token = localStorage.getItem('token');
   const userId = localStorage.getItem('userId');
   const question = questions[questionIndex];
   const isDynamic = question?.type === 'dynamic';
@@ -80,7 +89,7 @@ const ASLQuizPage = () => {
           throw new Error(data.message || 'Failed to load questions');
         setQuestions(data);
       } catch (err) {
-        console.error('Quiz fetch error:', err.message);
+          handleApiError(err);
       }
     };
 
@@ -105,7 +114,8 @@ const ASLQuizPage = () => {
 
         setQuizProgress(data.totalScore || 0);
       } catch (err) {
-        console.error('Quiz progress error:', err.message);
+          handleApiError(err);
+
       }
     };
 
@@ -310,7 +320,7 @@ const ASLQuizPage = () => {
             }),
           });
         } catch (err) {
-          console.error('Error saving static quiz progress:', err.message);
+          handleApiError(err);
         }
       }
       if (questionIndex === questions.length - 1) {
@@ -318,7 +328,7 @@ const ASLQuizPage = () => {
         await fetchProgress();
       }
     } catch (err) {
-      console.error('Prediction error:', err.message);
+       handleApiError(err);
       setFeedback('Error during prediction.');
       setFeedbackType('error');
     } finally {
@@ -510,14 +520,14 @@ const ASLQuizPage = () => {
               >
                 <button
                   className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg px-8 py-4 rounded-full shadow-xl transform hover:scale-105 transition"
-                  onClick={() => navigate('/learn/subjects', {
+                  onClick={() => navigate('/dashboard', {
                     state: {
                       subject: subject,
                       module: module
                     },
                   })}
                 >
-                  🚀 Back to Module Page
+                  🚀 Back to Dashboard Page
                 </button>
               </motion.div>
             </div>
