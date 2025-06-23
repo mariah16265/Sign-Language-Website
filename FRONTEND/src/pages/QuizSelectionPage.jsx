@@ -85,7 +85,7 @@ const QuizSelectionPage = () => {
               ? `Score: ${totalScore}%`
               : status === 'available'
               ? 'Ready to start! 💪'
-              : 'Complete previous quizes to unlock 🔒'}
+              : 'Complete module to unlock 🔒'}
           </p>
           {status === 'locked' && (
             <span className="flex items-center text-gray-500">

@@ -1,5 +1,6 @@
 const QuizQuestion = require('../models/quizQuestions.model');
 const SignsData = require('../models/signsData.model');
+const Progress = require('../models/progress.model.js');
 const QuizProgress = require('../models/quizProgress.model');
 
 const shuffle = (arr) => arr.sort(() => 0.5 - Math.random());
@@ -26,11 +27,10 @@ const generateQuizForModule = async (req, res) => {
       }
     };
 
-    pushN(staticQs, 10);
-    // Optional more dynamic/static
-    // pushN(dynamicQs, 2);
-    // pushN(staticQs, 3);
-    // pushN(dynamicQs, 3);
+    pushN(staticQs, 2);
+    pushN(dynamicQs, 2);
+    pushN(staticQs, 3);
+    pushN(dynamicQs, 3);
 
     const finalQuestions = orderedQuestions.map((q) => {
       if (q.type === 'static') {
@@ -85,56 +85,86 @@ const getQuizModuleInfo = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    // 1. Get all beginner modules with their subjects
+    // 1. Get all beginner modules with their subjects and signs count
     const allModules = await SignsData.find({ level: 'beginner' });
 
-    // Create a map from module name to subject (assume module names are unique)
-    const moduleToSubject = new Map();
-    allModules.forEach(({ module, subject }) => {
-      if (!moduleToSubject.has(module)) {
-        moduleToSubject.set(module, subject);
+    // Map module -> { subject, totalSigns }
+    const moduleInfoMap = new Map();
+    allModules.forEach(({ module, subject, signs }) => {
+      if (!moduleInfoMap.has(module)) {
+        moduleInfoMap.set(module, {
+          subject,
+          totalSigns: signs.length,
+        });
+      } else {
+        const current = moduleInfoMap.get(module);
+        current.totalSigns += signs.length;
       }
     });
 
-    // 2. Get all user's quiz progress (which only contains module, no subject)
-    const userProgress = await QuizProgress.find({ userId });
+    // 2. Get user's watched signs progress (from Progress collection)
+    const userWatchedSigns = await Progress.find({ userId, status: 'watched' });
 
-    // 3. Aggregate progress by module + subject (subject from moduleToSubject map)
-    const progressByModuleSubject = {};
-
-    userProgress.forEach(({ module, score }) => {
-      const subject = moduleToSubject.get(module) || 'Unknown';
-
-      const key = `${module}-${subject}`;
-      if (!progressByModuleSubject[key]) {
-        progressByModuleSubject[key] = { questionsAnswered: 0, totalScore: 0 };
-      }
-      progressByModuleSubject[key].questionsAnswered += 1;
-      progressByModuleSubject[key].totalScore += score;
+    // Count unique watched signs per module
+    const watchedSignsByModule = {};
+    userWatchedSigns.forEach(({ module, signTitle }) => {
+      if (!watchedSignsByModule[module]) watchedSignsByModule[module] = new Set();
+      watchedSignsByModule[module].add(signTitle);
     });
 
-    // 4. Build final response arrays
+    // 3. Get user's quiz answers progress
+    const userQuizProgress = await QuizProgress.find({ userId });
+
+    // Count quiz questions answered per module
+    const quizAnswersByModule = {};
+    userQuizProgress.forEach(({ module, answer }) => {
+      if (answer) { // Only quiz entries have 'answer'
+        quizAnswersByModule[module] = (quizAnswersByModule[module] || 0) + 1;
+      }
+    });
+
+    // 4. Build response arrays
     const englishModules = [];
     const arabicModules = [];
 
-    // Use the module-subject map as source for all beginner modules
-    moduleToSubject.forEach((subject, module) => {
-      const key = `${module}-${subject}`;
-      const progress = progressByModuleSubject[key] || { questionsAnswered: 0, totalScore: 0 };
+    moduleInfoMap.forEach(({ subject, totalSigns }, module) => {
+      const watchedSet = watchedSignsByModule[module] || new Set();
+      const watchedCount = watchedSet.size;
+      const questionsAnswered = quizAnswersByModule[module] || 0;
+      console.log(`Module: "${module}", Watched Signs: ${watchedCount}/${totalSigns}, All Watched: ${watchedCount === totalSigns}`);
 
-      let status = 'available';
-      if (progress.questionsAnswered >= 10) {
-        status = 'completed';
-      } else if (progress.questionsAnswered === 0) {
+      // Determine status:
+      // locked if no signs watched
+      // available if all signs watched and quiz not completed
+      // completed if quiz completed (>= 10 questions answered)
+      let status = 'locked';
+      if (watchedCount === 0) {
         status = 'locked';
+      } else if (watchedCount === totalSigns) {
+        if (questionsAnswered >= 10) {
+          status = 'completed';
+        } else {
+          status = 'available';
+        }
+      } else {
+        // Partial signs watched but not all
+        status = 'locked'; // or 'in-progress' if you want
       }
+
+      // Calculate totalScore only if completed
+      const totalScore =
+        status === 'completed'
+          ? userQuizProgress
+              .filter((p) => p.module === module && p.answer === 'correct')
+              .reduce((acc, cur) => acc + cur.score, 0)
+          : 0;
 
       const moduleInfo = {
         module,
         subject,
         status,
-        totalScore: progress.questionsAnswered >= 10 ? progress.totalScore : 0,
-        questionsAnswered: progress.questionsAnswered,
+        totalScore,
+        questionsAnswered,
       };
 
       if (subject.toLowerCase() === 'english') {
@@ -144,11 +174,7 @@ const getQuizModuleInfo = async (req, res) => {
       }
     });
 
-    res.json({
-      english: englishModules,
-      arabic: arabicModules,
-    });
-
+    res.json({ english: englishModules, arabic: arabicModules });
   } catch (err) {
     console.error('❌ Error fetching quiz module info:', err.message);
     res.status(500).json({ message: 'Failed to fetch quiz module info' });
