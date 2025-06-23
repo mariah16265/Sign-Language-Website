@@ -71,7 +71,6 @@ const getQuizProgressForModule = async (req, res) => {
   try {
     const progress = await QuizProgress.find({ userId, module });
     const totalScore = progress.reduce((acc, item) => acc + item.score, 0);
-    console.log("PROGRESs:",progress);
     console.log("SCORE:", totalScore);
     res.json({
       totalScore
