@@ -11,7 +11,7 @@ const ASLQuizPage = () => {
   const module = location.state?.moduleName || 'Module 1- Alphabets';
 
   // ----- REFS -----
-  const webcamRef = useRef(null);  
+  const webcamRef = useRef(null);
   const cameraRef = useRef(null);
   const countdownRef = useRef(0);
   const intervalRef = useRef(null);
@@ -26,12 +26,29 @@ const ASLQuizPage = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [feedback, setFeedback] = useState('');
+  const [feedbackType, setFeedbackType] = useState(''); // 'correct' or 'incorrect'
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [attemptedQuestions, setAttemptedQuestions] = useState(new Set());
   const [steps, setSteps] = useState([]);
-  const [autoChecking, setAutoChecking] = useState(true);
   const [countdown, setCountdown] = useState(0);
   const [isCountingDown, setIsCountingDown] = useState(false);
+
+  // ----- FEEDBACK MESSAGES -----
+  const correctFeedbacks = [
+    'Perfect! That was spot on!',
+    'Excellent! You got it right!',
+    'Great job! You nailed it!',
+    "Awesome! You're a pro!",
+    "Brilliant! That's correct!",
+  ];
+
+  const incorrectFeedbacks = [
+    'The correct sign was: ',
+    "That wasn't quite right. The correct sign was: ",
+    'Oops! The correct answer was: ',
+    'Almost! The correct sign was: ',
+    'Not this time. The correct sign was: ',
+  ];
 
   // ----- INFO -----
   const token = localStorage.getItem('token');
@@ -48,7 +65,8 @@ const ASLQuizPage = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'Failed to load questions');
+        if (!res.ok)
+          throw new Error(data.message || 'Failed to load questions');
         setQuestions(data);
       } catch (err) {
         console.error('Quiz fetch error:', err.message);
@@ -88,7 +106,10 @@ const ASLQuizPage = () => {
     const onResults = (results) => {
       if (!isMounted) return;
 
-      if (results.multiHandLandmarks?.length && results.multiHandedness?.length) {
+      if (
+        results.multiHandLandmarks?.length &&
+        results.multiHandedness?.length
+      ) {
         const landmarks = results.multiHandLandmarks[0];
         const handLabel = results.multiHandedness[0].label;
         setLandmarksData({ points: landmarks, hand: handLabel });
@@ -194,10 +215,21 @@ const ASLQuizPage = () => {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || 'Prediction failed');
 
+        // Random feedback selection
         if (data.answer === 'correct') {
-          setFeedback('✅ Correct! Great job!');
+          const randomIndex = Math.floor(
+            Math.random() * correctFeedbacks.length
+          );
+          setFeedback(correctFeedbacks[randomIndex]);
+          setFeedbackType('correct');
         } else {
-          setFeedback(`❌ Try again! Expected: ${question.correctLabel}`);
+          const randomIndex = Math.floor(
+            Math.random() * incorrectFeedbacks.length
+          );
+          setFeedback(
+            `${incorrectFeedbacks[randomIndex]}${question.correctLabel}`
+          );
+          setFeedbackType('incorrect');
         }
       } else {
         if (selectedOption === null) {
@@ -211,7 +243,24 @@ const ASLQuizPage = () => {
         );
 
         const selected = question.options[selectedOption];
-        setFeedback(selected.isCorrect ? '✅ Correct!' : '❌ Wrong!');
+        const correctLabel = question.options.find(
+          (opt) => opt.isCorrect
+        )?.label;
+
+        // Random feedback selection
+        if (selected.isCorrect) {
+          const randomIndex = Math.floor(
+            Math.random() * correctFeedbacks.length
+          );
+          setFeedback(correctFeedbacks[randomIndex]);
+          setFeedbackType('correct');
+        } else {
+          const randomIndex = Math.floor(
+            Math.random() * incorrectFeedbacks.length
+          );
+          setFeedback(`${incorrectFeedbacks[randomIndex]}${correctLabel}`);
+          setFeedbackType('incorrect');
+        }
 
         try {
           await fetch(`http://localhost:5000/api/quiz-static/save/${userId}`, {
@@ -223,17 +272,18 @@ const ASLQuizPage = () => {
             body: JSON.stringify({
               userId,
               module,
-              signTitle: question.options.find((opt) => opt.isCorrect)?.label,
+              signTitle: correctLabel,
               isCorrect: selected.isCorrect,
             }),
           });
         } catch (err) {
-          console.error('❌ Error saving static quiz progress:', err.message);
+          console.error('Error saving static quiz progress:', err.message);
         }
       }
     } catch (err) {
       console.error('Prediction error:', err.message);
-      setFeedback('❌ Error during prediction.');
+      setFeedback('Error during prediction.');
+      setFeedbackType('error');
     } finally {
       isSubmittingRef.current = false;
     }
@@ -259,7 +309,7 @@ const ASLQuizPage = () => {
 
   // ----- COUNTDOWN EFFECT -----
   useEffect(() => {
-    if (!isDynamic || !autoChecking || hasSubmitted) return;
+    if (!isDynamic || hasSubmitted) return;
 
     if (!landmarksData) {
       if (intervalRef.current) {
@@ -295,9 +345,7 @@ const ASLQuizPage = () => {
         });
       }, 1000);
     }
-
-    // No cleanup here to avoid clearing interval on every landmarksData change
-  }, [landmarksData, isDynamic, autoChecking, hasSubmitted]);
+  }, [landmarksData, isDynamic, hasSubmitted]);
 
   // ----- CLEANUP ON UNMOUNT OR KEY STATE CHANGE -----
   useEffect(() => {
@@ -311,7 +359,7 @@ const ASLQuizPage = () => {
       setCountdown(0);
       countdownRef.current = 0;
     };
-  }, [isDynamic, autoChecking, hasSubmitted]);
+  }, [isDynamic, hasSubmitted]);
 
   // ----- NEXT QUESTION -----
   const handleNext = () => {
@@ -325,146 +373,216 @@ const ASLQuizPage = () => {
     setQuestionIndex((prev) => (prev + 1) % questions.length);
     setSelectedOption(null);
     setFeedback('');
+    setFeedbackType('');
     setCountdown(0);
   };
 
-  if (questions.length === 0) return <div>Loading quiz...</div>;
+  if (questions.length === 0)
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-pink-50">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-pink-400"></div>
+      </div>
+    );
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-yellow-100 via-pink-100 to-purple-100 overflow-hidden">
+    <div
+      className="relative min-h-screen overflow-hidden"
+      style={{
+        backgroundImage: "url('/assets/quizbg.jpg')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
+      {/* <div className="absolute inset-0 bg-opacity-60"></div> */}
       <Navbar userName="Michael Bob" userAvatar="/images/avatar.jpg" />
       <div className="flex flex-col lg:flex-row min-h-screen z-10 relative">
         <Sidebar />
-        <div className="flex-1 pt-4 px-4 md:pt-4 md:px-6 lg:pt-5 lg:px-12 flex flex-col items-center">
-          <div className="flex flex-col sm:flex-row justify-between items-center w-full max-w-7xl mb-4 px-6">
-            <h2 className="text-3xl md:text-3xl font-extrabold text-pink-700 drop-shadow-md">
-              🎉 Quiz Time!
+        <div className="flex-1 pt-6 px-4 md:pt-8 md:px-6 lg:pt-10 lg:px-12 flex flex-col items-center pb-16">
+          {' '}
+          <div className="w-full max-w-7xl mb-8">
+            <h2 className="text-4xl md:text-5xl font-bold text-center text-purple-600 mb-2 baloo-font">
+              {module} Quiz
             </h2>
           </div>
-
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="bg-white rounded-2xl shadow-lg p-6 border-8 border-pink-300 w-full max-w-[80rem] min-h-[500px] flex flex-col gap-6 justify-between"
+            className="bg-white/80 rounded-3xl shadow-lg p-6 md:p-8 border-4 border-pink-200 w-full max-w-[80rem] min-h-[550px] flex flex-col gap-8 justify-between"
           >
             <div className="w-full">
               <StepProgressBar steps={steps} />
             </div>
 
             {!isDynamic ? (
-              <div className="flex flex-col md:flex-row w-full gap-8 items-center">
-                <div className="flex flex-col items-center w-full md:w-1/2 min-h-[280px]">
-                  <div className="relative bg-pink-50 rounded-2xl px-8 py-6 text-center shadow-inner border-4 border-pink-400 -mt-10 ml-9">
-                    <h3 className="text-2xl font-bold text-pink-700">
-                      {(() => {
-                        const category =
-                          module.split('-')[1]?.trim().toLowerCase() || 'item';
-                        return `This sign represents which ${category}?`;
-                      })()}
+              <div className="flex flex-col md:flex-row w-full gap-8 md:gap-10 items-center">
+                <div className="flex flex-col items-center w-full md:w-1/2">
+                  <div className="text-center px-4">
+                    <h3 className="text-3xl font-medium text-pink-800 font-sans leading-tight mb-2">
+                      What does this sign represent?
                     </h3>
                   </div>
 
-                  <div className="flex justify-center items-center bg-purple-100 rounded-2xl shadow-xl mt-8 w-[300px] h-[220px] border-4 border-purple-400 overflow-hidden">
+                  <div className="flex justify-center items-center bg-white rounded-2xl shadow-sm mt-8 w-[320px] h-[240px] md:w-[380px] md:h-[280px] border-2 border-pink-200 overflow-hidden">
                     <img
                       src={question.signUrl}
-                      alt="Sign"
-                      className="object-contain w-full h-full"
+                      alt="Sign language demonstration"
+                      className="object-contain w-full h-full p-4"
                     />
                   </div>
                 </div>
 
-                <div className="flex flex-col items-center w-full md:w-1/2 gap-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-md">
+                <div className="flex flex-col items-center w-full md:w-1/2 gap-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-lg mt-28">
                     {question.options.map((opt, index) => (
-                      <div
+                      <motion.div
                         key={index}
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => {
                           if (!hasSubmitted) setSelectedOption(index);
                         }}
-                        className={`cursor-pointer border-4 rounded-2xl overflow-hidden shadow-md transition-all ${
+                        className={`cursor-pointer rounded-xl overflow-hidden transition-all ${
                           selectedOption === index
                             ? hasSubmitted
                               ? question.options[index]?.isCorrect
-                                ? 'border-green-500 bg-green-100'
-                                : 'border-red-500 bg-red-100'
-                              : 'border-purple-500 scale-105'
-                            : 'border-gray-300'
+                                ? 'bg-green-100 border-4 border-green-500'
+                                : 'bg-red-100 border-4 border-red-500'
+                              : 'bg-pink-200 border-4 border-pink-500'
+                            : 'bg-pink-50 border-4 border-pink-300 hover:border-pink-500'
                         }`}
                       >
-                        <div className="bg-white py-4 text-center font-bold text-purple-600 text-xl">
+                        {/* CHANGED: Reduced padding and font size */}
+                        <div className="py-4 px-5 text-center font-bold text-pink-800 text-xl">
                           {opt.label}
                         </div>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
 
-                  <div className="flex flex-col items-center gap-3 mt-6">
-                    <div className="flex gap-6">
-                      <button
+                  <div className="flex flex-col items-center gap-5 w-full">
+                    <div className="flex flex-col sm:flex-row gap-5 w-full max-w-lg justify-center">
+                      <motion.button
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={handleSubmit}
-                        disabled={
-                          hasSubmitted ||
-                          (!isDynamic && selectedOption === null)
-                        }
+                        disabled={hasSubmitted || selectedOption === null}
                         className={`${
-                          hasSubmitted ||
-                          (!isDynamic && selectedOption === null)
-                            ? 'bg-gray-400 cursor-not-allowed opacity-50'
-                            : 'bg-pink-500 hover:bg-pink-600 transition transform hover:scale-105'
-                        } text-white font-extrabold py-4 px-10 rounded-full shadow-lg text-xl`}
+                          hasSubmitted || selectedOption === null
+                            ? 'bg-gray-200 cursor-not-allowed'
+                            : 'bg-pink-500 hover:bg-pink-600 text-white'
+                        } font-bold py-4 px-6 rounded-full text-md w-full flex items-center justify-center gap-2 transition-colors`}
                       >
-                        ✅ Submit Answer
-                      </button>
-                      <button
+                        {selectedOption === null ? 'Submit' : 'Submit'}
+                      </motion.button>
+
+                      <motion.button
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={handleNext}
+                        disabled={!hasSubmitted}
                         className={`${
                           !hasSubmitted
-                            ? 'bg-gray-300 cursor-not-allowed opacity-50'
-                            : 'bg-blue-500 hover:bg-blue-600 transition transform hover:scale-105'
-                        } text-white font-bold py-4 px-10 rounded-full shadow-lg text-xl`}
+                            ? 'bg-gray-200 cursor-not-allowed'
+                            : 'bg-purple-500 hover:bg-purple-600 text-white'
+                        } font-bold py-4 px-6 rounded-full text-md w-full flex items-center justify-center gap-2 transition-colors`}
                       >
-                        ➡️ Next Question
-                      </button>
+                        Next Question
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </motion.button>
                     </div>
 
-                    {feedback && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className={`text-xl font-bold px-6 py-3 rounded-xl shadow-md transition-all ${
-                          feedback.includes('Correct')
-                            ? 'bg-green-100 text-green-800 border border-green-300'
-                            : 'bg-red-100 text-red-800 border border-red-300'
-                        }`}
-                      >
-                        {feedback}
-                      </motion.div>
-                    )}
+                    {/* Static Quiz Feedback */}
+                    <div className="min-h-[3rem] flex items-center justify-center w-full">
+                      {feedback && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className={`flex justify-center text-lg font-bold ${
+                            feedbackType === 'correct'
+                              ? 'text-green-600'
+                              : 'text-red-600'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            {feedbackType === 'correct' ? (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-6 w-6 text-green-600"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            ) : (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-6 w-6 text-red-600"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            )}
+                            <span>{feedback}</span>
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col md:flex-row w-full gap-12 items-center">
-                <div className="flex flex-col items-center w-full md:w-1/3 min-h-[280px]">
-                  <div className="relative bg-pink-50 rounded-2xl px-8 py-6 text-center shadow-inner border-4 border-pink-400 -mt-10 ml-6">
-                    <h3 className="text-2xl font-bold text-pink-700">
-                      {question.prompt}
+              <div className="flex flex-col md:flex-row w-full gap-6 md:gap-8 items-center">
+                <div className="flex flex-col items-center w-full md:w-2/5 -mt-7">
+                  <div className="relative bg-pink-100 rounded-2xl px-8 py-4 text-center border-2 border-pink-300 ">
+                    <h3 className="text-2xl font-bold text-pink-800">
+                      Show the sign for
                     </h3>
                   </div>
-                  <div className="flex justify-center items-center bg-pink-500 rounded-full w-36 h-36 shadow-lg mt-6">
-                    <p className="text-5xl font-extrabold text-white animate-bounce">
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.05, 1],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      repeatType: 'reverse',
+                    }}
+                    className="flex justify-center items-center bg-gradient-to-r from-pink-400 to-pink-600 rounded-full w-40 h-40 shadow-xl mt-8"
+                  >
+                    <p className="text-6xl font-extrabold text-white">
                       {question.correctLabel}
                     </p>
-                  </div>
+                  </motion.div>
                 </div>
 
-                <div className="flex flex-col items-center w-full md:w-2/3">
-                  <p className="text-purple-600 text-lg font-semibold mb-6 text-center">
-                    Try your best and show the sign in front of the camera!
+                <div className="flex flex-col items-center w-full md:w-3/5">
+                  <p className="text-pink-700 text-center font-bold mb-4 text-xl mt-5">
+                    Show the sign in front of the camera
                   </p>
-                  <div className="rounded-3xl border-8 border-yellow-300 shadow-2xl overflow-hidden mb-6 w-full max-w-[550px] h-[220px]">
+                  <div className="relative rounded-2xl border-4 border-pink-300 shadow-lg overflow-hidden mb-6 w-full max-w-[540px] h-[280px]">
                     <Webcam
                       ref={webcamRef}
                       audio={false}
@@ -475,98 +593,102 @@ const ASLQuizPage = () => {
                         height: 720,
                         facingMode: 'user',
                       }}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                      }}
+                      className="w-full h-full object-cover"
                     />
                   </div>
 
-                  {/* Auto-detection countdown */}
-                  {isCountingDown && (
-                    <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full mb-4 animate-pulse">
-                      ✅ Detected! Auto-submitting in {countdown}...
-                    </div>
-                  )}
-
-
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="flex gap-2 mt-2">
-                      <button
-                        disabled={true}
-                        className={`flex items-center justify-center gap-2
-                          ${
-                            hasSubmitted && !feedback
-                              ? 'bg-pink-500' // submitted but feedback not shown yet → show pink
-                              : 'bg-gray-400 cursor-not-allowed opacity-50' // otherwise gray
-                          }
-                          text-white font-extrabold py-4 px-10 rounded-full shadow-lg text-xl`}
+                  <div className="flex flex-col items-center gap-3 w-full max-w-lg">
+                    <div className="flex flex-col sm:flex-row gap-5 w-full justify-center">
+                      <motion.button
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.98 }}
+                        disabled={hasSubmitted || isCountingDown}
+                        onClick={handleSubmit}
+                        className={`${
+                          hasSubmitted || isCountingDown
+                            ? 'bg-pink-300 cursor-not-allowed'
+                            : 'bg-pink-500 hover:bg-pink-600 text-white'
+                        } font-bold py-4 px-6 rounded-full text-md w-full sm:w-auto flex items-center justify-center gap-2 transition-colors`}
                       >
-                        {/* Spinner only during "submission in progress" */}
-                        {hasSubmitted && !feedback && (
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        )}
-                        <span>Checking Sign</span>
-                      </button>
-                      <button
+                        {isCountingDown
+                          ? `Submitting in ${countdown}...`
+                          : hasSubmitted
+                          ? 'Checking...'
+                          : 'No Sign Detected'}
+                      </motion.button>
+
+                      <motion.button
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={handleNext}
                         disabled={!feedback}
                         className={`${
                           !feedback
-                            ? 'bg-gray-300 cursor-not-allowed opacity-50'
-                            : 'bg-blue-500 hover:bg-blue-600 transition transform hover:scale-105'
-                        } text-white font-bold py-4 px-10 rounded-full shadow-lg text-xl`}
+                            ? 'bg-gray-200 cursor-not-allowed'
+                            : 'bg-purple-500 hover:bg-purple-600 text-white'
+                        } font-bold py-4 px-6 rounded-full text-md w-full sm:w-auto flex items-center justify-center gap-2 transition-colors`}
                       >
-                        ➡️ Next Question
-                      </button>
+                        Next
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </motion.button>
                     </div>
 
-                    {/* Auto-check toggle */}
-                    <div className="flex items-center gap-2 mt-2">
-                      <label className="flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={autoChecking}
-                          onChange={() => setAutoChecking(!autoChecking)}
-                          className="mr-2 h-5 w-5 text-pink-600"
-                        />
-                        Auto-detect
-                      </label>
+                    {/* Dynamic Quiz Feedback */}
+                    <div className="min-h-[2rem] flex items-center justify-center w-full mt-1">
+                      {feedback && (
+                        <motion.div
+                          initial={{ scale: 0.8 }}
+                          animate={{ scale: 1 }}
+                          className={`flex justify-center text-lg font-bold ${
+                            feedbackType === 'correct'
+                              ? 'text-green-600'
+                              : 'text-red-600'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            {feedbackType === 'correct' ? (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-6 w-6 text-green-600"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            ) : (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-6 w-6 text-red-600"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            )}
+                            <span>{feedback}</span>
+                          </div>
+                        </motion.div>
+                      )}
                     </div>
-
-                    {/* Improved feedback display */}
-                    {feedback && (
-                      <motion.div
-                        initial={{ scale: 0.8 }}
-                        animate={{ scale: 1 }}
-                        className={`text-2xl font-bold px-8 py-4 rounded-2xl shadow-lg ${
-                          feedback.includes('Correct')
-                            ? 'bg-green-100 text-green-800 border-4 border-green-500'
-                            : 'bg-red-100 text-red-800 border-4 border-red-500'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          {feedback.includes('Correct') ? (
-                            <>
-                              <span className="text-3xl">🎉</span>
-                              <span>Perfect! Great job!</span>
-                            </>
-                          ) : (
-                            <>
-                              <span className="text-3xl">🤔</span>
-                              <div>
-                                <div>Almost! Try again</div>
-                                <div className="text-lg font-normal">
-                                  Expected:{' '}
-                                  <strong>{question.correctLabel}</strong>
-                                </div>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </motion.div>
-                    )}
                   </div>
                 </div>
               </div>

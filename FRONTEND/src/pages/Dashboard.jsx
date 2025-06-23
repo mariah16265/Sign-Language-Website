@@ -44,16 +44,19 @@ const Dashboard = () => {
   //  Main dashboard data fetch
   useEffect(() => {
     const setupDashboard = async () => {
-    const userId = localStorage.getItem('userId');
+      const userId = localStorage.getItem('userId');
       try {
         // 1. Fetch study plan to get actual subjects
-        const studyPlanResponse = await fetch(`http://localhost:5000/api/studyplan/${userId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const studyPlanResponse = await fetch(
+          `http://localhost:5000/api/studyplan/${userId}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         const studyPlanData = await studyPlanResponse.json();
 
         if (!studyPlanResponse.ok) {
@@ -372,7 +375,7 @@ const Dashboard = () => {
         <div className="flex-1 p-4 md:p-6 lg:p-8">
           {/* Header Section */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
+            <h2 className="text-2xl md:text-3xl font-bold text-indigo-700">
               Today's Learning Adventure
             </h2>
 
@@ -421,12 +424,17 @@ const Dashboard = () => {
                           name: subjectItem.subject,
                           gradient:
                             subjectItem.subject === 'English'
-                              ? 'from-blue-500 to-indigo-500'
+                              ? 'from-blue-300 to-blue-500'
                               : subjectItem.subject === 'Arabic'
                               ? 'from-green-500 to-emerald-500'
                               : 'from-purple-500 to-pink-500',
+                          textColor:
+                            subjectItem.subject === 'English'
+                              ? 'text-gray-900' // Dark gray for English
+                              : subjectItem.subject === 'Arabic'
+                              ? 'text-gray-900' // Dark gray for Arabic
+                              : 'text-white', // White for other subjects
                           description: '',
-
                           lessons: subjectItem.lessons.map((lessonItem, i) => {
                             const firstSign = lessonItem.signs[0]?.title || '';
                             const lastSign =
@@ -508,9 +516,9 @@ const Dashboard = () => {
             </div>
 
             {/* Learning Progress - Right Side */}
-            <div className="bg-red-100 p-6 rounded-2xl shadow-md border border-gray-100">
+            <div className="bg-gradient-to-r from-lime-100 to-green-200 p-6 rounded-2xl shadow-md border border-gray-100">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-gray-800">
+                <h3 className="text-2xl font-bold text-green-800">
                   Learning Progress
                 </h3>
                 <div className="flex items-center gap-2">

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaSignInAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
-import FloatingEmojis from '../components/FloatingEmojis';
+// import FloatingEmojis from '../components/FloatingEmojis';
 import { jwtDecode } from 'jwt-decode';
 
 const LoginPage = () => {
@@ -74,106 +74,106 @@ const LoginPage = () => {
     }
   };
 
-  // Updated emoji options to match signup page
-  const emojis = [
-    '🌈',
-    '⭐',
-    '🌟',
-    '✨',
-    '🎈',
-    '🎀',
-    '🎁',
-    '🧸',
-    '🦄',
-    '🐝',
-    '🦋',
-    '🐞',
-    '🐶',
-    '🐱',
-    '🦁',
-    '🐯',
-    '🦊',
-    '🐻',
-    '🐧',
-    '🦉',
-    '🐙',
-    '🦕',
-    '🚀',
-    '🎠',
-    '🎪',
-    '🎨',
-    '🧩',
-    '🎯',
-    '🍎',
-    '🍭',
-    '🍪',
-    '🧁',
-    '👋',
-    '✋',
-    '🤚',
-    '📚',
-    '✏️',
-    '🎨',
-    '🖍️',
-    '🎮',
-    '🧩',
-    '🎲',
-    '🏆',
-    '🎵',
-    '🎶',
-    '🎤',
-    '🎧',
-    '🎭',
-    '🤹',
-    '🎪',
-  ];
+  // // Updated emoji options to match signup page
+  // const emojis = [
+  //   '🌈',
+  //   '⭐',
+  //   '🌟',
+  //   '✨',
+  //   '🎈',
+  //   '🎀',
+  //   '🎁',
+  //   '🧸',
+  //   '🦄',
+  //   '🐝',
+  //   '🦋',
+  //   '🐞',
+  //   '🐶',
+  //   '🐱',
+  //   '🦁',
+  //   '🐯',
+  //   '🦊',
+  //   '🐻',
+  //   '🐧',
+  //   '🦉',
+  //   '🐙',
+  //   '🦕',
+  //   '🚀',
+  //   '🎠',
+  //   '🎪',
+  //   '🎨',
+  //   '🧩',
+  //   '🎯',
+  //   '🍎',
+  //   '🍭',
+  //   '🍪',
+  //   '🧁',
+  //   '👋',
+  //   '✋',
+  //   '🤚',
+  //   '📚',
+  //   '✏️',
+  //   '🎨',
+  //   '🖍️',
+  //   '🎮',
+  //   '🧩',
+  //   '🎲',
+  //   '🏆',
+  //   '🎵',
+  //   '🎶',
+  //   '🎤',
+  //   '🎧',
+  //   '🎭',
+  //   '🤹',
+  //   '🎪',
+  // ];
 
-  const colors = [
-    '#a78bfa',
-    '#f9a8d4',
-    '#93c5fd',
-    '#86efac',
-    '#fde047',
-    '#fca5a5',
-    '#7dd3fc',
-    '#c4b5fd',
-    '#bef264',
-    '#fda4af',
-  ];
+  // const colors = [
+  //   '#a78bfa',
+  //   '#f9a8d4',
+  //   '#93c5fd',
+  //   '#86efac',
+  //   '#fde047',
+  //   '#fca5a5',
+  //   '#7dd3fc',
+  //   '#c4b5fd',
+  //   '#bef264',
+  //   '#fda4af',
+  // ];
 
-  // Memoize the emoji data to prevent recreation on re-renders
-  const floatingEmojis = useMemo(() => {
-    return [...Array(60)].map((_, i) => {
-      const row = Math.floor(i / 10);
-      const col = i % 10;
-      const startX = col * 10 + Math.random() * 5;
-      const startYOffset = row * 12;
-      const driftAmount = (Math.random() * 60 - 30) * (1 + row * 0.1);
-      const rotation = Math.random() * 360;
-      const size = `${Math.random() * 16 + 16}px`;
-      const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-      const duration = 15 + row * 1.5;
-      const delay = col * 0.03;
+  // // Memoize the emoji data to prevent recreation on re-renders
+  // const floatingEmojis = useMemo(() => {
+  //   return [...Array(60)].map((_, i) => {
+  //     const row = Math.floor(i / 10);
+  //     const col = i % 10;
+  //     const startX = col * 10 + Math.random() * 5;
+  //     const startYOffset = row * 12;
+  //     const driftAmount = (Math.random() * 60 - 30) * (1 + row * 0.1);
+  //     const rotation = Math.random() * 360;
+  //     const size = `${Math.random() * 16 + 16}px`;
+  //     const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+  //     const duration = 15 + row * 1.5;
+  //     const delay = col * 0.03;
 
-      return {
-        id: i,
-        startX,
-        startYOffset,
-        driftAmount,
-        rotation,
-        size,
-        emoji,
-        duration,
-        delay,
-        color: colors[i % colors.length],
-      };
-    });
-  }, []); // Empty dependency array means this only runs once
+  //     return {
+  //       id: i,
+  //       startX,
+  //       startYOffset,
+  //       driftAmount,
+  //       rotation,
+  //       size,
+  //       emoji,
+  //       duration,
+  //       delay,
+  //       color: colors[i % colors.length],
+  //     };
+  //   });
+  // }, []); // Empty dependency array means this only runs once
 
   return (
     <div className="relative min-h-screen flex flex-col">
       {/* Navbar */}
-      <div className="w-full z-20">
+      <div className="w-full z-50">
         <Navbar hideLoginButton={true} />
       </div>
 
@@ -181,16 +181,22 @@ const LoginPage = () => {
       <div
         className="flex-1 relative flex items-center justify-center"
         style={{
-          backgroundImage: "url('/assets/login.jpg')",
-          backgroundSize: 'cover',
-          backgroundPosition: '50% 20%',
-
+          backgroundImage: "url('/assets/login.webp')",
+          backgroundSize: 'cover', // This ensures the image covers the entire container
+          backgroundPosition: 'center center', // Center the image
           backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed', // Optional: makes the background fixed during scrolling
         }}
       >
         {/* Semi-transparent overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-200/30 to-white/10 backdrop-blur-[1px] z-0"></div>
-
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            background:
+              'linear-gradient(to right, rgba(255,241,204,0.3), rgba(255,224,130,0.2))',
+            backdropFilter: 'blur(2px)',
+          }}
+        ></div>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -199,29 +205,31 @@ const LoginPage = () => {
         >
           <motion.form
             onSubmit={handleLogin}
-            className="bg-indigo-100 backdrop-blur-sm shadow-xl rounded-3xl p-8 space-y-6 border border-white/20"
+            className="bg-[#fff9cc] backdrop-blur-sm shadow-xl rounded-3xl p-8 space-y-6 border border-white/20"
             whileHover={{ scale: 1.01 }}
           >
-            {/* Moved Welcome Section Here */}
+            {/* Welcome Section */}
             <div className="text-center">
               <motion.h1
-                className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-blue-500 mb-2"
+                className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-amber-800 mb-2"
                 whileHover={{ scale: 1.02 }}
               >
                 Welcome Back!
               </motion.h1>
-              <p className="text-lg text-blue-700">
+              <p className="text-lg text-amber-800">
                 Continue your learning journey with us
               </p>
             </div>
+
+            {/* Input Fields */}
             <div>
-              <label className="block text-blue-700 mb-2 font-medium">
+              <label className="block text-amber-800 mb-2 font-medium">
                 Username or Email
               </label>
               <motion.div whileHover={{ scale: 1.01 }}>
                 <input
                   type="text"
-                  className="w-full p-4 rounded-xl border-2 border-blue-100 focus:border-pink-300 focus:ring-2 focus:ring-pink-200 focus:outline-none transition-all duration-300"
+                  className="w-full p-4 rounded-xl border-2 border-amber-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200 focus:outline-none transition-all duration-300 text-amber-900 placeholder-amber-400"
                   placeholder="Enter your username or email"
                   name="username"
                   value={loginData.username}
@@ -231,13 +239,13 @@ const LoginPage = () => {
             </div>
 
             <div>
-              <label className="block text-blue-700 mb-2 font-medium">
+              <label className="block text-amber-800 mb-2 font-medium">
                 Password
               </label>
               <motion.div className="relative" whileHover={{ scale: 1.01 }}>
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  className="w-full p-4 rounded-xl border-2 border-blue-100 focus:border-pink-300 focus:ring-2 focus:ring-pink-200 focus:outline-none transition-all duration-300 pr-12"
+                  className="w-full p-4 rounded-xl border-2 border-amber-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200 focus:outline-none transition-all duration-300 pr-12 text-amber-900 placeholder-amber-400"
                   placeholder="Enter your password"
                   name="password"
                   value={loginData.password}
@@ -245,7 +253,7 @@ const LoginPage = () => {
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400 hover:text-pink-500 transition-colors"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-amber-600 hover:text-amber-800 transition-colors"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -258,37 +266,38 @@ const LoginPage = () => {
             </div>
 
             {loginError && (
-              <p className="text-red-600 font-medium mt-2">{loginError}</p>
+              <p className="text-red-700 font-medium mt-2">{loginError}</p>
             )}
 
+            {/* Remember Me & Forgot Password */}
             <div className="flex justify-between items-center">
               <div className="flex items-center">
                 <input
                   id="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-pink-500 focus:ring-pink-300 border-blue-200 rounded"
+                  className="h-4 w-4 text-amber-600 focus:ring-amber-300 border-amber-300 rounded"
                 />
                 <label
                   htmlFor="remember-me"
-                  className="ml-2 text-sm text-blue-700"
+                  className="ml-2 text-sm text-amber-800"
                 >
                   Remember me
                 </label>
               </div>
               <a
                 href="#"
-                className="text-sm text-pink-500 hover:text-pink-600 transition-colors"
+                className="text-sm text-amber-600 hover:text-amber-800 transition-colors"
               >
                 Forgot password?
               </a>
             </div>
 
+            {/* Login Button */}
             <motion.button
               type="submit"
-              className="w-full bg-gradient-to-r from-pink-500 to-blue-500 hover:from-pink-600 hover:to-blue-600 text-white py-4 px-6 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white py-4 px-6 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              //onClick={() => navigate('/studyplan')}
               onHoverStart={() => setIsHovered(true)}
               onHoverEnd={() => setIsHovered(false)}
             >
@@ -301,11 +310,12 @@ const LoginPage = () => {
               Log In
             </motion.button>
 
-            <p className="text-center text-blue-700">
+            {/* Sign Up Link */}
+            <p className="text-center text-amber-800">
               Don't have an account?{' '}
               <Link
                 to="/signup"
-                className="text-pink-500 font-semibold hover:text-pink-600 transition-colors"
+                className="text-amber-600 font-semibold hover:text-amber-800 transition-colors"
               >
                 Sign up now
               </Link>

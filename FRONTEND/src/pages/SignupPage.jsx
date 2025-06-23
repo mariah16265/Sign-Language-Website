@@ -26,15 +26,12 @@ const SignupPage = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    // Your Information
     Fname: '',
     Forganization: '',
-    Frole: '', // Changed from 'teacher' to empty string
+    Frole: '',
     Femail: '',
     Fphone: '',
     Faddress: '',
-
-    // Child Info
     Cname: '',
     Cdob: '',
     Cgender: '',
@@ -95,13 +92,13 @@ const SignupPage = () => {
         />
 
         {/* Main Content */}
-        <div className="mt-3 flex-grow flex items-center justify-center w-full">
+        <div className=" mt-2 flex-grow flex items-center justify-center w-full py-4">
           <motion.div className="w-full max-w-[760px] z-10">
             <motion.div
-              className="bg-white backdrop-blur-sm shadow-2xl rounded-2xl p-6 md:p-8 border border-purple-100"
+              className="bg-white backdrop-blur-sm shadow-2xl rounded-2xl p-5 md:p-8 border border-purple-100"
               whileHover={{ scale: 1.005 }}
             >
-              <div className="text-center mb-5">
+              <div className="mt-2 text-center mb-5">
                 <motion.h1
                   className="font-quicksand text-[37px] font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-rose-500 "
                   whileHover={{ scale: 1.02 }}
@@ -113,15 +110,14 @@ const SignupPage = () => {
                 </p>
               </div>
 
-              <form className="space-y-4" onSubmit={handleSubmit}>
-                {/* Facilitator Information - Now First Section */}
-
-                <motion.div className="space-y-3">
-                  <h2 className="font-poppins text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-500 mb-3 flex items-center">
+              <form onSubmit={handleSubmit}>
+                {/* Facilitator Information */}
+                <motion.div className="mb-5 space-y-2">
+                  <h2 className="font-poppins text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-500 mb-2 flex items-center">
                     <span className="mr-2 text-2xl">👤</span> Your Information
                   </h2>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-7 gap-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
                     <div className="relative">
                       <input
                         className="input-field"
@@ -151,7 +147,6 @@ const SignupPage = () => {
                         <MdBusiness />
                       </div>
                     </div>
-                    {/* Facilitator Role Dropdown */}
                     <div className="relative">
                       <select
                         className="input-field"
@@ -166,7 +161,6 @@ const SignupPage = () => {
                         <option value="teacher">Teacher/Educator</option>
                         <option value="ngo_worker">NGO/CBO Worker</option>
                         <option value="caregiver">Caregiver</option>
-
                         <option value="speech_therapist">
                           Speech Therapist
                         </option>
@@ -204,7 +198,6 @@ const SignupPage = () => {
                         value={formData.Femail}
                         onChange={handleChange}
                       />
-
                       <div className="input-icon text-green-500">
                         <MdEmail />
                       </div>
@@ -221,7 +214,6 @@ const SignupPage = () => {
                         value={formData.Fphone}
                         onChange={handleChange}
                       />
-
                       <div className="input-icon text-purple-500">
                         <MdPhone />
                       </div>
@@ -230,13 +222,12 @@ const SignupPage = () => {
                 </motion.div>
 
                 {/* Child Information Section */}
-                <motion.div className="space-y-3">
-                  <h2 className="font-poppins text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-orange-400 mb-3 flex items-center">
+                <motion.div className="mb-5 space-y-2">
+                  <h2 className="font-poppins text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-orange-400 mb-2 flex items-center">
                     <span className="mr-2 text-2xl">👦</span> Child Information
                   </h2>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-7 gap-y-2">
-                    {/* Basic Info */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
                     <div className="relative">
                       <input
                         className="input-field"
@@ -265,9 +256,7 @@ const SignupPage = () => {
                       </div>
                     </div>
 
-                    {/* Gender and Disability Row */}
-                    <div className="col-span-full grid grid-cols-1 md:grid-cols-2 gap-x-7 gap-y-2">
-                      {/* Gender Selection */}
+                    <div className="col-span-full grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
                       <div className="relative w-full">
                         <div className="input-field flex items-center space-x-6 p-3 h-full">
                           <div className="flex items-center space-x-2">
@@ -305,7 +294,6 @@ const SignupPage = () => {
                         </div>
                       </div>
 
-                      {/* Disability Dropdown */}
                       <div className="relative w-full">
                         <select
                           className="input-field w-full"
@@ -343,11 +331,11 @@ const SignupPage = () => {
 
                 {/* Account Setup */}
                 <motion.div className="pt-2">
-                  <h2 className="font-poppins text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500 mb-3 flex items-center">
+                  <h2 className="font-poppins text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500 mb-2 flex items-center">
                     <span className="mr-2 text-2xl">🔒</span> Account Setup
                   </h2>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
                     <div className="relative">
                       <input
                         className="input-field border-indigo-100 focus:border-indigo-300"
@@ -359,7 +347,6 @@ const SignupPage = () => {
                         value={formData.username}
                         onChange={handleChange}
                       />
-
                       <div className="input-icon text-indigo-500">
                         <span className="text-lg">👑</span>
                       </div>
@@ -377,7 +364,6 @@ const SignupPage = () => {
                         value={formData.password}
                         onChange={handleChange}
                       />
-
                       <div className="input-icon text-red-500">
                         <FaLock />
                       </div>
@@ -397,19 +383,21 @@ const SignupPage = () => {
                 </motion.div>
 
                 {signupError && (
-                  <p className="text-red-600 font-medium mt-2">{signupError}</p>
+                  <p className="text-red-600 font-medium mb-6">{signupError}</p>
                 )}
 
                 {/* Submit Button */}
-                <motion.button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-purple-500 to-rose-500 hover:from-purple-600 hover:to-rose-600 text-white py-3 px-2 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 mt-4 text-base"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <FaSignInAlt size={18} />
-                  Create Account
-                </motion.button>
+                <div className="mb-6">
+                  <motion.button
+                    type="submit"
+                    className="mt-6 w-full bg-gradient-to-r from-purple-500 to-rose-500 hover:from-purple-600 hover:to-rose-600 text-white py-3 px-2 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-base"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <FaSignInAlt size={18} />
+                    Create Account
+                  </motion.button>
+                </div>
 
                 <p className="text-center text-blue-700 text-sm">
                   Already have an account?{' '}
@@ -424,13 +412,12 @@ const SignupPage = () => {
             </motion.div>
           </motion.div>
         </div>
-
         <style jsx global>{`
           .input-field {
             border-radius: 0.8rem;
             max-width: 320px;
             width: 100%;
-            padding: 0.75rem 2.8rem;
+            padding: 0.65rem 2.8rem;
             border: 2px solid #d9cfc5;
             background-color: #fff9fb;
             color: #4c1d95;
@@ -438,8 +425,8 @@ const SignupPage = () => {
             font-size: 0.875rem;
           }
           .input-field::placeholder {
-            color: #9b4df0;
-            opacity: 1;
+            color: #000000;
+            opacity: 0.7;
           }
           .input-field:focus {
             outline: none;
@@ -453,10 +440,10 @@ const SignupPage = () => {
             background-position: right 0.75rem center;
             background-size: 16px 12px;
             appearance: none;
-            color: #9b4df0;
+            color: #4c1d95;
           }
           input[type='date'] {
-            color: #9b4df0;
+            color: #4c1d95;
           }
           input[type='date']:valid {
             color: #4c1d95;
