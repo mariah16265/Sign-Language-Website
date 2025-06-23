@@ -85,6 +85,9 @@ const SignDictionary = () => {
     acc[firstChar].push(sign);
     return acc;
   }, {});
+
+  const isNumberGroup = (str) => /^\d+$/.test(str);
+
   return (
     <div
       className="relative min-h-screen overflow-hidden"
@@ -176,7 +179,13 @@ const SignDictionary = () => {
               <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden max-h-[650px] overflow-y-auto">
                 <ul className="text-base">
                   {Object.keys(groupedSigns)
-                    .sort()
+                    .sort((a, b) => {
+                      const aIsNum = isNumberGroup(a);
+                      const bIsNum = isNumberGroup(b);
+                      if (aIsNum && !bIsNum) return 1;
+                      if (!aIsNum && bIsNum) return -1;
+                      return a.localeCompare(b);
+                    })
                     .map((letter) => (
                       <div key={letter} className="relative">
                         {/* Section header */}

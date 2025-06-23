@@ -12,7 +12,11 @@ import ModulesPage from './pages/ModulesPage';
 import LessonPage from './pages/LessonPage';
 import SignDictionaryPage from './pages/SignDictionaryPage.jsx';
 import SignVideoPage from './pages/SignVideoPage.jsx';
-import QuizPage from './pages/QuizPage';
+import QuizSelectionPage from './pages/QuizSelectionPage';
+import ASLQuizPage from './pages/ASLQuizPage';
+import WordQuizPage from './pages/WordQuizPage';
+//import ARSLQuizPage from './pages/ARSLQuizPage';
+
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
@@ -35,7 +39,9 @@ function App() {
           <Route path="/lesson/:lessonId/"element={<LessonPage />} />
           <Route path="/dictionary" element={<SignDictionaryPage />} />
           <Route path="/sign/:subject/:title" element={<SignVideoPage />} />
-          <Route path="/quiz" element={<QuizPage />} />
+          <Route path="/quiz" element={<QuizSelectionPage />} />
+          <Route path="/Equiz" element={<ASLQuizPage />} />
+          <Route path="/Wquiz" element={<WordQuizPage />} />
         </Routes>
       </div>
     </Router>
