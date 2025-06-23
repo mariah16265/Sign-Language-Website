@@ -12,6 +12,7 @@ const Navbar = ({ hideLoginButton = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const toggleMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+
   const getColorScheme = () => {
     switch (location.pathname) {
       case '/':
@@ -28,7 +29,7 @@ const Navbar = ({ hideLoginButton = false }) => {
       case '/signup':
         return {
           bg: 'bg-pink-50',
-          text: 'from-pink-600 to-fuchsia-500', // Updated text gradient
+          text: 'from-pink-600 to-fuchsia-500',
           icon: 'text-pink-600',
           button: 'from-fuchsia-500 to-pink-500',
           buttonHover: 'from-pink-600 to-fuchsia-600',
@@ -40,17 +41,18 @@ const Navbar = ({ hideLoginButton = false }) => {
       case '/login':
         return {
           bg: 'bg-gradient-to-r from-amber-100 to-amber-50',
-          text: 'from-orange-600 to-yellow-500', // Updated text gradient
+          text: 'from-orange-600 to-yellow-500',
           icon: 'text-orange-500',
           button: 'from-yellow-500 to-orange-400',
           buttonHover: 'from-orange-500 to-orange-600',
           navText: 'text-orange-700 hover:text-orange-500',
           border: 'border-orange-400',
         };
+
       case '/dashboard':
         return {
           bg: 'bg-white',
-          text: 'from-orange-600 to-orange-400', // Updated text gradient
+          text: 'from-orange-600 to-orange-400',
           icon: 'text-orange-600',
           button: 'bg-orange-400',
           buttonHover: 'bg-orange-500',
@@ -68,6 +70,18 @@ const Navbar = ({ hideLoginButton = false }) => {
           navText: 'text-sky-700 hover:text-sky-600',
           border: 'border-sky-400',
         };
+
+      case '/about':
+        return {
+          bg: 'bg-white',
+          text: 'from-purple-600 to-indigo-600',
+          icon: 'text-purple-600',
+          button: 'from-purple-300 to-indigo-400',
+          buttonHover: 'from-purple-400 to-indigo-500',
+          navText: 'text-purple-700 hover:text-indigo-600',
+          border: 'border-indigo-400',
+        };
+
       default:
         return {
           bg: 'bg-white',
@@ -83,7 +97,12 @@ const Navbar = ({ hideLoginButton = false }) => {
 
   const colors = getColorScheme();
 
-  const navLinks = ['Home', 'About', 'Curriculum'];
+  const navLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'About', path: '/about' },
+    { name: 'Curriculum', path: '/curriculum' },
+  ];
+
   const isLandingPage = location.pathname === '/';
   const isSignupPage = location.pathname === '/signup';
   const isLoginPage = location.pathname === '/login';
@@ -92,7 +111,6 @@ const Navbar = ({ hideLoginButton = false }) => {
   const shouldShowUsername =
     !isLandingPage && !isSignupPage && !isLoginPage && userName;
 
-  // Get username from localStorage
   useEffect(() => {
     const token = localStorage.getItem('token');
     const storedName = localStorage.getItem('userName');
@@ -123,7 +141,7 @@ const Navbar = ({ hideLoginButton = false }) => {
     <nav
       className={`${colors.bg} shadow-sm px-6 py-4 flex justify-between items-center sticky top-0 z-40 transition-colors duration-300`}
     >
-      {/* Logo - fixed alignment */}
+      {/* Logo */}
       <motion.div
         className="flex items-center space-x-3"
         whileHover={{ scale: 1.05 }}
@@ -142,12 +160,12 @@ const Navbar = ({ hideLoginButton = false }) => {
       <ul className="hidden md:flex space-x-6 font-medium text-lg items-center">
         {navLinks.map((item) => (
           <motion.li
-            key={item}
+            key={item.name}
             className={`${colors.navText} transition-colors flex items-center`}
             whileHover={{ scale: 1.1 }}
           >
-            <Link to="/" className="flex items-center">
-              {item}
+            <Link to={item.path} className="flex items-center">
+              {item.name}
             </Link>
           </motion.li>
         ))}
@@ -222,12 +240,12 @@ const Navbar = ({ hideLoginButton = false }) => {
         >
           {navLinks.map((item) => (
             <Link
-              key={item}
-              to={`/${item.toLowerCase()}`}
+              key={item.name}
+              to={item.path}
               className={`${colors.navText} font-medium`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              {item}
+              {item.name}
             </Link>
           ))}
 
