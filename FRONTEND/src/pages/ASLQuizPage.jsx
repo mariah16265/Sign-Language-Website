@@ -533,7 +533,7 @@ const ASLQuizPage = () => {
                       {(quizProgress ?? 0) < 50 && (
                         <div className="space-y-2">
                           <div className="font-bold">Keep Learning!</div>
-                          <div>Review the {module} module</div>
+                          <div>Review {module} module</div>
                         </div>
                       )}
                     </div>
