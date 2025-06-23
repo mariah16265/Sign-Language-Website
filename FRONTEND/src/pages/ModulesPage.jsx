@@ -5,12 +5,14 @@ import Navbar from '../components/Navbar';
 import { motion } from 'framer-motion';
 import { FaLayerGroup, FaRegClipboard } from 'react-icons/fa';
 import './ModulePage.css'; 
+import { FaLock } from 'react-icons/fa';
 import { useApiErrorHandler, useCheckTokenValid } from '../utils/apiErrorHandler';
 
 const ModulesPage = () => {
   const [lessonProgress, setLessonProgress] = useState({});
   const [modules, setModules] = useState([]);
   const [openModule, setOpenModule] = useState(null);
+  const [unlockedModules, setUnlockedModules] = useState([]);
   const { checkTokenValid } = useCheckTokenValid();
   const { handleApiError } = useApiErrorHandler();
 
@@ -30,15 +32,48 @@ const ModulesPage = () => {
   useEffect(() => {
     if (selectedSubject) {
       fetchModulesForSubject(selectedSubject);
+      fetchModuleAvailability(userId, selectedSubject);
+
     }
   }, [selectedSubject]);
 
+  const fetchModuleAvailability = async (userId, subjectId) => {
+  try {
+    const response = await fetch(
+      `http://localhost:5000/api/module-availability/quiz/user/${userId}/${subjectId}`,
+      {
+        method:'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    const data = await response.json();
+    if (response.ok) {
+      setUnlockedModules(data.unlockedModules || []);
+    } else {
+      throw new Error(data.message || 'Failed to fetch module availability');
+    }
+  } catch (error) {
+    handleApiError(error);
+  }
+};
   // Set initial openModule to the module passed in location state from lessons page
   useEffect(() => {
     if (selectedModule) {
       setOpenModule(selectedModule); 
     }
   }, [selectedModule]);
+
+  // Open "Module 1-" by default if no module already opened
+    useEffect(() => {
+    if (modules.length > 0 && !openModule) {
+      const module1 = modules.find(mod => mod.module.startsWith("Module 1-"));
+      if (module1) {
+        setOpenModule(module1.module);
+      }
+    }
+  }, [modules, openModule]);
 
   const fetchModulesForSubject = async (subject) => {
     try {
@@ -101,23 +136,34 @@ const ModulesPage = () => {
             <h2 className="text-3xl font-bold text-center text-pink-600 mb-10 mt-2">
               <FaLayerGroup className="inline mr-2" /> Modules
             </h2>
-            {uniqueModules.map((mod, index) => (
+            {uniqueModules.map((mod, index) => {
+            const isUnlocked = unlockedModules.includes(mod.module); // ✅ FIXED
+
+            return (
               <motion.div
                 key={mod._id}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.2, delay: index * 0.05 }}
-                className={`rounded-xl p-3 text-center cursor-pointer shadow-md mx-auto overflow-hidden ${
+                className={`rounded-xl p-3 text-center cursor-pointer shadow-md mx-auto overflow-hidden relative ${
                   openModule === mod.module
                     ? "bg-purple-600 text-white font-bold"
-                    : "bg-white hover:bg-purple-200 text-black font-bold"
+                    : isUnlocked
+                    ? "bg-white hover:bg-purple-200 text-black font-bold"
+                    : "bg-white text-gray-500 opacity-100 cursor-default" 
                 }`}
-                style={{ maxWidth: "300px", minWidth: "250px", marginBottom: "25px"}}
-                onClick={() => setOpenModule(mod.module)}
+                style={{ maxWidth: "300px", minWidth: "250px", marginBottom: "25px" }}
+                onClick={() => {
+                  if (isUnlocked) setOpenModule(mod.module);
+                }}
               >
-                <span className="text-base lg:text-lg block truncate whitespace-normal break-words">{mod.module}</span>
+              <span className="flex items-center justify-center space-x-2 text-base lg:text-lg block truncate whitespace-normal break-words">
+                <span>{mod.module}</span>
+                {!isUnlocked && <FaLock size={18} className="text-gray-500" />}
+              </span>
               </motion.div>
-            ))}
+            );
+          })}
           </div>
 
           {/* Lesson Section */}

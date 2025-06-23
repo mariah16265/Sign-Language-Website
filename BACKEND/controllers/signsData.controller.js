@@ -1,5 +1,6 @@
 const SignsData = require('../models/signsData.model');
 const StudyPlan = require('../models/studyplan.model.js');
+const QuizProgress = require('../models/quizProgress.model');
 
 // Controller to fetch all modules subject wise
 const getModulesBySub = async (req, res) => {
@@ -85,4 +86,70 @@ const getNextLesson = async (req,res) => {
   }
 };
 
-module.exports = { getModulesBySub, getLessonsByMod, getNextLesson };
+const getModuleAvailability = async (req, res) => {
+  try {
+    const { userId, subjectId } = req.params;
+
+    // 1. Get all signs data for this subject
+    const signs = await SignsData.find({ subject: subjectId });
+
+    // 2. Extract unique modules, sorted by module number (e.g. Module 1, Module 2)
+    const moduleSet = new Set(signs.map(sign => sign.module));
+    const orderedModules = [...moduleSet].sort((a, b) => {
+      const numA = parseInt(a.match(/Module (\d+)/)?.[1] || 0);
+      const numB = parseInt(b.match(/Module (\d+)/)?.[1] || 0);
+      return numA - numB;
+    });
+
+    // 3. Aggregate total quiz score per module for this user
+    const quizData = await QuizProgress.aggregate([
+      { $match: { userId: userId } },
+      {
+        $group: {
+          _id: "$module",
+          totalScore: { $sum: "$score" }
+        }
+      },
+      {
+        $project: {
+          module: "$_id",
+          totalScore: 1
+        }
+      }
+    ]);
+
+    // Map total scores by module for quick access
+    const quizScores = {};
+    quizData.forEach(entry => {
+      quizScores[entry.module] = entry.totalScore;
+    });
+
+    // 4. Unlock logic: always unlock first module, then unlock next if totalScore >= 70
+    const unlockedModules = new Set();
+    if (orderedModules.length > 0) unlockedModules.add(orderedModules[0]);
+
+    for (let i = 0; i < orderedModules.length; i++) {
+      const currentModule = orderedModules[i];
+      const score = quizScores[currentModule] || 0;
+      if (score >= 70) {
+        const nextModule = orderedModules[i + 1];
+        if (nextModule) unlockedModules.add(nextModule);
+      }
+    }
+
+    return res.status(200).json({
+      orderedModules,
+      unlockedModules: [...unlockedModules],
+    });
+  } catch (error) {
+    console.error("Module availability error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = {
+  getModulesBySub,
+  getLessonsByMod,
+  getNextLesson,
+  getModuleAvailability
+};

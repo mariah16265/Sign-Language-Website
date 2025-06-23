@@ -131,7 +131,6 @@ const getQuizModuleInfo = async (req, res) => {
       const watchedSet = watchedSignsByModule[module] || new Set();
       const watchedCount = watchedSet.size;
       const questionsAnswered = quizAnswersByModule[module] || 0;
-      console.log(`Module: "${module}", Watched Signs: ${watchedCount}/${totalSigns}, All Watched: ${watchedCount === totalSigns}`);
 
       // Determine status:
       // locked if no signs watched
