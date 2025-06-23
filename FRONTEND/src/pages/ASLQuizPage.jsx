@@ -4,10 +4,12 @@ import Webcam from 'react-webcam';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import StepProgressBar from '../components/StepProgress';
-import { useLocation } from 'react-router-dom';
+import { useNavigate,useLocation  } from 'react-router-dom';
 
 const ASLQuizPage = () => {
+  const navigate = useNavigate();
   const location = useLocation();
+  const subject = location.state?.subjectName || 'English';
   const module = location.state?.moduleName || 'Module 1- Alphabets';
 
   // ----- REFS -----
@@ -26,12 +28,15 @@ const ASLQuizPage = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [feedback, setFeedback] = useState('');
-  const [feedbackType, setFeedbackType] = useState(''); // 'correct' or 'incorrect'
+  const [feedbackType, setFeedbackType] = useState(''); 
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [attemptedQuestions, setAttemptedQuestions] = useState(new Set());
   const [steps, setSteps] = useState([]);
+  const [quizProgress, setQuizProgress] =useState(0)
   const [countdown, setCountdown] = useState(0);
   const [isCountingDown, setIsCountingDown] = useState(false);
+  const [isQuizFinished, setIsQuizFinished] = useState(false);
+  
 
   // ----- FEEDBACK MESSAGES -----
   const correctFeedbacks = [
@@ -75,6 +80,22 @@ const ASLQuizPage = () => {
 
     fetchQuestions();
   }, [token, userId, module]);
+
+   const fetchProgress = async () => {
+      console.log("GEting progress");
+      try {
+        const res = await fetch(
+          `http://localhost:5000/api/quiz-progress/user/${userId}/${module}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const data = await res.json();
+        console.log("Progress response:", data);
+
+        setQuizProgress(data.totalScore || 0);
+      } catch (err) {
+        console.error('Quiz progress error:', err.message);
+      }
+    };
 
   // ----- UPDATE STEPS PROGRESS -----
   useEffect(() => {
@@ -280,6 +301,10 @@ const ASLQuizPage = () => {
           console.error('Error saving static quiz progress:', err.message);
         }
       }
+      if (questionIndex === questions.length - 1) {
+        // After saving last question successfully:
+        await fetchProgress();
+      }
     } catch (err) {
       console.error('Prediction error:', err.message);
       setFeedback('Error during prediction.');
@@ -294,6 +319,7 @@ const ASLQuizPage = () => {
     module,
     question,
     selectedOption,
+    fetchProgress,
     token,
     userId,
   ]);
@@ -368,7 +394,14 @@ const ASLQuizPage = () => {
     intervalRef.current = null;
     setIsCountingDown(false);
     setCountdown(0);
-
+if (questionIndex === questions.length - 1) {
+      const stream = webcamRef.current?.video?.srcObject;
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      setIsQuizFinished(true); //last ques of quiz
+      return;
+      }
     setHasSubmitted(false);
     setQuestionIndex((prev) => (prev + 1) % questions.length);
     setSelectedOption(null);
@@ -415,7 +448,69 @@ const ASLQuizPage = () => {
             <div className="w-full">
               <StepProgressBar steps={steps} />
             </div>
+            {isQuizFinished ? (
+            <div className="flex-1 flex flex-col items-center justify-center gap-8 py-10 px-4 text-center bg-gradient-to-b from-purple-50 via-pink-50 to-yellow-100 rounded-2xl shadow-inner min-h-[500px]">
+              <motion.h2
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="text-5xl sm:text-6xl font-extrabold text-purple-700 drop-shadow-md"
+              >
+                🎓 Quiz Complete!
+              </motion.h2>
 
+              <div className="flex flex-col items-center justify-center mt-4">
+                <div className="text-[4rem] sm:text-[5rem] font-black text-pink-500 drop-shadow-lg leading-none">
+                  {quizProgress ?? 0}%
+                </div>
+                <div className="mt-2 text-lg sm:text-xl font-semibold text-purple-500">
+                  Your Score
+                </div>
+              </div>
+
+              <motion.p
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className={`text-xl sm:text-2xl font-semibold max-w-2xl px-4 ${
+                  (quizProgress ?? 0) >= 70 ? 'text-green-700' : 'text-red-700'
+                }`}
+              >
+                {(quizProgress ?? 0) >= 90 && (
+                  <>🌟 <strong>Amazing work!</strong> You’re a Sign Language Superstar! ⭐ Keep shining!</>
+                )}
+                {(quizProgress ?? 0) >= 70 && quizProgress < 90 && (
+                  <>🎉 <strong>Fantastic!</strong> You’re ready for the next module! Keep it up!</>
+                )}
+                {(quizProgress ?? 0) >= 50 && quizProgress < 70 && (
+                  <>✨ <strong>Almost there!</strong> Just a little more practice!</>
+                )}
+                {(quizProgress ?? 0) < 50 && (
+                  <>🔁 <strong>Don't give up!</strong> Watch <span className="font-bold">{module}</span> again and try once more. You’re learning!</>
+                )}
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="mt-6"
+              >
+                <button
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg px-8 py-4 rounded-full shadow-xl transform hover:scale-105 transition"
+                  onClick={() => navigate('/learn/subjects', {
+                    state: {
+                      subject: subject,
+                      module: module
+                    },
+                  })}
+                >
+                  🚀 Back to Module Page
+                </button>
+              </motion.div>
+            </div>
+          ) : (
+            <>
             {!isDynamic ? (
               <div className="flex flex-col md:flex-row w-full gap-8 md:gap-10 items-center">
                 <div className="flex flex-col items-center w-full md:w-1/2">
@@ -489,7 +584,7 @@ const ASLQuizPage = () => {
                             : 'bg-purple-500 hover:bg-purple-600 text-white'
                         } font-bold py-4 px-6 rounded-full text-md w-full flex items-center justify-center gap-2 transition-colors`}
                       >
-                        Next Question
+                        {questionIndex === questions.length - 1 ? ' Submit Quiz' : ' Next Question'}
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="h-5 w-5"
@@ -628,7 +723,7 @@ const ASLQuizPage = () => {
                             : 'bg-purple-500 hover:bg-purple-600 text-white'
                         } font-bold py-4 px-6 rounded-full text-md w-full sm:w-auto flex items-center justify-center gap-2 transition-colors`}
                       >
-                        Next
+                        {questionIndex === questions.length - 1 ? ' Submit Quiz' : ' Next Question'}
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="h-5 w-5"
@@ -692,6 +787,8 @@ const ASLQuizPage = () => {
                   </div>
                 </div>
               </div>
+            )}
+            </>
             )}
           </motion.div>
         </div>

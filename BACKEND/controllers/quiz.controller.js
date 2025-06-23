@@ -27,10 +27,10 @@ const generateQuizForModule = async (req, res) => {
       }
     };
 
-    pushN(staticQs, 2);
-    pushN(dynamicQs, 3);
-    pushN(staticQs, 2);
-    pushN(dynamicQs, 3);
+    pushN(staticQs, 10);
+//    pushN(dynamicQs, 2);
+//    pushN(staticQs, 3);
+//    pushN(dynamicQs, 3);
 
     const finalQuestions = orderedQuestions.map((q) => {
       if (q.type === 'static') {
@@ -68,19 +68,20 @@ const generateQuizForModule = async (req, res) => {
 
 const getQuizProgressForModule = async (req, res) => {
   const { userId, module } = req.params;
-
   try {
-    const progress = await QuizProgress.find({
-      userId,
-      module,
+    const progress = await QuizProgress.find({ userId, module });
+    const totalScore = progress.reduce((acc, item) => acc + item.score, 0);
+    console.log("PROGRESs:",progress);
+    console.log("SCORE:", totalScore);
+    res.json({
+      totalScore
     });
-
-    res.json(progress);
   } catch (err) {
     console.error('❌ Error fetching quiz progress:', err);
     res.status(500).json({ message: 'Failed to fetch quiz progress' });
   }
 };
+
 
 const saveQuizProgress = async (req, res) => {
   const { userId } = req.params;
