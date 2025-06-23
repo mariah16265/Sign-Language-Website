@@ -572,7 +572,7 @@ const Dashboard = () => {
                       initial={{ y: 30, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: index * 0.15 }}
-                      className="relative p-8 rounded-2xl shadow-xl transform hover:scale-[1.015] transition-all duration-300 min-h-[280px] bg-cover bg-center overflow-hidden before:absolute before:inset-0  before:z-0"
+                      className="relative p-8 rounded-2xl shadow-xl transform hover:scale-[1.015] transition-all duration-300 min-h-[280px] bg-cover bg-center overflow-hidden before:absolute before:inset-0 before:z-0"
                       style={{ backgroundImage: 'url(assets/quiznotif.png)' }}
                     >
                       <div className="relative z-10 h-full flex flex-col justify-center items-center text-center">
@@ -580,7 +580,7 @@ const Dashboard = () => {
                           {quiz.subject} Quiz Available!
                         </h3>
 
-                        <div className=" rounded-xl p-6 shadow-lg max-w-md mb-6">
+                        <div className="rounded-xl p-6 shadow-lg max-w-md mb-6">
                           <p className="text-gray-800 text-xl mb-3">
                             You've unlocked
                           </p>
@@ -611,24 +611,28 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <motion.div
-                  className="h-full flex flex-col items-center justify-center bg-gradient-to-br from-purple-50 to-blue-100 rounded-2xl shadow-md border border-gray-200 p-8"
+                  className="relative p-8 rounded-2xl shadow-xl min-h-[380px] bg-cover bg-center overflow-hidden before:absolute before:inset-0 before:z-0"
+                  style={{ backgroundImage: 'url(assets/quiznotif.png)' }}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16 flex items-center justify-center mb-4">
-                    <FaRegCalendarCheck className="text-3xl text-gray-400" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-700 mb-2">
-                    No Quizzes Today
-                  </h3>
-                  <p className="text-gray-600 text-center max-w-md">
-                    Great work! You're all caught up. New quizzes will unlock as
-                    you complete lessons.
-                  </p>
-                  <div className="mt-6 flex items-center text-sm text-gray-500">
-                    <FaInfoCircle className="mr-2" />
-                    <span>Next quiz unlocks after completing more lessons</span>
+                  <div className="relative z-10 h-full flex flex-col justify-center items-center text-center">
+                    <h3 className="text-4xl mt-9 font-medium font-['Fredoka'] text-indigo-800 mb-6 tracking-tight">
+                      No Quizzes Available
+                    </h3>
+
+                    <div className="rounded-xl p-6 shadow-lg max-w-md mb-6">
+                      <p className="text-gray-800 text-xl mt-2 mb-3">
+                        You're all caught up!
+                      </p>
+                      <p className="text-indigo-700 text-xl font-bold mb-4">
+                        Great work!
+                      </p>
+                      <p className="text-gray-700 text-base font-medium">
+                        New quizzes will unlock as you complete lessons
+                      </p>
+                    </div>
                   </div>
                 </motion.div>
               )}
