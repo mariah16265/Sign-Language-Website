@@ -20,12 +20,11 @@ module.exports = {
         "3-Static-K-'D:/_PROJECT/FINAL SEM PROECT/Sign-Language-Website/FRONTEND/public/Sign Language Quiz/K.jpg'",
         "4-Static-V-'D:/_PROJECT/FINAL SEM PROECT/Sign-Language-Website/FRONTEND/public/Sign Language Quiz/V.jpg'",
         "5-Static-N-'D:/_PROJECT/FINAL SEM PROECT/Sign-Language-Website/FRONTEND/public/Sign Language Quiz/N.jpg'",
-        "6-Static-A-'D:/_PROJECT/FINAL SEM PROECT/Sign-Language-Website/FRONTEND/public/Sign Language Quiz/A.jpg'",
-        "7-Static-S-'D:/_PROJECT/FINAL SEM PROECT/Sign-Language-Website/FRONTEND/public/Sign Language Quiz/S.jpg'",
-        "8-Static-P-'D:/_PROJECT/FINAL SEM PROECT/Sign-Language-Website/FRONTEND/public/Sign Language Quiz/P.jpg'",
-        "9-Static-G-'D:/_PROJECT/FINAL SEM PROECT/Sign-Language-Website/FRONTEND/public/Sign Language Quiz/G.jpg'",
-        "10-Static-X-'D:/_PROJECT/FINAL SEM PROECT/Sign-Language-Website/FRONTEND/public/Sign Language Quiz/X.jpg'",
-       
+        "6-Dynamic-B",
+        "7-Dynamic-I",
+        "8-Dynamic-F",
+        "9-Dynamic-D",
+        "10-Dynamic-W"
       ],
       "Module 2- Animals": [
         "1-Static-BIRD-'D:/_PROJECT/FINAL SEM PROECT/Sign-Language-Website/FRONTEND/public/Sign Language Quiz/bird.mp4'",
