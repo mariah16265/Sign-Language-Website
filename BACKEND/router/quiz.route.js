@@ -6,11 +6,13 @@ const { authenticateUser } = require('../middleware/authMiddleware'); // authent
 const { 
     generateQuizForModule,
     getQuizProgressForModule,
+    getQuizModuleInfo,
     saveQuizProgress
 } = require('../controllers/quiz.controller');
 
 router.get('/module/:module', authenticateUser, generateQuizForModule);
 router.get('/user/:userId/:module', authenticateUser, getQuizProgressForModule);
 router.post('/save/:userId/', authenticateUser, saveQuizProgress);
+router.get('/info/user/:userId/', authenticateUser, getQuizModuleInfo);
 
 module.exports = router;

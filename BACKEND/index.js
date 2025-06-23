@@ -74,6 +74,8 @@ app.use('/api/quiz-questions', quizRoutes);
 app.use('/api/quiz-progress', quizRoutes);
 // for saving quiz progress
 app.use('/api/quiz-static/', quizRoutes);
+// for saving quiz modules info
+app.use('/api/quiz-modules/', quizRoutes)
 
 //Route to get dictionary content
 app.use('/api/signs', signDictionaryRoutes);

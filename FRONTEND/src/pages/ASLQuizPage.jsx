@@ -67,7 +67,13 @@ const ASLQuizPage = () => {
       try {
         const res = await fetch(
           `http://localhost:5000/api/quiz-questions/module/${module}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+          }
         );
         const data = await res.json();
         if (!res.ok)
@@ -86,7 +92,13 @@ const ASLQuizPage = () => {
       try {
         const res = await fetch(
           `http://localhost:5000/api/quiz-progress/user/${userId}/${module}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         const data = await res.json();
         console.log("Progress response:", data);
@@ -394,7 +406,7 @@ const ASLQuizPage = () => {
     intervalRef.current = null;
     setIsCountingDown(false);
     setCountdown(0);
-if (questionIndex === questions.length - 1) {
+    if (questionIndex === questions.length - 1) {
       const stream = webcamRef.current?.video?.srcObject;
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
