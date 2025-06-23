@@ -65,8 +65,6 @@ const LessonPage = () => {
           throw new Error(progress.message || 'Failed to fetch progress');
 
         const watchedSet = new Set(progress.map((p) => p.signId));
-        console.log('progress:', watchedSet);
-
         const signs = lesson.signs;
         const firstUnwatchedIndex = signs.findIndex(
           (sign) => !watchedSet.has(sign._id)
@@ -104,7 +102,7 @@ const LessonPage = () => {
         if (nextdata.message === 'End of Module') {
           setEndOfModule(true);
         } else {
-          setNextLessonId(nextdata._id); // Store next lesson ID
+          setNextLessonId(nextdata._id);
         }
       } catch (err) {
         console.error('Error fetching next lesson:', err.message);
@@ -153,7 +151,6 @@ const LessonPage = () => {
         const data = await response.json();
         if (!response.ok)
           throw new Error(data.message || 'Failed to save progress');
-        // ✅ Only show quiz popup when watching last sign for the first time
         const isLastSign = currentSignIndex === lessonData.signs.length - 1;
         if (isLastSign && endOfModule) {
           setShowQuizPopup(true);
@@ -176,11 +173,6 @@ const LessonPage = () => {
     }
   };
 
-  if (!lessonData)
-    return <div className="p-6 text-center text-lg">Loading lesson...</div>;
-
-  const currentSign = lessonData.signs[currentSignIndex];
-
   const handleStartQuiz = (module, subject) => {
     let path = '';
 
@@ -199,6 +191,12 @@ const LessonPage = () => {
       },
     });
   };
+
+  if (!lessonData)
+    return <div className="p-4 text-center text-base">Loading lesson...</div>;
+
+  const currentSign = lessonData.signs[currentSignIndex];
+
   return (
     <div
       className="relative w-full min-h-screen bg-cover bg-center"
@@ -206,11 +204,11 @@ const LessonPage = () => {
     >
       <Navbar userName="Michael Bob" userAvatar="/images/avatar.jpg" />
       <div className="flex flex-col lg:flex-row min-h-screen">
-        <Sidebar className="h-full" /> {/* Sidebar should take full height */}
-        <div className="flex-1 px-2 py-4 md:px-4 md:py-6 lg:px-8 lg:py-8 flex flex-col justify-start items-center">
-          <div className="bg-white bg-opacity-90 backdrop-blur-sm rounded-3xl shadow-2xl p-4 md:p-6 lg:p-8 w-full max-w-6xl">
-            {/* Back Button */}
-            <div className="flex items-center justify-start mb-4">
+        <Sidebar className="h-full" />
+        <div className="flex-1 px-2 py-2 md:px-4 md:py-4 lg:px-6 lg:py-6 flex flex-col justify-start items-center">
+          <div className="bg-white mt-8 bg-opacity-90 backdrop-blur-sm rounded-2xl shadow-xl p-4 md:p-5 lg:p-6 w-full max-w-5xl">
+            {/* Back Button - Made more compact */}
+            <div className="flex items-center justify-start mb-3">
               <button
                 onClick={() =>
                   navigate('/learn/subjects', {
@@ -220,21 +218,21 @@ const LessonPage = () => {
                     },
                   })
                 }
-                className="flex items-center gap-3 bg-gradient-to-r from-purple-600 to-indigo-500 text-white font-bold hover:from-purple-700 hover:to-indigo-600 shadow-lg text-lg py-3 px-6 rounded-full transition duration-300"
+                className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-500 text-white font-semibold hover:from-purple-700 hover:to-indigo-600 shadow text-sm py-3 px-4 rounded-full transition duration-300"
               >
-                <FaArrowLeft />
+                <FaArrowLeft className="text-sm" />
                 Back to Modules
               </button>
             </div>
 
-            {/* Title */}
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-6 text-purple-700 drop-shadow-lg">
+            {/* Title - Made more compact */}
+            <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-center mb-7 text-purple-700">
               {lessonData.module.split('-')[1]?.trim()} - Lesson{' '}
               {lessonData.lessonNumber}
             </h2>
 
-            {/* Video Player */}
-            <div className="w-full flex justify-center items-center mb-6 md:mb-8 min-h-[300px]">
+            {/* Video Player - Adjusted spacing */}
+            <div className="w-full flex justify-center items-center mb-4 min-h-[270px]">
               <video
                 ref={videoRef}
                 key={currentSign._id}
@@ -242,69 +240,68 @@ const LessonPage = () => {
                 controls
                 loop
                 onPlay={handlePlay}
-                className="rounded-2xl max-w-full max-h-[500px] object-contain shadow-xl"
+                className="rounded-xl max-w-full max-h-[400px] object-contain shadow-lg"
               />
             </div>
 
-            {/* Navigation Buttons */}
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-4">
+            {/* Navigation Buttons - Made more compact */}
+            <div className="flex flex-col md:flex-row justify-between items-center gap-3 mt-3">
               <button
                 onClick={handlePrev}
                 disabled={currentSignIndex === 0}
-                className={`flex items-center gap-2 ${
+                className={`flex items-center gap-1 ${
                   currentSignIndex === 0
-                    ? 'bg-gray-300 text-gray-100 font-bold cursor-not-allowed'
-                    : 'bg-gradient-to-r from-pink-400 to-red-400 font-bold hover:from-pink-500 hover:to-red-500 text-white shadow-xl'
-                } text-lg py-3 px-7 rounded-full transition-all duration-300 w-full md:w-auto`}
+                    ? 'bg-gray-300 text-gray-100 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-pink-400 to-red-400 hover:from-pink-500 hover:to-red-500 text-white'
+                } text-base py-2 px-5 rounded-full transition-all duration-300 w-full md:w-auto`}
               >
-                <FaChevronLeft />
+                <FaChevronLeft className="text-xs" />
                 Previous
               </button>
 
-              <div className="text-lg md:text-xl font-semibold text-gray-700">
+              <div className="text-xl font-medium text-gray-700">
                 {currentSign.title}
               </div>
 
-              {/* Next Button */}
               {currentSignIndex === lessonData.signs.length - 1 && hasPlayed ? (
                 endOfModule ? (
                   <button
                     disabled
-                    className="flex items-center gap-2 bg-gray-300 text-gray-100 font-bold cursor-not-allowed text-lg py-3 px-7 rounded-full transition-all duration-300 w-full md:w-auto"
+                    className="flex items-center gap-1 bg-gray-300 text-gray-100 cursor-not-allowed text-sm py-2 px-4 rounded-full transition-all duration-300 w-full md:w-auto"
                   >
                     End of Module
                   </button>
                 ) : (
                   <button
                     onClick={() => navigate(`/lesson/${nextLessonId}`)}
-                    className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 font-bold hover:from-blue-600 hover:to-indigo-700 text-white shadow-xl text-lg py-3 px-7 rounded-full transition-all duration-300 w-full md:w-auto"
+                    className="flex items-center gap-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm py-2 px-4 rounded-full transition-all duration-300 w-full md:w-auto"
                   >
                     Next Lesson
-                    <FaChevronRight />
+                    <FaChevronRight className="text-xs" />
                   </button>
                 )
               ) : (
                 <button
                   onClick={handleNext}
                   disabled={!hasPlayed}
-                  className={`flex items-center gap-2 ${
+                  className={`flex items-center gap-1 ${
                     !hasPlayed
-                      ? 'bg-gray-300 text-gray-100 font-bold cursor-not-allowed'
-                      : 'bg-gradient-to-r from-green-300 to-teal-500 font-bold hover:from-green-500 hover:to-teal-600 text-white shadow-xl'
-                  } text-lg py-3 px-7 rounded-full transition-all duration-300 w-full md:w-auto`}
+                      ? 'bg-gray-300 text-gray-200 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-green-300 to-teal-500 hover:from-green-500 hover:to-teal-600 text-white'
+                  } text-base py-2 px-6 rounded-full transition-all duration-300 w-full md:w-auto`}
                 >
                   Next
-                  <FaChevronRight />
+                  <FaChevronRight className="text-xs" />
                 </button>
               )}
             </div>
 
-            {/* Progress */}
-            <div className="mt-6 text-center text-gray-700 font-medium">
+            {/* Progress - Made more compact */}
+            <div className="mt-6 text-center text-base text-gray-800 mb-3">
               {playedSigns.size} / {lessonData.signs.length} signs watched
             </div>
 
-            <div className="w-full bg-gray-200 rounded-full h-4 mt-2 overflow-hidden">
+            <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1.5 overflow-hidden">
               <div
                 style={{
                   width: `${
@@ -318,21 +315,15 @@ const LessonPage = () => {
         </div>
       </div>
       {showQuizPopup && (
-        <div
-          className="fixed top-24 right-6 z-50 bg-white border border-green-400 text-green-900 px-6 py-4 rounded-2xl shadow-lg max-w-sm
-      ring-2 ring-green-300
-      animate-fadeIn
-      flex flex-col items-center justify-center space-y-4"
-        >
-          <div className="font-semibold text-xl text-center">
-            You’ve unlocked your quiz!
+        <div className="fixed top-20 right-4 z-50 bg-white border border-green-400 text-green-900 px-4 py-2 rounded-xl shadow-md max-w-xs text-sm flex flex-col items-center justify-center space-y-2">
+          <div className="font-semibold text-center">
+            You've unlocked your quiz!
           </div>
           <button
             onClick={() =>
               handleStartQuiz(lessonData.module, lessonData.subject)
             }
-            className="text-base font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-8 rounded-full shadow-lg hover:from-purple-700 hover:to-indigo-700 transition"
-            aria-label="Start Quiz"
+            className="text-sm font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 px-6 rounded-full shadow hover:from-purple-700 hover:to-indigo-700 transition"
           >
             Start Quiz
           </button>

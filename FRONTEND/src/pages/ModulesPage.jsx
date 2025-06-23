@@ -142,7 +142,7 @@ const ModulesPage = () => {
 
         <div className="flex-1 flex flex-col lg:flex-row">
           {/* Module List Section */}
-          <div className="w-full lg:w-[25%] p-4 space-y-4 overflow-y-auto border-b lg:border-r border-white-200">
+          <div className="w-full lg:w-[25%] p-4 space-y-6 overflow-y-auto border-b lg:border-r border-white-200">
             <h2 className="text-3xl font-bold text-center text-pink-600 mb-10 mt-2">
               <FaLayerGroup className="inline mr-2" /> Modules
             </h2>
