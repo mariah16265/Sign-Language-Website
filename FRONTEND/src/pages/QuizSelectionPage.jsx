@@ -179,7 +179,7 @@ const QuizSelectionPage = () => {
         backgroundRepeat: 'no-repeat',
       }}
     >
-      <div className="absolute inset-0 backdrop-blur-[4px] z-0" />
+      <div className="absolute inset-0 backdrop-blur-[5px] z-0" />
 
       {/* Fixed Navbar */}
       <div className="fixed top-0 left-0 right-0 z-50">

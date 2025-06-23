@@ -46,16 +46,20 @@ const StudyPlanPage = () => {
   useEffect(() => {
     const fetchStudyPlan = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/studyplan/${userId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `http://localhost:5000/api/studyplan/${userId}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
-          throw new Error('Failed to fetch study plan');}
+          throw new Error('Failed to fetch study plan');
+        }
         const data = await response.json();
 
         // Prefill the form with existing studyplan data, 1 sub or 2 subjects
@@ -99,14 +103,13 @@ const StudyPlanPage = () => {
         ),
       };
       const endpoint = isEditMode
-      ? `http://localhost:5000/api/studyplan/edit/${userId}` // Edit plan endpoint
-      : 'http://localhost:5000/api/studyplan/'; // Create plan endpoint
+        ? `http://localhost:5000/api/studyplan/edit/${userId}` // Edit plan endpoint
+        : 'http://localhost:5000/api/studyplan/'; // Create plan endpoint
       const method = isEditMode ? 'PUT' : 'POST';
-
 
       const response = await fetch(endpoint, {
         method: method,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
@@ -195,23 +198,25 @@ const StudyPlanPage = () => {
     );
 */
   // New validation logic: A subject is valid only if all three are selected
-  const isValid = Object.entries(studyPlan.startingLevels).every(([subjectId, level]) => {
-  const lessons = studyPlan.weeklyLessons[subjectId];
-  const days = studyPlan.subjectDays[subjectId];
+  const isValid = Object.entries(studyPlan.startingLevels).every(
+    ([subjectId, level]) => {
+      const lessons = studyPlan.weeklyLessons[subjectId];
+      const days = studyPlan.subjectDays[subjectId];
 
-  const levelSelected = level && level !== '';
-  const lessonsSelected = lessons > 0;
-  const daysSelected = Array.isArray(days) && days.length > 0;
+      const levelSelected = level && level !== '';
+      const lessonsSelected = lessons > 0;
+      const daysSelected = Array.isArray(days) && days.length > 0;
 
-  // Case 1: If nothing is selected for this subject → OK
-  if (!levelSelected && !lessonsSelected && !daysSelected) return true;
+      // Case 1: If nothing is selected for this subject → OK
+      if (!levelSelected && !lessonsSelected && !daysSelected) return true;
 
-  // Case 2: If level is selected → lessons and days must also be selected
-  if (levelSelected && lessonsSelected && daysSelected) return true;
+      // Case 2: If level is selected → lessons and days must also be selected
+      if (levelSelected && lessonsSelected && daysSelected) return true;
 
-  // All other cases → Invalid
-  return false;
-});
+      // All other cases → Invalid
+      return false;
+    }
+  );
 
   // Darker color configuration
   const colorSchemes = {
@@ -237,13 +242,17 @@ const StudyPlanPage = () => {
 
   return (
     <div
-      className="min-h-screen bg-cover bg-fixed bg-center relative"
+      className="relative min-h-screen overflow-hidden"
       style={{
-        backgroundImage: `url(${process.env.PUBLIC_URL}/assets/studybg.webp)`,
+        backgroundImage: "url('/assets/studyplan.avif')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        backgroundRepeat: 'no-repeat',
       }}
     >
       {/* Ultra subtle overlay with slight blur */}
-      <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px]"></div>{' '}
+      <div className="absolute inset-0 backdrop-blur-[2px]"></div>{' '}
       <div className="relative z-10">
         <Navbar />
         <div className="max-w-[85rem] mx-auto px-6 py-6 flex flex-col min-h-[calc(100vh-100px)]">
@@ -252,12 +261,15 @@ const StudyPlanPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <h1 className="text-[3rem] font-bold text-gray-800 ">
-              <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Create Your Learning Path
-              </span>
-            </h1>
-            <p className="text-lg text-gray-600 ">
+            <div className=" mt-5 inline-block bg-white/50 px-7 py-2 rounded-xl shadow-sm">
+              <h1 className="text-[2.75rem] font-bold text-gray-800">
+                <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                  Create Your Learning Path
+                </span>
+              </h1>
+            </div>
+
+            <p className="text-lg text-gray-600 mt-1 ">
               Let's build your personalized sign language journey
             </p>
           </motion.div>
